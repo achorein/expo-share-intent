@@ -1,0 +1,80 @@
+{
+  "name": "expo-share-intent",
+  "version": "0.1.0",
+  "description": "use native share intent for ios and android with expo",
+  "homepage": "https://github.com/achorein/expo-share-intent/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/achorein/expo-share-intent.git"
+  },
+  "author": "achorein (https://github.com/achorein)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/achorein/expo-share-intent/issues"
+  },
+  "funding": [
+    {
+      "type": "github",
+      "url": "https://github.com/sponsors/achorein"
+    },
+    "https://www.buymeacoffee.com/achorein"
+  ],
+  "keywords": [
+    "react-native",
+    "expo",
+    "expo-share-extension",
+    "react-native-share-extension",
+    "react-native-share-intent",
+    "expo-config-plugin",
+    "share-share-intent",
+    "share-intent"
+  ],
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/"
+  },
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
+  "files": [
+    "app.plugin.js",
+    "plugin/build",
+    "build",
+    "expo-module.config.json",
+    "ios",
+    "android",
+    "!android/build/"
+  ],
+  "scripts": {
+    "release": "release-it",
+    "build": "expo-module build",
+    "build:plugin": "expo-module build plugin",
+    "postbuild": "cp plugin/src/ios/*.swift plugin/build/ios",
+    "clean": "expo-module clean",
+    "lint": "expo-module lint",
+    "test": "expo-module test",
+    "prepare": "expo-module prepare && yarn postbuild",
+    "prepublishOnly": "expo-module prepublishOnly",
+    "expo-module": "expo-module"
+  },
+  "dependencies": {
+    "@expo/config-plugins": "~7.8.4",
+    "expo-linking": "~6.2.2",
+    "expo-constants": "~14.4.2"
+  },
+  "peerDependencies": {
+    "expo": ">=49.0.0",
+    "react": "*",
+    "react-native": "*",
+    "expo-linking": ">=6.2.2",
+    "expo-constants": ">=14.4.2"
+  },
+  "devDependencies": {
+    "@release-it/conventional-changelog": "^8.0.1",
+    "@types/react": "^18.0.25",
+    "@types/react-native": "^0.69.5",
+    "eslint": "^7.25.0",
+    "expo-module-scripts": "^3.4.1",
+    "expo-modules-core": "^1.11.8",
+    "prettier": "^2.2.1",
+    "release-it": "^17.1.1"
+  }
+}
