@@ -157,6 +157,11 @@ export function getShareExtensionViewControllerContent(
   console.debug(
     `[expo-share-intent] add ios share extension (scheme:${scheme} appIdentifier:${appIdentifier})`
   );
+  if (!scheme) {
+    throw new Error(
+      "[expo-share-intent] missing custom URL scheme 'expo.scheme' in app.json ! (see https://docs.expo.dev/guides/linking/#linking-to-your-app)"
+    );
+  }
 
   const content = fs.readFileSync(
     path.resolve(__dirname, "./ShareExtensionViewController.swift"),

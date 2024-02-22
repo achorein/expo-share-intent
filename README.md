@@ -21,7 +21,7 @@ Share intent in a native module for Expo (React Native).
 
 ## Installation
 
-Install npm package
+**Install npm package**
 
 ```bash
 yarn add expo-share-intent
@@ -29,7 +29,9 @@ yarn add expo-share-intent
 npm install expo-share-intent
 ```
 
-add expo plugin into your `app.json`
+**Into your `app.json`:**
+
+- add expo plugin
 
 ```json
   "plugins": [
@@ -38,6 +40,14 @@ add expo plugin into your `app.json`
 ```
 
 > by default only text and url sharing is activated
+
+- configure a custom URL scheme
+
+```json
+  "scheme": "my-app"
+```
+
+> More info here : [Linking to your app](https://docs.expo.dev/guides/linking/#linking-to-your-app)
 
 ## Usage
 
