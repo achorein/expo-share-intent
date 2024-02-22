@@ -57,24 +57,24 @@
   },
   "dependencies": {
     "@expo/config-plugins": "~7.8.4",
-    "expo-linking": "~6.2.2",
-    "expo-constants": "~14.4.2"
+    "expo-constants": "~14.4.2",
+    "expo-linking": "~6.2.2"
   },
   "peerDependencies": {
     "expo": ">=49.0.0",
-    "react": "*",
-    "react-native": "*",
+    "expo-constants": ">=14.4.2",
     "expo-linking": ">=6.2.2",
-    "expo-constants": ">=14.4.2"
+    "react": "*",
+    "react-native": "*"
   },
   "devDependencies": {
     "@release-it/conventional-changelog": "^8.0.1",
     "@types/react": "^18.0.25",
     "@types/react-native": "^0.69.5",
-    "eslint": "^7.25.0",
+    "eslint": "^8.50.0",
     "expo-module-scripts": "^3.4.1",
     "expo-modules-core": "^1.11.8",
-    "prettier": "^2.2.1",
+    "prettier": "^3.2.5",
     "release-it": "^17.1.1"
   }
 }

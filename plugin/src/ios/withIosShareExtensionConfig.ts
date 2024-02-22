@@ -1,4 +1,5 @@
 import { ConfigPlugin } from "@expo/config-plugins";
+
 import {
   getShareExtensionBundledIdentifier,
   shareExtensionName,
@@ -15,7 +16,7 @@ export const withShareExtensionConfig: ConfigPlugin = (config) => {
   config.extra?.eas?.build?.experimental?.ios?.appExtensions?.forEach(
     (ext: any, index: number) => {
       ext.targetName === extName && (extConfigIndex = index);
-    }
+    },
   );
 
   if (!config.extra) {

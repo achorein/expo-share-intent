@@ -4,22 +4,22 @@
  *
  * inspired by: https://github.com/expo/expo/blob/main/packages/%40expo/config-plugins/src/android/IntentFilters.ts
  */
-import type { AndroidIntentFiltersData, Android } from "@expo/config-types";
 import {
   AndroidManifest,
   AndroidConfig,
   ConfigPlugin,
   withAndroidManifest,
 } from "@expo/config-plugins";
+import type { AndroidIntentFiltersData, Android } from "@expo/config-types";
 
 import { Parameters } from "../types";
 
 type AndroidIntentFilters = NonNullable<Android["intentFilters"]>;
 
-const GENERATED_TAG = "data-generated";
+// const GENERATED_TAG = "data-generated";
 
 function renderIntentFilters(
-  intentFilters: AndroidIntentFilters
+  intentFilters: AndroidIntentFilters,
 ): AndroidConfig.Manifest.ManifestIntentFilter[] {
   return intentFilters.map((intentFilter) => {
     // <intent-filter>
@@ -44,12 +44,12 @@ function renderIntentFilters(
 }
 
 function renderIntentFilterData(
-  data: AndroidIntentFiltersData | AndroidIntentFiltersData[] | undefined
+  data: AndroidIntentFiltersData | AndroidIntentFiltersData[] | undefined,
 ) {
   return (Array.isArray(data) ? data : [data]).filter(Boolean).map((datum) => ({
     $: Object.entries(datum ?? {}).reduce(
       (prev, [key, value]) => ({ ...prev, [`android:${key}`]: value }),
-      {}
+      {},
     ),
   }));
 }
@@ -68,7 +68,7 @@ function addIntentFilters(
   androidManifest: AndroidManifest,
   currentIntentFilters: AndroidIntentFilters,
   filters: Parameters["androidIntentFilters"],
-  multiFilters: Parameters["androidIntentFilters"]
+  multiFilters: Parameters["androidIntentFilters"],
 ) {
   const mainActivity =
     AndroidConfig.Manifest.getMainActivityOrThrow(androidManifest);
@@ -77,7 +77,7 @@ function addIntentFilters(
   const newFilters: Parameters["androidIntentFilters"] = filters || ["text/*"];
 
   console.debug(
-    `[expo-share-intent] add android filters (${newFilters.join(" ")}) and multi-filters (${multiFilters ? multiFilters.join(" ") : ""})`
+    `[expo-share-intent] add android filters (${newFilters.join(" ")}) and multi-filters (${multiFilters ? multiFilters.join(" ") : ""})`,
   );
   const newIntentFilters = [
     {
@@ -88,21 +88,26 @@ function addIntentFilters(
       })),
     },
   ];
-  const newMultiIntentFilters = multiFilters ? [
-    {
-      action: "android.intent.action.SEND_MULTIPLE",
-      category: "android.intent.category.DEFAULT",
-      data: multiFilters.map((filter) => ({
-        mimeType: filter,
-      })),
-    },
-  ] : [];
+  const newMultiIntentFilters = multiFilters
+    ? [
+        {
+          action: "android.intent.action.SEND_MULTIPLE",
+          category: "android.intent.category.DEFAULT",
+          data: multiFilters.map((filter) => ({
+            mimeType: filter,
+          })),
+        },
+      ]
+    : [];
 
-  const renderedNewIntentFilters = renderIntentFilters([...newIntentFilters, ...newMultiIntentFilters]);
+  const renderedNewIntentFilters = renderIntentFilters([
+    ...newIntentFilters,
+    ...newMultiIntentFilters,
+  ]);
 
   // adds them properly to the manifest
   mainActivity["intent-filter"] = mainActivity["intent-filter"]?.concat(
-    renderedNewIntentFilters
+    renderedNewIntentFilters,
   );
 
   return androidManifest;
@@ -110,7 +115,7 @@ function addIntentFilters(
 
 export const withAndroidIntentFilters: ConfigPlugin<Parameters> = (
   config,
-  parameters
+  parameters,
 ) => {
   return withAndroidManifest(config, (config) => {
     config.modResults = addIntentFilters(

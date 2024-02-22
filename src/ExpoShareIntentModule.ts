@@ -1,9 +1,10 @@
-import { requireNativeModule } from "expo-modules-core";
 import {
+  requireNativeModule,
   NativeModulesProxy,
   EventEmitter,
   Subscription,
 } from "expo-modules-core";
+
 import { ChangeEventPayload } from "./ExpoShareIntentModule.types";
 
 // Import the native module. On web, it will be resolved to ExpoShareIntentModule.web.ts
@@ -18,17 +19,17 @@ export function getShareIntent(url: string): string {
 }
 
 const emitter = new EventEmitter(
-  ExpoShareIntentModule ?? NativeModulesProxy.ExpoShareIntentModule
+  ExpoShareIntentModule ?? NativeModulesProxy.ExpoShareIntentModule,
 );
 
 export function addErrorListener(
-  listener: (event: ChangeEventPayload) => void
+  listener: (event: ChangeEventPayload) => void,
 ): Subscription {
   return emitter.addListener<ChangeEventPayload>("onError", listener);
 }
 
 export function addChangeListener(
-  listener: (event: ChangeEventPayload) => void
+  listener: (event: ChangeEventPayload) => void,
 ): Subscription {
   return emitter.addListener<ChangeEventPayload>("onChange", listener);
 }

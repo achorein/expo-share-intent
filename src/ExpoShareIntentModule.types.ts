@@ -3,7 +3,7 @@ export type ChangeEventPayload = {
 };
 
 export type ShareIntent = {
-  files: Array<{ path?: string }> | null;
+  files: { path?: string }[] | null;
   text: string | null;
 };
 

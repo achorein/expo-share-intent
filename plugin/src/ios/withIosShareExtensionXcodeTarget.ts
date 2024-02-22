@@ -1,7 +1,5 @@
 import { ConfigPlugin, withXcodeProject } from "@expo/config-plugins";
 
-import { Parameters } from "../types";
-
 import {
   getShareExtensionBundledIdentifier,
   shareExtensionName,
@@ -13,10 +11,11 @@ import {
   getShareExtensionViewControllerPath,
   writeShareExtensionFiles,
 } from "./writeIosShareExtensionFiles";
+import { Parameters } from "../types";
 
 export const withShareExtensionXcodeTarget: ConfigPlugin<Parameters> = (
   config,
-  parameters
+  parameters,
 ) => {
   return withXcodeProject(config, async (config) => {
     const extensionName = shareExtensionName;
@@ -41,7 +40,7 @@ export const withShareExtensionXcodeTarget: ConfigPlugin<Parameters> = (
       platformProjectRoot,
       scheme,
       appIdentifier,
-      parameters
+      parameters,
     );
 
     const pbxProject = config.modResults;
@@ -49,7 +48,7 @@ export const withShareExtensionXcodeTarget: ConfigPlugin<Parameters> = (
     const target = pbxProject.addTarget(
       extensionName,
       "app_extension",
-      extensionName
+      extensionName,
     );
 
     // Add a new PBXSourcesBuildPhase for our ShareViewController
@@ -58,7 +57,7 @@ export const withShareExtensionXcodeTarget: ConfigPlugin<Parameters> = (
       [],
       "PBXSourcesBuildPhase",
       "Sources",
-      target.uuid
+      target.uuid,
     );
 
     // Add a new PBXResourcesBuildPhase for the Resources used by the Share Extension
@@ -67,7 +66,7 @@ export const withShareExtensionXcodeTarget: ConfigPlugin<Parameters> = (
       [],
       "PBXResourcesBuildPhase",
       "Resources",
-      target.uuid
+      target.uuid,
     );
 
     // Create a separate PBXGroup for the shareExtension's files
@@ -80,38 +79,35 @@ export const withShareExtensionXcodeTarget: ConfigPlugin<Parameters> = (
     pbxProject.addSourceFile(
       viewControllerFilePath,
       { target: target.uuid },
-      pbxGroupKey
+      pbxGroupKey,
     );
 
     //  Add the resource file and include it into the target PbxResourcesBuildPhase and PbxGroup
     pbxProject.addResourceFile(
       storyboardFilePath,
       { target: target.uuid },
-      pbxGroupKey
+      pbxGroupKey,
     );
 
-    var configurations = pbxProject.pbxXCBuildConfigurationSection();
-    for (var key in configurations) {
+    const configurations = pbxProject.pbxXCBuildConfigurationSection();
+    for (const key in configurations) {
       if (typeof configurations[key].buildSettings !== "undefined") {
-        var buildSettingsObj = configurations[key].buildSettings;
+        const buildSettingsObj = configurations[key].buildSettings;
         if (
           typeof buildSettingsObj["PRODUCT_NAME"] !== "undefined" &&
           buildSettingsObj["PRODUCT_NAME"] === `"${extensionName}"`
         ) {
           buildSettingsObj["CLANG_ENABLE_MODULES"] = "YES";
           buildSettingsObj["INFOPLIST_FILE"] = `"${infoPlistFilePath}"`;
-          buildSettingsObj[
-            "CODE_SIGN_ENTITLEMENTS"
-          ] = `"${entitlementsFilePath}"`;
+          buildSettingsObj["CODE_SIGN_ENTITLEMENTS"] =
+            `"${entitlementsFilePath}"`;
           buildSettingsObj["CODE_SIGN_STYLE"] = "Automatic";
-          buildSettingsObj[
-            "CURRENT_PROJECT_VERSION"
-          ] = `"${currentProjectVersion}"`;
+          buildSettingsObj["CURRENT_PROJECT_VERSION"] =
+            `"${currentProjectVersion}"`;
           buildSettingsObj["GENERATE_INFOPLIST_FILE"] = "YES";
           buildSettingsObj["MARKETING_VERSION"] = `"${marketingVersion}"`;
-          buildSettingsObj[
-            "PRODUCT_BUNDLE_IDENTIFIER"
-          ] = `"${shareExtensionIdentifier}"`;
+          buildSettingsObj["PRODUCT_BUNDLE_IDENTIFIER"] =
+            `"${shareExtensionIdentifier}"`;
           buildSettingsObj["SWIFT_EMIT_LOC_STRINGS"] = "YES";
           buildSettingsObj["SWIFT_VERSION"] = "5.0";
           buildSettingsObj["TARGETED_DEVICE_FAMILY"] = `"1,2"`;
