@@ -6,7 +6,7 @@ import {
 
 // Android
 import { withAndroidIntentFilters } from "./android/withAndroidIntentFilters";
-
+import { withAndroidMainActivityAttributes } from "./android/withAndroidMainActivityAttributes";
 // iOS
 import { withAppEntitlements } from "./ios/withIosAppEntitlements";
 import { withShareExtensionConfig } from "./ios/withIosShareExtensionConfig";
@@ -27,6 +27,7 @@ const withShareMenu: ConfigPlugin<Parameters> = createRunOncePlugin(
       () => withShareExtensionXcodeTarget(config, params),
       // Android
       () => withAndroidIntentFilters(config, params),
+      () => withAndroidMainActivityAttributes(config, params),
     ]);
   },
   pkg.name,
