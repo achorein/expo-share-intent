@@ -1,5 +1,5 @@
 /*!
- * Plugin created for Expo Share Intent Demo (https://github.com/achorein/expo-share-intent-demo)
+ * Plugin created for Expo Share Intent (https://github.com/achorein/expo-share-intent)
  * author: achorein (https://github.com/achorein)
  *
  * inspired by: https://forums.expo.dev/t/how-to-edit-android-manifest-was-build/65663/4
