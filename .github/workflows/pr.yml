@@ -7,7 +7,7 @@ on:
   pull_request:
 
 jobs:
-  build:
+  build-plugin:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -17,8 +17,16 @@ jobs:
           registry-url: "https://registry.npmjs.org"
       - run: yarn install --immutable
       - run: yarn prepare
+      - uses: actions/cache/save@v3
+        with:
+          path: |
+            build
+            plugin/build
+            !node_modules
+          key: ${{ github.sha }}
 
   example-basic:
+    needs: build-plugin
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -29,11 +37,19 @@ jobs:
         with:
           node-version: "18.x"
           registry-url: "https://registry.npmjs.org"
+      - uses: actions/cache/restore@v3
+        with:
+          path: |
+            build
+            plugin/build
+            !node_modules
+          key: ${{ github.sha }}
       - run: yarn install --immutable
       - run: yarn lint
       - run: yarn prebuild
 
   example-expo-router:
+    needs: build-plugin
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -44,6 +60,13 @@ jobs:
         with:
           node-version: "18.x"
           registry-url: "https://registry.npmjs.org"
+      - uses: actions/cache/restore@v3
+        with:
+          path: |
+            build
+            plugin/build
+            !node_modules
+          key: ${{ github.sha }}
       - run: yarn install --immutable
       - run: yarn lint
       - run: yarn prebuild
