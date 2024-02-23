@@ -20,26 +20,30 @@ jobs:
 
   example-basic:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: example/basic
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
           node-version: "18.x"
           registry-url: "https://registry.npmjs.org"
-      - run: cd example/expo-router
       - run: yarn install --immutable
       - run: yarn lint
       - run: yarn prebuild
 
   example-expo-router:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: example/expo-router
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
           node-version: "18.x"
           registry-url: "https://registry.npmjs.org"
-      - run: cd example/basic
       - run: yarn install --immutable
       - run: yarn lint
       - run: yarn prebuild
