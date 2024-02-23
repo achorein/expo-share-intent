@@ -22,7 +22,7 @@ jobs:
           path: |
             build
             plugin/build
-            !node_modules
+            node_modules
           key: ${{ github.sha }}
 
   example-basic:
@@ -42,7 +42,7 @@ jobs:
           path: |
             build
             plugin/build
-            !node_modules
+            node_modules
           key: ${{ github.sha }}
       - run: yarn install --immutable
       - run: yarn lint
@@ -65,7 +65,7 @@ jobs:
           path: |
             build
             plugin/build
-            !node_modules
+            node_modules
           key: ${{ github.sha }}
       - run: yarn install --immutable
       - run: yarn lint
