@@ -1,8 +1,6 @@
-import path from "node:path";
-import fs from "node:fs";
 import plist from "@expo/plist";
-
-import { Parameters } from "../types";
+import fs from "node:fs";
+import path from "node:path";
 
 import {
   shareExtensionName,
@@ -12,16 +10,17 @@ import {
   shareExtensionStoryBoardFileName,
   shareExtensionViewControllerFileName,
 } from "./constants";
+import { Parameters } from "../types";
 
 export async function writeShareExtensionFiles(
   platformProjectRoot: string,
   scheme: string,
   appIdentifier: string,
-  parameters: Parameters
+  parameters: Parameters,
 ) {
   const infoPlistFilePath = getShareExtensionInfoFilePath(platformProjectRoot);
   const infoPlistContent = getShareExtensionInfoContent(
-    parameters.iosActivationRules
+    parameters.iosActivationRules,
   );
   await fs.promises.mkdir(path.dirname(infoPlistFilePath), { recursive: true });
   await fs.promises.writeFile(infoPlistFilePath, infoPlistContent);
@@ -41,19 +40,19 @@ export async function writeShareExtensionFiles(
     getShareExtensionViewControllerPath(platformProjectRoot);
   const viewControllerContent = getShareExtensionViewControllerContent(
     scheme,
-    appIdentifier
+    appIdentifier,
   );
   await fs.promises.writeFile(viewControllerFilePath, viewControllerContent);
 }
 
 //: [root]/ios/ShareExtension/ShareExtension-Entitlements.plist
 export function getShareExtensionEntitlementsFilePath(
-  platformProjectRoot: string
+  platformProjectRoot: string,
 ) {
   return path.join(
     platformProjectRoot,
     shareExtensionName,
-    shareExtensionEntitlementsFileName
+    shareExtensionEntitlementsFileName,
   );
 }
 
@@ -72,12 +71,12 @@ export function getShareExtensionInfoFilePath(platformProjectRoot: string) {
   return path.join(
     platformProjectRoot,
     shareExtensionName,
-    shareExtensionInfoFileName
+    shareExtensionInfoFileName,
   );
 }
 
 export function getShareExtensionInfoContent(
-  activationRules: Parameters["iosActivationRules"]
+  activationRules: Parameters["iosActivationRules"],
 ) {
   return plist.build({
     CFBundleName: "$(PRODUCT_NAME)",
@@ -102,12 +101,12 @@ export function getShareExtensionInfoContent(
 
 //: [root]/ios/ShareExtension/ShareExtension-Info.plist
 export function getShareExtensionStoryboardFilePath(
-  platformProjectRoot: string
+  platformProjectRoot: string,
 ) {
   return path.join(
     platformProjectRoot,
     shareExtensionName,
-    shareExtensionStoryBoardFileName
+    shareExtensionStoryBoardFileName,
   );
 }
 
@@ -141,21 +140,21 @@ export function getShareExtensionStoryBoardContent() {
 
 //: [root]/ios/ShareExtension/ShareViewController.swift
 export function getShareExtensionViewControllerPath(
-  platformProjectRoot: string
+  platformProjectRoot: string,
 ) {
   return path.join(
     platformProjectRoot,
     shareExtensionName,
-    shareExtensionViewControllerFileName
+    shareExtensionViewControllerFileName,
   );
 }
 
 export function getShareExtensionViewControllerContent(
   scheme: string,
-  appIdentifier: string
+  appIdentifier: string,
 ) {
   console.debug(
-    `[expo-share-intent] add ios share extension (scheme:${scheme} appIdentifier:${appIdentifier})`
+    `[expo-share-intent] add ios share extension (scheme:${scheme} appIdentifier:${appIdentifier})`,
   );
   if (!scheme) {
     throw new Error(
@@ -165,7 +164,7 @@ export function getShareExtensionViewControllerContent(
 
   const content = fs.readFileSync(
     path.resolve(__dirname, "./ShareExtensionViewController.swift"),
-    "utf8"
+    "utf8",
   );
 
   return content

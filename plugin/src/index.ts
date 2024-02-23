@@ -4,8 +4,6 @@ import {
   withPlugins,
 } from "@expo/config-plugins";
 
-import { Parameters } from "./types";
-
 // Android
 import { withAndroidIntentFilters } from "./android/withAndroidIntentFilters";
 
@@ -13,8 +11,9 @@ import { withAndroidIntentFilters } from "./android/withAndroidIntentFilters";
 import { withAppEntitlements } from "./ios/withIosAppEntitlements";
 import { withShareExtensionConfig } from "./ios/withIosShareExtensionConfig";
 import { withShareExtensionXcodeTarget } from "./ios/withIosShareExtensionXcodeTarget";
+import { Parameters } from "./types";
 
-let pkg: { name: string; version?: string } = {
+const pkg: { name: string; version?: string } = {
   name: "expo-share-intent",
   version: "UNVERSIONED",
 };
@@ -31,7 +30,7 @@ const withShareMenu: ConfigPlugin<Parameters> = createRunOncePlugin(
     ]);
   },
   pkg.name,
-  pkg.version
+  pkg.version,
 );
 
 export default withShareMenu;

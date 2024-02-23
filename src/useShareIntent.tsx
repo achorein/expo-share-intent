@@ -1,7 +1,7 @@
+import Constants from "expo-constants";
+import { useURL } from "expo-linking";
 import { useEffect, useRef, useState } from "react";
 import { AppState } from "react-native";
-import { useURL } from "expo-linking";
-import Constants from "expo-constants";
 
 import {
   addChangeListener,
@@ -38,13 +38,13 @@ const parseShareIntent = (value): ShareIntent => {
       shareIntent?.files?.map((f) => ({
         path: f.path || f.contentUri,
         type: f.type || f.mimeType,
-        fileName: f.fileName
+        fileName: f.fileName,
       })) || null,
   };
 };
 
 export default function useShareIntent(
-  options: { debug: boolean } = { debug: false }
+  options: { debug: boolean } = { debug: false },
 ) {
   const url = useURL();
 
