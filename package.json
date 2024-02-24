@@ -60,6 +60,11 @@
     "expo-constants": "~14.4.2",
     "expo-linking": "~6.2.2"
   },
+  "resolutions": {
+    "string-width": "^4",
+    "strip-ansi": "^4",
+    "wrap-ansi": "^7"
+  },
   "peerDependencies": {
     "expo": ">=49.0.0",
     "expo-constants": ">=14.4.2",
