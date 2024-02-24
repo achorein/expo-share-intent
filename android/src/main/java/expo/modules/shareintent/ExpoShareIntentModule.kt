@@ -17,6 +17,8 @@ import android.database.Cursor
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
+import android.os.Parcelable
+import android.os.Bundle
 import android.provider.DocumentsContract
 import android.provider.OpenableColumns
 import android.provider.MediaStore
@@ -49,11 +51,13 @@ class ExpoShareIntentModule : Module() {
 
         @SuppressLint("Range")
         private fun getFileInfo(uri: Uri): Map<String, String> {
-            val resolver: ContentResolver = instance?.currentActivity?.getContentResolver()!!
+            val resolver: ContentResolver = instance?.currentActivity?.contentResolver!!
             val queryResult: Cursor = resolver.query(uri, null, null, null, null)!!
             queryResult.moveToFirst()
+            val fileName = queryResult.getString(queryResult.getColumnIndex(OpenableColumns.DISPLAY_NAME))
+            queryResult.close()
             return mapOf(
-                    "fileName" to queryResult.getString(queryResult.getColumnIndex(OpenableColumns.DISPLAY_NAME)),
+                    "fileName" to fileName,
                     "filePath" to instance!!.getAbsolutePath(uri)!!,
                     "mimeType" to resolver.getType(uri)!!,
                     "contentUri" to uri.toString(),
@@ -73,10 +77,12 @@ class ExpoShareIntentModule : Module() {
             } else {
                 // files / medias
                 if (intent.action == Intent.ACTION_SEND) {
-                    val uri: Uri = intent.getParcelableExtra(Intent.EXTRA_STREAM)!!;
+                    @Suppress("DEPRECATION") // see inline function at the end of the file
+                    val uri = intent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM)!!;
                     notifyShareIntent(arrayOf(getFileInfo(uri)))
                 } else if (intent.action == Intent.ACTION_SEND_MULTIPLE) {
-                    val uris: ArrayList<Uri> = intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM)!!
+                    @Suppress("DEPRECATION") // see inline function at the end of the file
+                    val uris = intent.getParcelableArrayListExtra<Uri>(Intent.EXTRA_STREAM)!!
                     notifyShareIntent(uris.map { getFileInfo(it) })
                 } else {
                     notifyError("Invalid action for file sharing: " + intent.action)
@@ -99,7 +105,7 @@ class ExpoShareIntentModule : Module() {
 
         // Defines a JavaScript function that always returns a Promise and whose native code
         // is by default dispatched on the different thread than the JavaScript runtime runs on.
-        AsyncFunction("getShareIntent") { value: String ->
+        AsyncFunction("getShareIntent") { _: String ->
             // nothing to do for Android
         }
 
@@ -127,7 +133,7 @@ class ExpoShareIntentModule : Module() {
     fun getAbsolutePath(uri: Uri): String? {
 
         // DocumentProvider
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT && DocumentsContract.isDocumentUri(context, uri)) {
+        if (DocumentsContract.isDocumentUri(context, uri)) {
             // ExternalStorageProvider
             if (isExternalStorageDocument(uri)) {
                 val docId = DocumentsContract.getDocumentId(uri)
@@ -186,7 +192,7 @@ class ExpoShareIntentModule : Module() {
      */
     private fun getDataColumn(uri: Uri, selection: String?,
                               selectionArgs: Array<String>?): String? {
-        val resolver: ContentResolver = instance?.currentActivity?.getContentResolver()!!
+        val resolver: ContentResolver = instance?.currentActivity?.contentResolver!!
         if (uri.authority != null) {
             var cursor: Cursor? = null
             val column = "_display_name"
@@ -246,7 +252,7 @@ class ExpoShareIntentModule : Module() {
      * @param uri The Uri to check.
      * @return Whether the Uri authority is ExternalStorageProvider.
      */
-    fun isExternalStorageDocument(uri: Uri): Boolean {
+    private fun isExternalStorageDocument(uri: Uri): Boolean {
         return "com.android.externalstorage.documents" == uri.authority
     }
 
@@ -254,7 +260,7 @@ class ExpoShareIntentModule : Module() {
      * @param uri The Uri to check.
      * @return Whether the Uri authority is DownloadsProvider.
      */
-    fun isDownloadsDocument(uri: Uri): Boolean {
+    private fun isDownloadsDocument(uri: Uri): Boolean {
         return "com.android.providers.downloads.documents" == uri.authority
     }
 
@@ -262,7 +268,20 @@ class ExpoShareIntentModule : Module() {
      * @param uri The Uri to check.
      * @return Whether the Uri authority is MediaProvider.
      */
-    fun isMediaDocument(uri: Uri): Boolean {
+    private fun isMediaDocument(uri: Uri): Boolean {
         return "com.android.providers.media.documents" == uri.authority
+    }
+
+    /*
+     * https://stackoverflow.com/questions/73019160/the-getparcelableextra-method-is-deprecated
+     */
+    inline fun <reified T : Parcelable> Intent.parcelable(key: String): T? = when {
+        Build.VERSION.SDK_INT >= 33 -> getParcelableExtra(key, T::class.java)
+        else -> @Suppress("DEPRECATION") getParcelableExtra(key) as? T
+    }
+
+    inline fun <reified T : Parcelable> Bundle.parcelableArrayList(key: String): ArrayList<T>? = when {
+        Build.VERSION.SDK_INT >= 33 -> getParcelableArrayList(key, T::class.java)
+        else -> @Suppress("DEPRECATION") getParcelableArrayList(key)
     }
 }
