@@ -65,6 +65,7 @@ class ExpoShareIntentModule : Module() {
         }
 
         fun handleShareIntent(intent: Intent) {
+            if (intent.type == null) return
             if (intent.type!!.startsWith("text")) {
                 // text / urls
                 if (intent.action == Intent.ACTION_SEND) {
@@ -78,12 +79,20 @@ class ExpoShareIntentModule : Module() {
                 // files / medias
                 if (intent.action == Intent.ACTION_SEND) {
                     @Suppress("DEPRECATION") // see inline function at the end of the file
-                    val uri = intent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM)!!;
-                    notifyShareIntent(arrayOf(getFileInfo(uri)))
+                    val uri = intent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM);
+                    if (uri != null) {
+                        notifyShareIntent(arrayOf(getFileInfo(uri)))
+                    } else {
+                        notifyError("empty uri for file sharing: " + intent.action)
+                    }
                 } else if (intent.action == Intent.ACTION_SEND_MULTIPLE) {
                     @Suppress("DEPRECATION") // see inline function at the end of the file
-                    val uris = intent.getParcelableArrayListExtra<Uri>(Intent.EXTRA_STREAM)!!
-                    notifyShareIntent(uris.map { getFileInfo(it) })
+                    val uris = intent.getParcelableArrayListExtra<Uri>(Intent.EXTRA_STREAM)
+                    if (uris != null) {
+                        notifyShareIntent(uris.map { getFileInfo(it) })
+                    } else {
+                        notifyError("empty uris array for file sharing: " + intent.action)
+                    }
                 } else {
                     notifyError("Invalid action for file sharing: " + intent.action)
                 }
