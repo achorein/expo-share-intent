@@ -2,7 +2,12 @@
 
 > This is not an official Expo SDK package.
 
-Allow sharing **URL, text, images, videos and files** to your **iOS** and **Android** app, using a simple native module for Expo **SDK 50** (React Native)
+Allow sharing **URL, text, images, videos and files** to your **iOS** and **Android** app, using a simple native module for Expo (React Native)
+
+| Expo       | Supported `expo-share-intent` version |
+| ---------- | ------------------------------------- |
+| **SDK 50** | 1.0+                                  |
+| **SDK 49** | 0.2+                                  |
 
 [<img src="https://badge.fury.io/js/expo-share-intent.svg">](https://www.npmjs.com/package/expo-share-intent)
 
@@ -47,6 +52,16 @@ npm install expo-share-intent
 ```
 
 > More info here : [Linking to your app](https://docs.expo.dev/guides/linking/#linking-to-your-app)
+
+**Run your app in dev-client**
+
+```
+expo prebuild --no-install --clean
+expo run:ios
+expo run:android
+```
+
+> We cannot use expo go with this package, more info [here](https://github.com/achorein/expo-share-intent?tab=readme-ov-file#expo-go-)
 
 ## Usage
 
