@@ -1,6 +1,6 @@
 {
   "name": "expo-share-intent",
-  "version": "1.0.0",
+  "version": "0.2.0",
   "description": "use native share intent for ios and android with expo",
   "homepage": "https://github.com/achorein/expo-share-intent/",
   "repository": {
@@ -56,9 +56,9 @@
     "expo-module": "expo-module"
   },
   "dependencies": {
-    "@expo/config-plugins": "~7.8.4",
+    "@expo/config-plugins": "~7.2.2",
     "expo-constants": "~14.4.2",
-    "expo-linking": "~6.2.2"
+    "expo-linking": "~5.0.2"
   },
   "resolutions": {
     "string-width": "^4",
@@ -68,7 +68,7 @@
   "peerDependencies": {
     "expo": ">=49.0.0",
     "expo-constants": ">=14.4.2",
-    "expo-linking": ">=6.2.2",
+    "expo-linking": ">=5.0.2",
     "react": "*",
     "react-native": "*"
   },
@@ -77,8 +77,8 @@
     "@types/react": "^18.0.25",
     "@types/react-native": "^0.69.5",
     "eslint": "^8.50.0",
-    "expo-module-scripts": "^3.4.1",
-    "expo-modules-core": "^1.11.8",
+    "expo-module-scripts": "^2.1.0",
+    "expo-modules-core": "^1.11.9",
     "prettier": "^3.2.5",
     "release-it": "^17.1.1"
   }
