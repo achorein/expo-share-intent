@@ -100,22 +100,18 @@ class ExpoShareIntentModule : Module() {
         }
     }
 
-    // Each module class must implement the definition function. The definition consists of components
-    // that describes the module's functionality and behavior.
-    // See https://docs.expo.dev/modules/module-api for more details about available components.
+    // See https://docs.expo.dev/modules/module-api
     override fun definition() = ModuleDefinition {
-        // Sets the name of the module that JavaScript code will use to refer to the module. Takes a string as an argument.
-        // Can be inferred from module's class name, but it's recommended to set it explicitly for clarity.
-        // The module will be accessible from `requireNativeModule('ExpoShareIntentModule')` in JavaScript.
         Name("ExpoShareIntentModule")
 
-        // Defines event names that the module can send to JavaScript.
         Events("onChange", "onError")
 
-        // Defines a JavaScript function that always returns a Promise and whose native code
-        // is by default dispatched on the different thread than the JavaScript runtime runs on.
         AsyncFunction("getShareIntent") { _: String ->
-            // nothing to do for Android
+            // get the Intent from onCreate activity (app not running in background)
+            if (ExpoShareIntentSingleton.intent?.type != null) {
+                handleShareIntent(ExpoShareIntentSingleton.intent!!);
+                ExpoShareIntentSingleton.intent = null
+            }
         }
 
         OnNewIntent {

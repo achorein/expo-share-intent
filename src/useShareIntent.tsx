@@ -1,7 +1,7 @@
 import Constants from "expo-constants";
 import { useURL } from "expo-linking";
 import { useEffect, useRef, useState } from "react";
-import { AppState } from "react-native";
+import { AppState, Platform } from "react-native";
 
 import {
   addChangeListener,
@@ -58,9 +58,11 @@ export default function useShareIntent(
    * Call native module on universal linking url change
    */
   const refreshShareIntent = () => {
-    // iOS only
     if (url?.startsWith(`${Constants.expoConfig?.scheme}://dataUrl`)) {
+      // iOS only
       getShareIntent(url);
+    } else if (Platform.OS === "android") {
+      getShareIntent();
     }
   };
 
