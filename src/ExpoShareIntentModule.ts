@@ -14,7 +14,7 @@ import { ChangeEventPayload } from "./ExpoShareIntentModule.types";
 const ExpoShareIntentModule = requireNativeModule("ExpoShareIntentModule");
 export default ExpoShareIntentModule;
 
-export function getShareIntent(url: string): string {
+export function getShareIntent(url = ""): string {
   return ExpoShareIntentModule.getShareIntent(url);
 }
 
