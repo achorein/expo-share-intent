@@ -33,6 +33,25 @@ yarn add expo-share-intent
 npm install expo-share-intent
 ```
 
+**Requirement**
+
+For the moment this package need a post-install script
+
+- copy the [xcode patch](https://github.com/achorein/expo-share-intent/blob/main/example/basic/patches/xcode%2B3.0.1.patch) in you `patches` project directory (like example)
+- add post-install script
+```json
+  "scripts": {
+    ...
+    "postinstall": "patch-package"
+  },
+```
+- add `patch-package` for auto patching
+```bash
+yarn add patch-package
+```
+
+> More info in [#13](https://github.com/achorein/expo-share-intent/issues/13) and [FAQ](https://github.com/achorein/expo-share-intent/edit/main/README.md#config-sync-failed)
+
 **Into your `app.json`:**
 
 - add expo plugin
@@ -131,7 +150,7 @@ $ yarn prebuild
 TypeError: [ios.xcodeproj]: withIosXcodeprojBaseMod: Cannot read properties of null (reading 'path')
 ```
 
-This package need a post-install script, see `xcode+3.0.1.patch` file in [example/patches](https://github.com/achorein/expo-share-intent/tree/main/example/basic/patches) (more info [#31](https://github.com/achorein/expo-share-intent-demo/issues/31))
+This package need a post-install script, see `xcode+3.0.1.patch` file in [example/patches](https://github.com/achorein/expo-share-intent/tree/main/example/basic/patches) (more info [#31](https://github.com/achorein/expo-share-intent-demo/issues/31) and [#13](https://github.com/achorein/expo-share-intent/issues/13))
 
 ### Expo Go ?
 
