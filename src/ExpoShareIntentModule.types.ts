@@ -2,9 +2,14 @@ export type ChangeEventPayload = {
   value: string;
 };
 
+export type StateEventPayload = {
+  value: "pending" | "none";
+};
+
 export type ShareIntentOptions = {
   debug?: boolean;
   resetOnBackground?: boolean;
+  onResetShareIntent?: () => void;
 };
 
 export type ShareIntent = {

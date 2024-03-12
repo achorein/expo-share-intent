@@ -14,5 +14,6 @@ class ExpoShareIntentReactActivityLifecycleListener(activityContext: Context) : 
 
     override fun onCreate(activity: Activity?, savedInstanceState: Bundle?) {
         ExpoShareIntentSingleton.intent = activity?.intent
+        ExpoShareIntentSingleton.isPending = activity?.intent?.type != null
     }
 }

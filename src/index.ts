@@ -4,9 +4,11 @@ export { ShareIntent } from "./ExpoShareIntentModule.types";
 
 export const SHARE_EXTENSION_KEY = `${Constants.expoConfig?.scheme}ShareKey`;
 export {
+  hasShareIntent,
   getShareIntent,
   clearShareIntent,
   addChangeListener,
+  addStateListener,
   addErrorListener,
 } from "./ExpoShareIntentModule";
 

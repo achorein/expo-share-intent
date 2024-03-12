@@ -4,6 +4,7 @@ import { ShareIntent, ShareIntentOptions } from "./ExpoShareIntentModule.types";
 import useShareIntent, { SHAREINTENT_DEFAULTVALUE } from "./useShareIntent";
 
 type ShareIntentContextState = {
+  isReady: boolean;
   hasShareIntent: boolean;
   shareIntent: ShareIntent;
   resetShareIntent: () => void;
@@ -11,6 +12,7 @@ type ShareIntentContextState = {
 };
 
 const ShareIntentContext = React.createContext<ShareIntentContextState>({
+  isReady: false,
   hasShareIntent: false,
   shareIntent: SHAREINTENT_DEFAULTVALUE,
   resetShareIntent: () => {},
@@ -30,12 +32,13 @@ export function ShareIntentProvider({
   options?: ShareIntentOptions;
   children: any;
 }) {
-  const { hasShareIntent, shareIntent, resetShareIntent, error } =
+  const { isReady, hasShareIntent, shareIntent, resetShareIntent, error } =
     useShareIntent(options);
 
   return (
     <ShareIntentContext.Provider
       value={{
+        isReady,
         hasShareIntent,
         shareIntent,
         resetShareIntent,
