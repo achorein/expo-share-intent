@@ -20,6 +20,7 @@ Allow sharing **URL, text, images, videos and files** to your **iOS** and **Andr
 - [Usage](#usage)
   - [Configure Content Types](#configure-content-types-in-appjson)
   - [Expo Router](#expo-router)
+  - [React Navigation](#react-navigation)
 - [Troubleshooting / FAQ](#troubleshooting---faq)
 - [Support](#support)
 
@@ -158,6 +159,54 @@ Simply choose content types you need :
 With `expo-router` you need to handle loading elements on [Layout](https://docs.expo.dev/routing/appearance/). It's the only way to call the native module using deeplink url (useShareIntent hook).
 
 An example is available with Expo Router v3 in [example/expo-router](https://github.com/achorein/expo-share-intent/tree/main/example/expo-router/)
+
+### React Navigation
+
+If you want to handle share intent with react-navigation, you must add a custom mapping function in your linking configuration like this :
+
+For iOS :
+
+```ts
+  // see: https://reactnavigation.org/docs/configuring-links/#advanced-cases
+  getStateFromPath(path, config) {
+    if (
+      path.includes(`dataUrl=${SHARE_EXTENSION_KEY}`) ||
+      path.includes("expo-development-client") // for test only
+    ) {
+      /**
+       * Need to call manually the native module to request the share intent data !
+       * React Navigation consume the deep link which is not available into the hook (useShareIntent)
+       * import { getShareIntent } from "expo-share-intent";
+       */
+      getShareIntent(`${Constants.expoConfig?.scheme}://${path}`);
+      // redirect to the ShareIntent Screen to handle data with the hook
+      return {
+        routes: [
+          {
+            name: "ShareIntent",
+          },
+        ],
+      };
+    }
+    return getStateFromPath(path, config);
+  },
+```
+
+For Android :
+
+```ts
+  async getInitialURL() {
+    // REQUIRED FOR ANDROID
+    const needRedirect = hasShareIntent();
+    if (needRedirect) {
+      return `${Constants.expoConfig?.scheme}://shareintent`;
+    }
+    // As a fallback, do the default deep link handling
+    return Linking.getInitialURL();
+  },
+```
+
+An example is available with React Navigation v6 in [example/react-navigation](https://github.com/achorein/expo-share-intent/tree/main/example/react-navigation/)
 
 ## Troubleshooting - FAQ
 

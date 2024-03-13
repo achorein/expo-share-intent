@@ -1,0 +1,46 @@
+{
+  "name": "expo-share-intent-example",
+  "version": "1.0.0",
+  "main": "node_modules/expo/AppEntry.js",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
+    "web": "expo start --web",
+    "prebuild": "expo prebuild --no-install",
+    "clean": "yarn prebuild --clean",
+    "test": "CI=1 expo install --check",
+    "test:fix": "expo install --fix",
+    "doctor": "npx --yes expo-doctor@latest",
+    "lint": "eslint .",
+    "postinstall": "patch-package"
+  },
+  "dependencies": {
+    "@react-navigation/native": "^6.1.16",
+    "@react-navigation/native-stack": "^6.9.25",
+    "@react-navigation/stack": "^6.3.28",
+    "expo": "~50.0.11",
+    "expo-splash-screen": "~0.26.4",
+    "expo-status-bar": "~1.11.1",
+    "patch-package": "^8.0.0",
+    "react": "18.2.0",
+    "react-native": "0.73.4",
+    "react-native-safe-area-context": "4.8.2",
+    "react-native-screens": "~3.29.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.20.0",
+    "@types/react": "~18.2.45",
+    "babel-plugin-module-resolver": "^5.0.0",
+    "eslint": "^8.50.0",
+    "eslint-config-universe": "^12.0.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.3.0"
+  },
+  "private": true,
+  "expo": {
+    "autolinking": {
+      "nativeModulesDir": "../.."
+    }
+  }
+}
