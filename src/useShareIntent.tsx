@@ -114,7 +114,7 @@ export default function useShareIntent(
   }, []);
 
   return {
-    hasShareIntent: shareIntent?.text || shareIntent?.files,
+    hasShareIntent: !!(shareIntent?.text || shareIntent?.files),
     shareIntent,
     resetShareIntent,
     error,
