@@ -13,12 +13,21 @@ import {
   AndroidShareIntent,
   IosShareIntent,
   ShareIntent,
+  ShareIntentOptions,
 } from "./ExpoShareIntentModule.types";
 
-const detaultValue: ShareIntent = { files: null, text: null };
+export const SHAREINTENT_DEFAULTVALUE: ShareIntent = {
+  files: null,
+  text: null,
+};
+
+export const SHAREINTENT_OPTIONS_DEFAULT: ShareIntentOptions = {
+  debug: false,
+  resetOnBackground: true,
+};
 
 const parseShareIntent = (value): ShareIntent => {
-  if (!value) return detaultValue;
+  if (!value) return SHAREINTENT_DEFAULTVALUE;
   let shareIntent: AndroidShareIntent | IosShareIntent;
   if (typeof value === "string") {
     shareIntent = JSON.parse(value.replaceAll("\n", "\\n")); // iOS
@@ -29,12 +38,12 @@ const parseShareIntent = (value): ShareIntent => {
   }
   if (shareIntent.text) {
     return {
-      ...detaultValue,
+      ...SHAREINTENT_DEFAULTVALUE,
       text: shareIntent.text,
     };
   }
   return {
-    ...detaultValue,
+    ...SHAREINTENT_DEFAULTVALUE,
     files:
       shareIntent?.files?.map((f) => ({
         path: f.path || f.contentUri,
@@ -45,18 +54,20 @@ const parseShareIntent = (value): ShareIntent => {
 };
 
 export default function useShareIntent(
-  options: { debug: boolean } = { debug: false },
+  options: ShareIntentOptions = SHAREINTENT_OPTIONS_DEFAULT,
 ) {
   const url = useURL();
 
   const appState = useRef(AppState.currentState);
-  const [shareIntent, setSharedIntent] = useState<ShareIntent>(detaultValue);
+  const [shareIntent, setSharedIntent] = useState<ShareIntent>(
+    SHAREINTENT_DEFAULTVALUE,
+  );
   const [error, setError] = useState<string | null>(null);
 
   const resetShareIntent = () => {
     setError(null);
     clearShareIntent();
-    setSharedIntent(detaultValue);
+    setSharedIntent(SHAREINTENT_DEFAULTVALUE);
   };
 
   /**
@@ -87,6 +98,7 @@ export default function useShareIntent(
         options.debug && console.debug("useShareIntent[active] refresh intent");
         refreshShareIntent();
       } else if (
+        options.resetOnBackground &&
         appState.current === "active" &&
         ["inactive", "background"].includes(nextAppState)
       ) {
