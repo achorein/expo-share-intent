@@ -20,6 +20,7 @@ Allow sharing **URL, text, images, videos and files** to your **iOS** and **Andr
 - [Usage](#usage)
   - [Configure Content Types](#configure-content-types-in-appjson)
   - [Expo Router](#expo-router)
+  - [React Navigation](#react-navigation)
 - [Troubleshooting / FAQ](#troubleshooting---faq)
 - [Support](#support)
 
@@ -158,6 +159,12 @@ Simply choose content types you need :
 With `expo-router` you need to handle loading elements on [Layout](https://docs.expo.dev/routing/appearance/). It's the only way to call the native module using deeplink url (useShareIntent hook).
 
 An example is available with Expo Router v3 in [example/expo-router](https://github.com/achorein/expo-share-intent/tree/main/example/expo-router/)
+
+### React Navigation
+
+If you want to handle share intent with React Navigation v6, you must use the `ShareIntentProvider` and add a custom mapping function in your linking configuration.
+
+Take a look at the example in [example/react-navigation](https://github.com/achorein/expo-share-intent/tree/main/example/react-navigation/)
 
 ## Troubleshooting - FAQ
 
