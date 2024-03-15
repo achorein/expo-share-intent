@@ -1,9 +1,11 @@
+import { createRef } from "react";
 import { Text, View } from "react-native";
 import Constants from "expo-constants";
 import * as Linking from "expo-linking";
 import {
   LinkingOptions,
   NavigationContainer,
+  NavigationContainerRef,
   getStateFromPath,
 } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -21,6 +23,9 @@ const PACKAGE_NAME =
   Constants.expoConfig?.android?.package ||
   Constants.expoConfig?.ios?.bundleIdentifier;
 const SHARE_EXTENSION_KEY = `${Constants.expoConfig?.scheme}ShareKey`;
+
+export const navigationRef =
+  createRef<NavigationContainerRef<RootStackParamList>>();
 
 const linking: LinkingOptions<RootStackParamList> = {
   prefixes: [
@@ -105,6 +110,7 @@ const linking: LinkingOptions<RootStackParamList> = {
 export default function Navigator() {
   return (
     <NavigationContainer
+      ref={navigationRef}
       linking={linking}
       fallback={
         <View style={{ flex: 1 }}>
