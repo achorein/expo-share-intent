@@ -6,6 +6,7 @@ import { AppState, Platform } from "react-native";
 import {
   addChangeListener,
   addErrorListener,
+  clearShareIntent,
   getShareIntent,
 } from "./ExpoShareIntentModule";
 import {
@@ -52,12 +53,16 @@ export default function useShareIntent(
   const [shareIntent, setSharedIntent] = useState<ShareIntent>(detaultValue);
   const [error, setError] = useState<string>();
 
-  const resetShareIntent = () => setSharedIntent(detaultValue);
+  const resetShareIntent = () => {
+    clearShareIntent();
+    setSharedIntent(detaultValue);
+  };
 
   /**
    * Call native module on universal linking url change
    */
   const refreshShareIntent = () => {
+    options.debug && console.debug("useShareIntent[refresh]", url);
     if (url?.startsWith(`${Constants.expoConfig?.scheme}://dataUrl`)) {
       // iOS only
       getShareIntent(url);
