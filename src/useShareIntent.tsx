@@ -63,11 +63,15 @@ export default function useShareIntent(
     SHAREINTENT_DEFAULTVALUE,
   );
   const [error, setError] = useState<string | null>(null);
+  const [isReady, setIsReady] = useState(false);
 
   const resetShareIntent = () => {
     setError(null);
     clearShareIntent();
-    setSharedIntent(SHAREINTENT_DEFAULTVALUE);
+    if (shareIntent?.text || shareIntent?.files) {
+      setSharedIntent(SHAREINTENT_DEFAULTVALUE);
+      options.onResetShareIntent?.();
+    }
   };
 
   /**
@@ -115,7 +119,7 @@ export default function useShareIntent(
     return () => {
       subscription.remove();
     };
-  }, [url]);
+  }, [url, shareIntent]);
 
   /**
    * Detect Native Module response
@@ -134,6 +138,7 @@ export default function useShareIntent(
       options.debug && console.debug("useShareIntent[error]", event?.value);
       setError(event?.value);
     });
+    setIsReady(true);
     return () => {
       changeSubscription.remove();
       errorSubscription.remove();
@@ -141,6 +146,7 @@ export default function useShareIntent(
   }, []);
 
   return {
+    isReady,
     hasShareIntent: !!(shareIntent?.text || shareIntent?.files),
     shareIntent,
     resetShareIntent,

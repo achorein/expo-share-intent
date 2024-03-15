@@ -9,6 +9,7 @@ object ExpoShareIntentSingleton : SingletonModule {
     return "ExpoShareIntent"
   }
 
-  // member to store the initial launch intent
+  // members to store the initial launch intent
   var intent: Intent? = null
+  var isPending: Boolean = false
 }

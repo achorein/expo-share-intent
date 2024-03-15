@@ -39,22 +39,17 @@ android.iml
 android/app/libs
 android/keystores/debug.keystore
 
-# Cocoapods
-#
-example/ios/Pods
-
-# Ruby
-example/vendor/
-
 # node.js
 #
-node_modules/
+node_modules
 npm-debug.log
 yarn-debug.log
 yarn-error.log
 
 # Expo
-.expo/*
+example/*/.expo
+example/*/android
+example/*/ios
 
 # Custom
 .env

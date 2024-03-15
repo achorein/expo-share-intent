@@ -18,7 +18,7 @@ public class ExpoShareIntentModule: Module {
     // The module will be accessible from `requireNativeModule('ExpoShareIntentModule')` in JavaScript.
     Name("ExpoShareIntentModule")
 
-    Events("onChange", "onError")
+    Events("onChange", "onStateChange", "onError")
 
     // Defines a JavaScript function that always returns a Promise and whose native code
     // is by default dispatched on the different thread than the JavaScript runtime runs on.
@@ -36,6 +36,11 @@ public class ExpoShareIntentModule: Module {
         let userDefaults = UserDefaults(suiteName: "group.\(Bundle.main.bundleIdentifier!)")
         userDefaults?.set(nil, forKey: sharedKey)
         userDefaults?.synchronize()
+    }
+
+    Function("hasShareIntent") { (key: String) in
+        // for Android only
+        return false
     }
   }
 
