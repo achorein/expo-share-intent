@@ -337,7 +337,7 @@ import UIKit
      
      // Debug method to print out SharedMediaFile details in the console
      func toString() {
-       print("[SharedMediaFile] path: \(self.path)thumbnail: \(self.thumbnail)duration: \(self.duration)type: \(self.type)")
+       print("[SharedMediaFile] path: \(self.path)thumbnail: \(self.thumbnail!)duration: \(self.duration!)type: \(self.type)")
      }
    }
    

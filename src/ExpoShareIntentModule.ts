@@ -5,10 +5,10 @@ import {
   Subscription,
 } from "expo-modules-core";
 
+import { SHARE_EXTENSION_KEY } from ".";
 import { ChangeEventPayload } from "./ExpoShareIntentModule.types";
 
-// Import the native module. On web, it will be resolved to ExpoShareIntentModule.web.ts
-// and on native platforms to ExpoShareIntentModule.ts
+// Import the native module. it will be resolved on native platforms to ExpoShareIntentModule.ts
 // It loads the native module object from the JSI or falls back to
 // the bridge module (from NativeModulesProxy) if the remote debugger is on.
 const ExpoShareIntentModule = requireNativeModule("ExpoShareIntentModule");
@@ -16,6 +16,10 @@ export default ExpoShareIntentModule;
 
 export function getShareIntent(url = ""): string {
   return ExpoShareIntentModule.getShareIntent(url);
+}
+
+export function clearShareIntent(key = SHARE_EXTENSION_KEY): string {
+  return ExpoShareIntentModule.clearShareIntent(key);
 }
 
 const emitter = new EventEmitter(

@@ -25,11 +25,17 @@ public class ExpoShareIntentModule: Module {
     AsyncFunction("getShareIntent") { (url: String) in
         let fileUrl = URL(string: url)
         let json =  handleUrl(url: fileUrl);
-        if (json != "error") {
+        if (json != "error" && json != "empty") {
             self.sendEvent("onChange", [
                 "value": json
             ])
         }
+    }
+
+    Function("clearShareIntent") { (sharedKey: String) in
+        let userDefaults = UserDefaults(suiteName: "group.\(Bundle.main.bundleIdentifier!)")
+        userDefaults?.set(nil, forKey: sharedKey)
+        userDefaults?.synchronize()
     }
   }
 
@@ -44,47 +50,55 @@ public class ExpoShareIntentModule: Module {
     if let url = url {
         let userDefaults = UserDefaults(suiteName: "group.\(appDomain)")
         if url.fragment == "media" {
-            if let key = url.host?.components(separatedBy: "=").last,
-                let json = userDefaults?.object(forKey: key) as? Data {
-                let sharedArray = decode(data: json)
-                let sharedMediaFiles: [SharedMediaFile] = sharedArray.compactMap {
-                    guard let path = getAbsolutePath(for: $0.path) else {
-                        return nil
-                    }
-                    if ($0.type == .video && $0.thumbnail != nil) {
-                        let thumbnail = getAbsolutePath(for: $0.thumbnail!)
-                        return SharedMediaFile.init(path: path, thumbnail: thumbnail, duration: $0.duration, type: $0.type)
-                    } else if ($0.type == .video && $0.thumbnail == nil) {
+            if let key = url.host?.components(separatedBy: "=").last {
+                if let json = userDefaults?.object(forKey: key) as? Data {
+                    let sharedArray = decode(data: json)
+                    let sharedMediaFiles: [SharedMediaFile] = sharedArray.compactMap {
+                        guard let path = getAbsolutePath(for: $0.path) else {
+                            return nil
+                        }
+                        if ($0.type == .video && $0.thumbnail != nil) {
+                            let thumbnail = getAbsolutePath(for: $0.thumbnail!)
+                            return SharedMediaFile.init(path: path, thumbnail: thumbnail, duration: $0.duration, type: $0.type)
+                        } else if ($0.type == .video && $0.thumbnail == nil) {
+                            return SharedMediaFile.init(path: path, thumbnail: nil, duration: $0.duration, type: $0.type)
+                        }
                         return SharedMediaFile.init(path: path, thumbnail: nil, duration: $0.duration, type: $0.type)
                     }
-                    return SharedMediaFile.init(path: path, thumbnail: nil, duration: $0.duration, type: $0.type)
+                    guard let json = toJson(data: sharedMediaFiles) else { return "[]"};
+                    return "{ \"files\": \(json) }";
+                } else {
+                    return "empty"
                 }
-                guard let json = toJson(data: sharedMediaFiles) else { return "[]"};
-                return "{ \"files\": \(json) }";
             }
         } else if url.fragment == "file" {
-            if let key = url.host?.components(separatedBy: "=").last,
-                let json = userDefaults?.object(forKey: key) as? Data {
-                let sharedArray = decode(data: json)
-                let sharedMediaFiles: [SharedMediaFile] = sharedArray.compactMap{
-                    guard let path = getAbsolutePath(for: $0.path) else {
-                        return nil
+            if let key = url.host?.components(separatedBy: "=").last {
+                if let json = userDefaults?.object(forKey: key) as? Data {                
+                    let sharedArray = decode(data: json)
+                    let sharedMediaFiles: [SharedMediaFile] = sharedArray.compactMap{
+                        guard let path = getAbsolutePath(for: $0.path) else {
+                            return nil
+                        }
+                        return SharedMediaFile.init(path: path, thumbnail: nil, duration: nil, type: $0.type)
                     }
-                    return SharedMediaFile.init(path: path, thumbnail: nil, duration: nil, type: $0.type)
+                    guard let json = toJson(data: sharedMediaFiles) else { return "[]"};
+                    return "{ \"files\": \(json) }";
+                } else {
+                    return "empty"
                 }
-                guard let json = toJson(data: sharedMediaFiles) else { return "[]"};
-                return "{ \"files\": \(json) }";
             }
         } else if url.fragment == "text" {
-            if let key = url.host?.components(separatedBy: "=").last,
-                let sharedArray = userDefaults?.object(forKey: key) as? [String] {
-                latestText =  sharedArray.joined(separator: ",")
-                
-                let optionalString = latestText;
-                if let unwrapped = optionalString {
-                    return "{ \"text\": \"\(unwrapped)\" }";
+            if let key = url.host?.components(separatedBy: "=").last {
+                if let sharedArray = userDefaults?.object(forKey: key) as? [String] {
+                    latestText =  sharedArray.joined(separator: ",")
+                    let optionalString = latestText;
+                    if let unwrapped = optionalString {
+                        return "{ \"text\": \"\(unwrapped)\" }";
+                    }
+                    return latestText!;
+                } else {
+                    return "empty"
                 }
-                return latestText!;
             }
         } else {
             latestText = url.absoluteString
@@ -92,10 +106,12 @@ public class ExpoShareIntentModule: Module {
             // now unwrap it
             if let unwrapwebUrl = optionalString {
                 return "{ \"text\": \"\(unwrapwebUrl)\" }";
+            } else {
+                return "empty"
             }
         }
         self.sendEvent("onError", [
-            "value": "file type is Invalid \(url.fragment)"
+            "value": "file type is Invalid \(url.fragment!)"
         ]);
         return "error"
     }
