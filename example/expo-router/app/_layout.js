@@ -8,6 +8,7 @@ export default function Layout() {
   const router = useRouter();
   const { hasShareIntent, shareIntent, resetShareIntent } = useShareIntent({
     debug: true,
+    resetOnBackground: true,
   });
 
   useEffect(() => {
