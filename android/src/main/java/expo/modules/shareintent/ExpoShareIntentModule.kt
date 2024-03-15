@@ -43,7 +43,11 @@ class ExpoShareIntentModule : Module() {
         private var instance: ExpoShareIntentModule? = null
 
         private fun notifyShareIntent(value: Any) {
+            notifyState("pending")
             instance!!.sendEvent("onChange", mapOf("value" to value))
+        }
+        private fun notifyState(state: String) {
+            instance!!.sendEvent("onStateChange", mapOf("value" to state))
         }
         private fun notifyError(message: String) {
             instance!!.sendEvent("onError", mapOf("value" to message))
@@ -104,10 +108,11 @@ class ExpoShareIntentModule : Module() {
     override fun definition() = ModuleDefinition {
         Name("ExpoShareIntentModule")
 
-        Events("onChange", "onError")
+        Events("onChange", "onStateChange", "onError")
 
         AsyncFunction("getShareIntent") { _: String ->
             // get the Intent from onCreate activity (app not running in background)
+            ExpoShareIntentSingleton.isPending = false
             if (ExpoShareIntentSingleton.intent?.type != null) {
                 handleShareIntent(ExpoShareIntentSingleton.intent!!);
                 ExpoShareIntentSingleton.intent = null
@@ -116,6 +121,10 @@ class ExpoShareIntentModule : Module() {
 
         Function("clearShareIntent") { _: String ->
             ExpoShareIntentSingleton.intent = null
+        }
+
+        Function("hasShareIntent") { _: String ->
+            ExpoShareIntentSingleton.isPending
         }
 
         OnNewIntent {

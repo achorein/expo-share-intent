@@ -6,7 +6,10 @@ import {
 } from "expo-modules-core";
 
 import { SHARE_EXTENSION_KEY } from ".";
-import { ChangeEventPayload } from "./ExpoShareIntentModule.types";
+import {
+  ChangeEventPayload,
+  StateEventPayload,
+} from "./ExpoShareIntentModule.types";
 
 // Import the native module. it will be resolved on native platforms to ExpoShareIntentModule.ts
 // It loads the native module object from the JSI or falls back to
@@ -20,6 +23,10 @@ export function getShareIntent(url = ""): string {
 
 export function clearShareIntent(key = SHARE_EXTENSION_KEY): string {
   return ExpoShareIntentModule.clearShareIntent(key);
+}
+
+export function hasShareIntent(key = SHARE_EXTENSION_KEY): boolean {
+  return ExpoShareIntentModule.hasShareIntent(key);
 }
 
 const emitter = new EventEmitter(
@@ -36,4 +43,10 @@ export function addChangeListener(
   listener: (event: ChangeEventPayload) => void,
 ): Subscription {
   return emitter.addListener<ChangeEventPayload>("onChange", listener);
+}
+
+export function addStateListener(
+  listener: (event: StateEventPayload) => void,
+): Subscription {
+  return emitter.addListener<StateEventPayload>("onStateChange", listener);
 }
