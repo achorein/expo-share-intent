@@ -2,6 +2,11 @@ export type ChangeEventPayload = {
   value: string;
 };
 
+export type ShareIntentOptions = {
+  debug?: boolean;
+  resetOnBackground?: boolean;
+};
+
 export type ShareIntent = {
   files:
     | {

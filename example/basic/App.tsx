@@ -6,6 +6,7 @@ export default function App() {
   const { hasShareIntent, shareIntent, resetShareIntent, error } =
     useShareIntent({
       debug: true,
+      resetOnBackground: true,
     });
 
   return (
