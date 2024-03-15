@@ -11,3 +11,7 @@ export {
 } from "./ExpoShareIntentModule";
 
 export { default as useShareIntent } from "./useShareIntent";
+export {
+  ShareIntentProvider,
+  useShareIntentContext,
+} from "./ShareIntentProvider";
