@@ -28,6 +28,28 @@ yarn add expo-share-intent
 npm install expo-share-intent
 ```
 
+**Requirement**
+
+For the moment this package need a post-install script
+
+- copy the [xcode patch](https://github.com/achorein/expo-share-intent/blob/main/example/basic/patches/xcode%2B3.0.1.patch) in you `patches` project directory (like example)
+- add post-install script
+
+```json
+  "scripts": {
+    ...
+    "postinstall": "patch-package"
+  },
+```
+
+- add `patch-package` for auto patching
+
+```bash
+yarn add patch-package
+```
+
+> More info in [#13](https://github.com/achorein/expo-share-intent/issues/13) and [FAQ](https://github.com/achorein/expo-share-intent/edit/main/README.md#config-sync-failed)
+
 **Into your `app.json`:**
 
 - add expo plugin
@@ -52,15 +74,41 @@ npm install expo-share-intent
 
 #### Use the hook in your App
 
-```ts
-import { useShareIntent } from "expo-share-intent";
-```
+Make sure to use the hook in your main `App.tsx` component before any other Provider :
 
 ```ts
-const { hasShareIntent, shareIntent, resetShareIntent } = useShareIntent();
+import { useShareIntent } from "expo-share-intent";
+
+const { hasShareIntent, shareIntent, resetShareIntent, error } =
+  useShareIntent();
 ```
 
 See [App.tsx ](https://github.com/achorein/expo-share-intent/blob/main/example/basic/App.tsx) for more details
+
+#### Use the Provider in your App
+
+When dealing with multiple screens and providers your may use `ShareIntentProvider` and it's specific hook `useShareIntentContext`. Must be in your top component (`App.tsx`) before any other Provider :
+
+```tsx
+import { ShareIntentProvider, useShareIntentContext } from "expo-share-intent";
+
+
+const Home = () => {
+  const { hasShareIntent, shareIntent, resetShareIntent, error } = useShareIntentContext();
+  return ...
+}
+
+export default const App = () => {
+  return (
+    <ShareIntentProvider>
+      <ThirdPartyExtraProvider>
+        <Home />
+      </ThirdPartyExtraProvider>
+    </ShareIntentProvider>
+  )
+}
+
+```
 
 #### Configure Content Types in `app.json`
 
