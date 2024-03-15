@@ -114,6 +114,10 @@ class ExpoShareIntentModule : Module() {
             }
         }
 
+        Function("clearShareIntent") { _: String ->
+            ExpoShareIntentSingleton.intent = null
+        }
+
         OnNewIntent {
             handleShareIntent(it)
         }
