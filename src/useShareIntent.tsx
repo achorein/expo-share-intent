@@ -21,7 +21,7 @@ const parseShareIntent = (value): ShareIntent => {
   if (!value) return detaultValue;
   let shareIntent: AndroidShareIntent | IosShareIntent;
   if (typeof value === "string") {
-    shareIntent = JSON.parse(value); // iOS
+    shareIntent = JSON.parse(value.replaceAll("\n", "\\n")); // iOS
   } else if (Array.isArray(value)) {
     shareIntent = { files: value }; // Android
   } else {
@@ -51,9 +51,10 @@ export default function useShareIntent(
 
   const appState = useRef(AppState.currentState);
   const [shareIntent, setSharedIntent] = useState<ShareIntent>(detaultValue);
-  const [error, setError] = useState<string>();
+  const [error, setError] = useState<string | null>(null);
 
   const resetShareIntent = () => {
+    setError(null);
     clearShareIntent();
     setSharedIntent(detaultValue);
   };
@@ -106,7 +107,12 @@ export default function useShareIntent(
   useEffect(() => {
     const changeSubscription = addChangeListener((event) => {
       options.debug && console.debug("useShareIntent[onChange]", event);
-      setSharedIntent(parseShareIntent(event.value));
+      try {
+        setSharedIntent(parseShareIntent(event.value));
+      } catch (e) {
+        options.debug && console.error("useShareIntent[onChange]", e);
+        setError("Cannot parse share intent value !");
+      }
     });
     const errorSubscription = addErrorListener((event) => {
       options.debug && console.debug("useShareIntent[error]", event?.value);
