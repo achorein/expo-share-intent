@@ -47,6 +47,7 @@ jobs:
       - run: yarn install --immutable
       - run: yarn lint
       - run: yarn prebuild
+      - run: yarn doctor
 
   example-expo-router:
     needs: build-plugin
@@ -70,3 +71,28 @@ jobs:
       - run: yarn install --immutable
       - run: yarn lint
       - run: yarn prebuild
+      - run: yarn doctor
+
+  example-react-navigation:
+    needs: build-plugin
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: example/react-navigation
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "18.x"
+          registry-url: "https://registry.npmjs.org"
+      - uses: actions/cache/restore@v3
+        with:
+          path: |
+            build
+            plugin/build
+            node_modules
+          key: ${{ github.sha }}
+      - run: yarn install --immutable
+      - run: yarn lint
+      - run: yarn prebuild
+      - run: yarn doctor

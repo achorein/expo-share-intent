@@ -65,9 +65,10 @@ export default function useShareIntent(
   const [error, setError] = useState<string | null>(null);
   const [isReady, setIsReady] = useState(false);
 
-  const resetShareIntent = () => {
+  const resetShareIntent = (clearNativeModule = true) => {
     setError(null);
-    clearShareIntent();
+    clearNativeModule &&
+      clearShareIntent(`${Constants.expoConfig?.scheme}ShareKey`);
     if (shareIntent?.text || shareIntent?.files) {
       setSharedIntent(SHAREINTENT_DEFAULTVALUE);
       options.onResetShareIntent?.();
