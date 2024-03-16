@@ -21,12 +21,12 @@ export function getShareIntent(url = ""): string {
   return ExpoShareIntentModule.getShareIntent(url);
 }
 
-export function clearShareIntent(key = SHARE_EXTENSION_KEY): string {
-  return ExpoShareIntentModule.clearShareIntent(key);
+export function clearShareIntent(key: string) {
+  return ExpoShareIntentModule.clearShareIntent(key ?? SHARE_EXTENSION_KEY);
 }
 
-export function hasShareIntent(key = SHARE_EXTENSION_KEY): boolean {
-  return ExpoShareIntentModule.hasShareIntent(key);
+export function hasShareIntent(key: string): boolean {
+  return ExpoShareIntentModule.hasShareIntent(key ?? SHARE_EXTENSION_KEY);
 }
 
 const emitter = new EventEmitter(
