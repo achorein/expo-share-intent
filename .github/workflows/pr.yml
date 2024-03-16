@@ -47,7 +47,7 @@ jobs:
       - run: yarn install --immutable
       - run: yarn lint
       - run: yarn prebuild
-      - run: yarn doctor
+      - run: yarn test
 
   example-expo-router:
     needs: build-plugin
@@ -71,7 +71,7 @@ jobs:
       - run: yarn install --immutable
       - run: yarn lint
       - run: yarn prebuild
-      - run: yarn doctor
+      - run: yarn test
 
   example-react-navigation:
     needs: build-plugin
@@ -95,4 +95,4 @@ jobs:
       - run: yarn install --immutable
       - run: yarn lint
       - run: yarn prebuild
-      - run: yarn doctor
+      - run: yarn test

@@ -5,12 +5,9 @@
 **Todo**
 
 <!--
-- [ ] ${{ Todo item 1 }}
-- [ ] ${{ Todo item 2 }}
+- [ ] ${{ Todo item }}
 - [ ] Update README.md
 -->
-
-<!-- If you have a Notion Ticket / GitHub Issue -->
 
 **Issue**
 
