@@ -19,6 +19,7 @@ import {
 export const SHAREINTENT_DEFAULTVALUE: ShareIntent = {
   files: null,
   text: null,
+  link: null,
 };
 
 export const SHAREINTENT_OPTIONS_DEFAULT: ShareIntentOptions = {
@@ -37,9 +38,14 @@ const parseShareIntent = (value): ShareIntent => {
     shareIntent = value;
   }
   if (shareIntent.text) {
+    const link =
+      shareIntent.text.match(
+        /[(http(s)?)://(www.)?-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)/gi,
+      )?.[0] || null;
     return {
       ...SHAREINTENT_DEFAULTVALUE,
       text: shareIntent.text,
+      link,
     };
   }
   return {

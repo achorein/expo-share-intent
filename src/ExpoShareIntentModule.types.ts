@@ -21,6 +21,7 @@ export type ShareIntent = {
       }[]
     | null;
   text: string | null;
+  link: string | null;
 };
 
 export type IosShareIntent = {
