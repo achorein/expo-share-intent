@@ -9,6 +9,7 @@ export type StateEventPayload = {
 export type ShareIntentOptions = {
   debug?: boolean;
   resetOnBackground?: boolean;
+  disabled?: boolean;
   onResetShareIntent?: () => void;
 };
 

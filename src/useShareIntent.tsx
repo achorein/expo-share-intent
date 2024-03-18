@@ -26,6 +26,7 @@ export const SHAREINTENT_DEFAULTVALUE: ShareIntent = {
 export const SHAREINTENT_OPTIONS_DEFAULT: ShareIntentOptions = {
   debug: false,
   resetOnBackground: true,
+  disabled: false,
 };
 
 const IOS_SHARE_TYPE_MAPPING = {
@@ -110,6 +111,7 @@ export default function useShareIntent(
   };
 
   useEffect(() => {
+    if (options.disabled) return;
     options.debug &&
       console.debug(
         "useShareIntent[mount]",
@@ -117,12 +119,13 @@ export default function useShareIntent(
         options,
       );
     refreshShareIntent();
-  }, [url]);
+  }, [url, options.disabled]);
 
   /**
    * Handle application state (active, background, inactive)
    */
   useEffect(() => {
+    if (options.disabled) return;
     const subscription = AppState.addEventListener("change", (nextAppState) => {
       if (nextAppState === "active") {
         options.debug && console.debug("useShareIntent[active] refresh intent");
@@ -141,12 +144,13 @@ export default function useShareIntent(
     return () => {
       subscription.remove();
     };
-  }, [url, shareIntent]);
+  }, [url, shareIntent, options.disabled]);
 
   /**
    * Detect Native Module response
    */
   useEffect(() => {
+    if (options.disabled) return;
     const changeSubscription = addChangeListener((event) => {
       options.debug && console.debug("useShareIntent[onChange]", event);
       try {
@@ -165,7 +169,7 @@ export default function useShareIntent(
       changeSubscription.remove();
       errorSubscription.remove();
     };
-  }, []);
+  }, [options.disabled]);
 
   return {
     isReady,
