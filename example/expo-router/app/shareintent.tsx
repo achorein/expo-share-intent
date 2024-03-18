@@ -1,17 +1,12 @@
-import { useMemo } from "react";
 import { Button, Image, StyleSheet, Text, View } from "react-native";
-import { StatusBar } from "expo-status-bar";
 
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
+import { useShareIntentContext } from "expo-share-intent";
 
 export default function ShareIntent() {
   const router = useRouter();
-  const params = useLocalSearchParams();
-
-  const shareIntent = useMemo(
-    () => (params?.shareIntent ? JSON.parse(params.shareIntent) : null),
-    [params],
-  );
+  const { hasShareIntent, shareIntent, error, resetShareIntent } =
+    useShareIntentContext();
 
   return (
     <View style={styles.container}>
@@ -19,8 +14,8 @@ export default function ShareIntent() {
         source={require("../assets/icon.png")}
         style={[styles.logo, styles.gap]}
       />
-      {!shareIntent && <Text>No Share intent detected</Text>}
-      {!!shareIntent && (
+      {!hasShareIntent && <Text>No Share intent detected</Text>}
+      {hasShareIntent && (
         <Text style={[styles.gap, { fontSize: 20 }]}>
           Congratz, a share intent value is available
         </Text>
@@ -33,10 +28,9 @@ export default function ShareIntent() {
           style={[styles.image, styles.gap]}
         />
       ))}
-      {!!shareIntent && (
-        <Button onPress={() => router.replace("/")} title="Go home" />
-      )}
-      <StatusBar style="auto" />
+      {hasShareIntent && <Button onPress={resetShareIntent} title="Reset" />}
+      <Text style={[styles.error]}>{error}</Text>
+      <Button onPress={() => router.replace("/")} title="Go home" />
     </View>
   );
 }
@@ -60,5 +54,8 @@ const styles = StyleSheet.create({
   },
   gap: {
     marginBottom: 20,
+  },
+  error: {
+    color: "red",
   },
 });
