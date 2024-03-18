@@ -1,6 +1,22 @@
+import { useRouter } from "expo-router";
+import { useShareIntentContext } from "expo-share-intent";
+import { useEffect } from "react";
 import { Text, View, StyleSheet } from "react-native";
 
-export default function Page() {
+export default function Home() {
+  const router = useRouter();
+
+  const { hasShareIntent } = useShareIntentContext();
+
+  useEffect(() => {
+    if (hasShareIntent) {
+      // we want to handle share intent event in a specific page
+      router.replace({
+        pathname: "shareintent",
+      });
+    }
+  }, [hasShareIntent]);
+
   return (
     <View style={styles.container}>
       <Text style={styles.heading}>Welcome to Expo Share Intent Demo !</Text>
