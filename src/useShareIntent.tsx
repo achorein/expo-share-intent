@@ -150,7 +150,11 @@ export default function useShareIntent(
    * Detect Native Module response
    */
   useEffect(() => {
-    if (options.disabled) return;
+    if (options.disabled) {
+      options.debug &&
+        console.debug("expo-share-intent module is disabled by configuration!");
+      return;
+    }
     const changeSubscription = addChangeListener((event) => {
       options.debug && console.debug("useShareIntent[onChange]", event);
       try {
