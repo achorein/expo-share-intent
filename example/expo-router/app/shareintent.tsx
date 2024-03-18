@@ -28,7 +28,9 @@ export default function ShareIntent() {
           style={[styles.image, styles.gap]}
         />
       ))}
-      {hasShareIntent && <Button onPress={resetShareIntent} title="Reset" />}
+      {hasShareIntent && (
+        <Button onPress={() => resetShareIntent()} title="Reset" />
+      )}
       <Text style={[styles.error]}>{error}</Text>
       <Button onPress={() => router.replace("/")} title="Go home" />
     </View>

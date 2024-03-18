@@ -26,7 +26,9 @@ export default function App() {
           style={[styles.image, styles.gap]}
         />
       ))}
-      {!!shareIntent && <Button onPress={resetShareIntent} title="Reset" />}
+      {!!shareIntent && (
+        <Button onPress={() => resetShareIntent()} title="Reset" />
+      )}
       <Text style={[styles.error]}>{error}</Text>
     </View>
   );
