@@ -7,7 +7,7 @@ type ShareIntentContextState = {
   isReady: boolean;
   hasShareIntent: boolean;
   shareIntent: ShareIntent;
-  resetShareIntent: () => void;
+  resetShareIntent: (clearNativeModule?: boolean) => void;
   error: string | null;
 };
 

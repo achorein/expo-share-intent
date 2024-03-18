@@ -29,7 +29,9 @@ export default function ShareIntentScreen({ navigation }: Props) {
           style={[styles.image, styles.gap]}
         />
       ))}
-      {!!shareIntent && <Button onPress={resetShareIntent} title="Reset" />}
+      {!!shareIntent && (
+        <Button onPress={() => resetShareIntent()} title="Reset" />
+      )}
       <Text style={[styles.error]}>{error}</Text>
       {/* @ts-ignore */}
       <Button onPress={() => navigation.navigate("Home")} title="Go home" />
