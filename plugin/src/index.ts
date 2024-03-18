@@ -12,6 +12,7 @@ import { withAppEntitlements } from "./ios/withIosAppEntitlements";
 import { withShareExtensionConfig } from "./ios/withIosShareExtensionConfig";
 import { withShareExtensionXcodeTarget } from "./ios/withIosShareExtensionXcodeTarget";
 import { Parameters } from "./types";
+import { withCompatibilityChecker } from "./withCompatibilityChecker";
 
 const pkg: { name: string; version?: string } = {
   name: "expo-share-intent",
@@ -28,6 +29,7 @@ const withShareMenu: ConfigPlugin<Parameters> = createRunOncePlugin(
       // Android
       () => withAndroidIntentFilters(config, params),
       () => withAndroidMainActivityAttributes(config, params),
+      withCompatibilityChecker,
     ]);
   },
   pkg.name,
