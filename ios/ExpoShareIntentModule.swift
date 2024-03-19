@@ -59,16 +59,16 @@ public class ExpoShareIntentModule: Module {
                 if let json = userDefaults?.object(forKey: key) as? Data {
                     let sharedArray = decode(data: json)
                     let sharedMediaFiles: [SharedMediaFile] = sharedArray.compactMap {
-                        guard let path = getAbsolutePath(for: $0.path) else {
-                            return nil
+                        if let path = getAbsolutePath(for: $0.path) {
+                            if ($0.type == .video && $0.thumbnail != nil) {
+                                let thumbnail = getAbsolutePath(for: $0.thumbnail!)
+                                return SharedMediaFile.init(path: path, thumbnail: thumbnail, fileName: $0.fileName, duration: $0.duration, type: $0.type)
+                            } else if ($0.type == .video && $0.thumbnail == nil) {
+                                return SharedMediaFile.init(path: path, thumbnail: nil, fileName: $0.fileName, duration: $0.duration, type: $0.type)
+                            }
+                            return SharedMediaFile.init(path: path, thumbnail: nil, fileName: $0.fileName, duration: $0.duration, type: $0.type)
                         }
-                        if ($0.type == .video && $0.thumbnail != nil) {
-                            let thumbnail = getAbsolutePath(for: $0.thumbnail!)
-                            return SharedMediaFile.init(path: path, thumbnail: thumbnail, duration: $0.duration, type: $0.type)
-                        } else if ($0.type == .video && $0.thumbnail == nil) {
-                            return SharedMediaFile.init(path: path, thumbnail: nil, duration: $0.duration, type: $0.type)
-                        }
-                        return SharedMediaFile.init(path: path, thumbnail: nil, duration: $0.duration, type: $0.type)
+                        return nil
                     }
                     guard let json = toJson(data: sharedMediaFiles) else { return "[]"};
                     return "{ \"files\": \(json), \"type\": \"\(url.fragment!)\" }";
@@ -81,10 +81,10 @@ public class ExpoShareIntentModule: Module {
                 if let json = userDefaults?.object(forKey: key) as? Data {                
                     let sharedArray = decode(data: json)
                     let sharedMediaFiles: [SharedMediaFile] = sharedArray.compactMap{
-                        guard let path = getAbsolutePath(for: $0.path) else {
-                            return nil
+                        if let path = getAbsolutePath(for: $0.path) {
+                            return SharedMediaFile.init(path: path, thumbnail: nil, fileName: $0.fileName, duration: nil, type: $0.type)
                         }
-                        return SharedMediaFile.init(path: path, thumbnail: nil, duration: nil, type: $0.type)
+                        return nil
                     }
                     guard let json = toJson(data: sharedMediaFiles) else { return "[]"};
                     return "{ \"files\": \(json), \"type\": \"\(url.fragment!)\" }";
@@ -170,12 +170,14 @@ public class ExpoShareIntentModule: Module {
   class SharedMediaFile: Codable {
     var path: String;
     var thumbnail: String?; // video thumbnail
+    var fileName: String?; // video thumbnail
     var duration: Double?; // video duration in milliseconds
     var type: SharedMediaType;
 
-    init(path: String, thumbnail: String?, duration: Double?, type: SharedMediaType) {
+    init(path: String, thumbnail: String?, fileName: String?, duration: Double?, type: SharedMediaType) {
         self.path = path
         self.thumbnail = thumbnail
+        self.fileName = fileName
         self.duration = duration
         self.type = type
     }

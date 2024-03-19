@@ -10,9 +10,9 @@ import {
   getShareIntent,
 } from "./ExpoShareIntentModule";
 import {
-  AndroidShareIntent,
-  IosShareIntent,
+  NativeShareIntent,
   ShareIntent,
+  ShareIntentFile,
   ShareIntentOptions,
 } from "./ExpoShareIntentModule.types";
 
@@ -28,9 +28,16 @@ export const SHAREINTENT_OPTIONS_DEFAULT: ShareIntentOptions = {
   resetOnBackground: true,
 };
 
+const IOS_SHARE_TYPE_MAPPING = {
+  0: "media",
+  1: "text",
+  2: "weburl",
+  3: "file",
+};
+
 const parseShareIntent = (value): ShareIntent => {
   if (!value) return SHAREINTENT_DEFAULTVALUE;
-  let shareIntent: AndroidShareIntent | IosShareIntent;
+  let shareIntent: NativeShareIntent;
   if (typeof value === "string") {
     shareIntent = JSON.parse(value.replaceAll("\n", "\\n")); // iOS
   } else {
@@ -45,18 +52,25 @@ const parseShareIntent = (value): ShareIntent => {
       ...SHAREINTENT_DEFAULTVALUE,
       text: shareIntent.text,
       webUrl,
-      type: shareIntent.type,
+      type: shareIntent.type ?? null,
     };
   }
   return {
     ...SHAREINTENT_DEFAULTVALUE,
-    files:
-      shareIntent?.files?.map((f) => ({
-        path: f.path || f.contentUri,
-        type: f.type || f.mimeType,
-        fileName: f.fileName,
-      })) || null,
-    type: shareIntent.type,
+    files: shareIntent?.files
+      ? shareIntent.files.reduce((acc: ShareIntentFile[], f: any) => {
+          if (!f.path && !f.contentUri) return acc;
+          return [
+            ...acc,
+            {
+              path: f.path || f.contentUri,
+              type: IOS_SHARE_TYPE_MAPPING[f.type] || f.mimeType || null,
+              fileName: f.fileName || null,
+            },
+          ];
+        }, [])
+      : null,
+    type: shareIntent.type ?? null,
   };
 };
 

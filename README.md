@@ -136,11 +136,11 @@ export default const App = () => {
 const { shareIntent } = useShareIntent();
 ```
 
-| attribute            | description                                           | example                                                                                                                                                                         |
-| -------------------- | ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `shareIntent.text`   | raw text from text/weburl (ios) and text/\* (android) | "`some text`", "`http://example.com`", "`Hey, Click on my link : http://example.com/nickname`"                                                                                  |
-| `shareIntent.webUrl` | link extracted from raw text                          | `null`, "`http://example.com`", "`http://example.com/nickname`"                                                                                                                 |
-| `shareIntent.files`  | image / movies / audio / files with path and type     | ios: `[{ path: "file:///local/path/filename.jpg", type: "0" }]`<br/>android: `[{ path: "file:///local/path/filename"; type: "image/jpeg"; fileName: "originalFilename.jpg"; }]` |
+| attribute            | description                                           | example                                                                                                                                                                                                              |
+| -------------------- | ----------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `shareIntent.text`   | raw text from text/weburl (ios) and text/\* (android) | "`some text`", "`http://example.com`", "`Hey, Click on my link : http://example.com/nickname`"                                                                                                                       |
+| `shareIntent.webUrl` | link extracted from raw text                          | `null`, "`http://example.com`", "`http://example.com/nickname`"                                                                                                                                                      |
+| `shareIntent.files`  | image / movies / audio / files with path and type     | ios: `[{ path: "file:///local/path/filename.jpg", type: "media", fileName: "originalFilename.jpg" }]`<br/>android: `[{ path: "file:///local/path/filename", type: "image/jpeg", fileName: "originalFilename.jpg" }]` |
 
 #### Customize Content Types in `app.json`
 

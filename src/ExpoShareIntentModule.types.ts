@@ -13,34 +13,41 @@ export type ShareIntentOptions = {
 };
 
 export type ShareIntent = {
-  files:
-    | {
-        path: string;
-        type: string;
-        fileName?: string;
-      }[]
-    | null;
+  files: ShareIntentFile[] | null;
   text: string | null;
   webUrl: string | null;
   type: "media" | "file" | "text" | "weburl" | null;
 };
 
+export interface ShareIntentFile {
+  path: string;
+  type: string;
+  fileName?: string;
+}
+
 export type IosShareIntent = {
   text?: string;
-  files?: {
-    path: string;
-    type: string;
-  }[];
+  files?: IosShareIntentFile[];
   type: "media" | "file" | "text" | "weburl";
 };
 
+export interface IosShareIntentFile {
+  path: string;
+  type: string;
+}
+
 export type AndroidShareIntent = {
   text?: string;
-  files?: {
-    fileName: string;
-    filePath: string;
-    mimeType: string;
-    contentUri: string;
-  }[];
-  type: "media" | "file" | "text" | "weburl";
+  files?: AndroidShareIntentFile[];
+  type: "file" | "text";
 };
+
+export interface AndroidShareIntentFile {
+  fileName: string;
+  filePath: string;
+  mimeType: string;
+  contentUri: string;
+}
+
+export type NativeShareIntent = IosShareIntent | AndroidShareIntent;
+export type NativeShareIntentFile = IosShareIntentFile | AndroidShareIntentFile;
