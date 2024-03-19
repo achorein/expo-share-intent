@@ -120,7 +120,7 @@ const { shareIntent } = useShareIntent();
 | attribute           | description                                           | example                                                                                                                                                                                 |
 | ------------------- | ----------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `shareIntent.text`  | raw text from text/weburl (ios) and text/\* (android) | "`some text`", "`http://example.com`", "`Hey, Click on my link : http://example.com`"                                                                                                   |
-| `shareIntent.files` | image / movies / audio / files with path and type     | ios: `[{ path: "file:///local/path/filename.jpg", type: "0" }]`<br/>android: `[{ path: "file:///local/path/filename.jpg"; mimeType: "image/jpeg"; fileName: "originalFilename.jpg"; }]` |
+| `shareIntent.files` | image / movies / audio / files with path and type     | ios: `[{ path: "file:///local/path/filename.jpg", type: "0" }]`<br/>android: `[{ path: "file:///local/path/filename"; type: "image/jpeg"; fileName: "originalFilename.jpg"; }]` |
 
 #### Customize Content Types in `app.json`
 
