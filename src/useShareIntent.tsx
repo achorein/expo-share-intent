@@ -19,7 +19,8 @@ import {
 export const SHAREINTENT_DEFAULTVALUE: ShareIntent = {
   files: null,
   text: null,
-  link: null,
+  webUrl: null,
+  type: null,
 };
 
 export const SHAREINTENT_OPTIONS_DEFAULT: ShareIntentOptions = {
@@ -32,20 +33,19 @@ const parseShareIntent = (value): ShareIntent => {
   let shareIntent: AndroidShareIntent | IosShareIntent;
   if (typeof value === "string") {
     shareIntent = JSON.parse(value.replaceAll("\n", "\\n")); // iOS
-  } else if (Array.isArray(value)) {
-    shareIntent = { files: value }; // Android
   } else {
-    shareIntent = value;
+    shareIntent = value; // Android
   }
   if (shareIntent.text) {
-    const link =
+    const webUrl =
       shareIntent.text.match(
         /[(http(s)?)://(www.)?-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)/gi,
       )?.[0] || null;
     return {
       ...SHAREINTENT_DEFAULTVALUE,
       text: shareIntent.text,
-      link,
+      webUrl,
+      type: shareIntent.type,
     };
   }
   return {
@@ -56,6 +56,7 @@ const parseShareIntent = (value): ShareIntent => {
         type: f.type || f.mimeType,
         fileName: f.fileName,
       })) || null,
+    type: shareIntent.type,
   };
 };
 

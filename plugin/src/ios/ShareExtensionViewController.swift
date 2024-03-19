@@ -50,15 +50,6 @@ import UIKit
        }
      }
    }
-        
-   override func didSelectPost() {
-         print("didSelectPost");
-     }
-        
-   override func configurationItems() -> [Any]! {
-     // To add configuration options via table cells at the bottom of the sheet, return an array of SLComposeSheetConfigurationItem here.
-     return []
-   }
     
    private func handleText (content: NSExtensionItem, attachment: NSItemProvider, index: Int) {
      attachment.loadItem(forTypeIdentifier: textContentType, options: nil) { [weak self] data, error in
@@ -67,7 +58,7 @@ import UIKit
         
          this.sharedText.append(item)
             
-         // If this is the last item, save imagesData in userDefaults and redirect to host app
+         // If this is the last item, save sharedText in userDefaults and redirect to host app
          if index == (content.attachments?.count)! - 1 {
            let userDefaults = UserDefaults(suiteName: "group.\(this.hostAppBundleIdentifier)")
            userDefaults?.set(this.sharedText, forKey: this.sharedKey)
@@ -88,12 +79,12 @@ import UIKit
         
          this.sharedText.append(item.absoluteString)
         
-         // If this is the last item, save imagesData in userDefaults and redirect to host app
+         // If this is the last item, save sharedText in userDefaults and redirect to host app
          if index == (content.attachments?.count)! - 1 {
            let userDefaults = UserDefaults(suiteName: "group.\(this.hostAppBundleIdentifier)")
            userDefaults?.set(this.sharedText, forKey: this.sharedKey)
            userDefaults?.synchronize()
-           this.redirectToHostApp(type: .text)
+           this.redirectToHostApp(type: .weburl)
          }
         
        } else {
@@ -110,7 +101,6 @@ import UIKit
         if let dataURL = data as? URL { url = dataURL }
         else if let imageData = data as? UIImage { url = this.saveScreenshot(imageData) }
 
-         //  this.redirectToHostApp(type: .media)
          // Always copy
          let fileExtension = this.getExtension(from: url!, type: .image)
          let newName = UUID().uuidString
@@ -241,6 +231,7 @@ import UIKit
    enum RedirectType {
      case media
      case text
+     case weburl
      case file
    }
    

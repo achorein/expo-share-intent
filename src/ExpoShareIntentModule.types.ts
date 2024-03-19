@@ -21,7 +21,8 @@ export type ShareIntent = {
       }[]
     | null;
   text: string | null;
-  link: string | null;
+  webUrl: string | null;
+  type: "media" | "file" | "text" | "weburl" | null;
 };
 
 export type IosShareIntent = {
@@ -30,6 +31,7 @@ export type IosShareIntent = {
     path: string;
     type: string;
   }[];
+  type: "media" | "file" | "text" | "weburl";
 };
 
 export type AndroidShareIntent = {
@@ -40,4 +42,5 @@ export type AndroidShareIntent = {
     mimeType: string;
     contentUri: string;
   }[];
+  type: "media" | "file" | "text" | "weburl";
 };

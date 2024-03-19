@@ -71,7 +71,7 @@ public class ExpoShareIntentModule: Module {
                         return SharedMediaFile.init(path: path, thumbnail: nil, duration: $0.duration, type: $0.type)
                     }
                     guard let json = toJson(data: sharedMediaFiles) else { return "[]"};
-                    return "{ \"files\": \(json) }";
+                    return "{ \"files\": \(json), \"type\": \"\(url.fragment!)\" }";
                 } else {
                     return "empty"
                 }
@@ -87,18 +87,18 @@ public class ExpoShareIntentModule: Module {
                         return SharedMediaFile.init(path: path, thumbnail: nil, duration: nil, type: $0.type)
                     }
                     guard let json = toJson(data: sharedMediaFiles) else { return "[]"};
-                    return "{ \"files\": \(json) }";
+                    return "{ \"files\": \(json), \"type\": \"\(url.fragment!)\" }";
                 } else {
                     return "empty"
                 }
             }
-        } else if url.fragment == "text" {
+        } else if url.fragment == "text" || url.fragment == "weburl" {
             if let key = url.host?.components(separatedBy: "=").last {
                 if let sharedArray = userDefaults?.object(forKey: key) as? [String] {
                     latestText =  sharedArray.joined(separator: ",")
                     let optionalString = latestText;
                     if let unwrapped = optionalString {
-                        return "{ \"text\": \"\(unwrapped)\" }";
+                        return "{ \"text\": \"\(unwrapped)\", \"type\": \"\(url.fragment!)\" }";
                     }
                     return latestText!;
                 } else {
@@ -110,7 +110,7 @@ public class ExpoShareIntentModule: Module {
             let optionalString = latestText;
             // now unwrap it
             if let unwrapwebUrl = optionalString {
-                return "{ \"text\": \"\(unwrapwebUrl)\" }";
+                return "{ \"text\": \"\(unwrapwebUrl)\", \"type\": \"\(url.fragment!)\" }";
             } else {
                 return "empty"
             }
