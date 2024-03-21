@@ -10,15 +10,17 @@ import {
   getShareIntent,
 } from "./ExpoShareIntentModule";
 import {
-  AndroidShareIntent,
-  IosShareIntent,
+  NativeShareIntent,
   ShareIntent,
+  ShareIntentFile,
   ShareIntentOptions,
 } from "./ExpoShareIntentModule.types";
 
 export const SHAREINTENT_DEFAULTVALUE: ShareIntent = {
   files: null,
   text: null,
+  webUrl: null,
+  type: null,
 };
 
 export const SHAREINTENT_OPTIONS_DEFAULT: ShareIntentOptions = {
@@ -26,30 +28,49 @@ export const SHAREINTENT_OPTIONS_DEFAULT: ShareIntentOptions = {
   resetOnBackground: true,
 };
 
+const IOS_SHARE_TYPE_MAPPING = {
+  0: "media",
+  1: "text",
+  2: "weburl",
+  3: "file",
+};
+
 const parseShareIntent = (value): ShareIntent => {
   if (!value) return SHAREINTENT_DEFAULTVALUE;
-  let shareIntent: AndroidShareIntent | IosShareIntent;
+  let shareIntent: NativeShareIntent;
   if (typeof value === "string") {
     shareIntent = JSON.parse(value.replaceAll("\n", "\\n")); // iOS
-  } else if (Array.isArray(value)) {
-    shareIntent = { files: value }; // Android
   } else {
-    shareIntent = value;
+    shareIntent = value; // Android
   }
   if (shareIntent.text) {
+    const webUrl =
+      shareIntent.text.match(
+        /[(http(s)?)://(www.)?-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)/gi,
+      )?.[0] || null;
     return {
       ...SHAREINTENT_DEFAULTVALUE,
       text: shareIntent.text,
+      webUrl,
+      type: shareIntent.type ?? null,
     };
   }
   return {
     ...SHAREINTENT_DEFAULTVALUE,
-    files:
-      shareIntent?.files?.map((f) => ({
-        path: f.path || f.contentUri,
-        type: f.type || f.mimeType,
-        fileName: f.fileName,
-      })) || null,
+    files: shareIntent?.files
+      ? shareIntent.files.reduce((acc: ShareIntentFile[], f: any) => {
+          if (!f.path && !f.contentUri) return acc;
+          return [
+            ...acc,
+            {
+              path: f.path || f.contentUri,
+              type: IOS_SHARE_TYPE_MAPPING[f.type] || f.mimeType || null,
+              fileName: f.fileName || null,
+            },
+          ];
+        }, [])
+      : null,
+    type: shareIntent.type ?? null,
   };
 };
 
