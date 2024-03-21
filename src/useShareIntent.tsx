@@ -59,7 +59,8 @@ const parseShareIntent = (value): ShareIntent => {
   return {
     ...SHAREINTENT_DEFAULTVALUE,
     files: shareIntent?.files
-      ? shareIntent.files.reduce((acc: ShareIntentFile[], f: any) => {
+      ? // @ts-ignore
+        shareIntent.files.reduce((acc: ShareIntentFile[], f: any) => {
           if (!f.path && !f.contentUri) return acc;
           return [
             ...acc,
