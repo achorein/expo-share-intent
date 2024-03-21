@@ -88,6 +88,7 @@ export default function useShareIntent(
   const [isReady, setIsReady] = useState(false);
 
   const resetShareIntent = (clearNativeModule = true) => {
+    if (options.disabled) return;
     setError(null);
     clearNativeModule &&
       clearShareIntent(`${Constants.expoConfig?.scheme}ShareKey`);
