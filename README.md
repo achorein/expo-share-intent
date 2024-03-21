@@ -213,7 +213,7 @@ That way you can test your share intent into simulator, but that does not exempt
 
 NB: don't commit your ios/ and android/ folder, rebuild it before EAS build.
 
-> If you want to open your application in expo go with this package your can **disable** the native module call with `option: { disabled: true }`. Allowing to speed test other features on your app without share intent.
+> If you want to open your application in expo go with this package your can **disable** the native module call with `useShareIntent({ disabled: true })`. Allowing to speed test other features on your app without share intent.
 
 ### Custom view ?
 
