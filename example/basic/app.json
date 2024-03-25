@@ -28,7 +28,8 @@
           "androidIntentFilters": ["text/*", "image/*"],
           "androidMultiIntentFilters": ["image/*"]
         }
-      ]
+      ],
+      ["expo-updates"]
     ],
     "ios": {
       "supportsTablet": true,
@@ -43,8 +44,14 @@
     },
     "extra": {
       "eas": {
-        "projectId": "xxx-xxx-xxx-xxx-xxx"
+        "projectId": "7a5b9f0b-c450-4c48-9e89-be9b6d6a2e98"
       }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/7a5b9f0b-c450-4c48-9e89-be9b6d6a2e98"
     }
   }
 }
