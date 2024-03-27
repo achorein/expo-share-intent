@@ -215,6 +215,28 @@ NB: don't commit your ios/ and android/ folder, rebuild it before EAS build.
 
 > If you want to open your application in expo go with this package your can **disable** the native module call with `useShareIntent({ disabled: true })`. Allowing to speed test other features on your app without share intent.
 
+### Google Signin and CFBundleURLSchemes
+
+When using `@react-native-google-signin/google-signin` you need to configure a custom scheme in your app.json to handle google signin fallback. By doing this, the original app scheme is deleted and must be manually reassigned :
+
+```json
+ "scheme": "exposhareintentexample",
+ "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "expo.modules.exposhareintent.example",
+      "infoPlist": {
+        "CFBundleURLTypes": [
+          {
+            "CFBundleURLSchemes": [
+              "com.googleusercontent.apps.xxxxxxxx-xxxxxxxxx",
+              "exposhareintentexample"
+            ]
+          }
+        ]
+      }
+    },
+```
+
 ### Custom view ?
 
 At the moment, this project does not support iOS custom view (native view in share intent context).
