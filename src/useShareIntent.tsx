@@ -36,8 +36,9 @@ const IOS_SHARE_TYPE_MAPPING = {
   3: "file",
 };
 
-const parseShareIntent = (value): ShareIntent => {
-  if (!value) return SHAREINTENT_DEFAULTVALUE;
+const parseShareIntent = (value, options): ShareIntent => {
+  let result = SHAREINTENT_DEFAULTVALUE;
+  if (!value) return result;
   let shareIntent: NativeShareIntent;
   if (typeof value === "string") {
     shareIntent = JSON.parse(value.replaceAll("\n", "\\n")); // iOS
@@ -49,30 +50,38 @@ const parseShareIntent = (value): ShareIntent => {
       shareIntent.text.match(
         /[(http(s)?)://(www.)?-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)/gi,
       )?.[0] || null;
-    return {
+    result = {
       ...SHAREINTENT_DEFAULTVALUE,
       text: shareIntent.text,
       webUrl,
-      type: shareIntent.type ?? null,
+      type: webUrl ? "weburl" : "text",
+    };
+  } else {
+    const files =
+      shareIntent?.files?.filter((f: any) => f.path || f.contentUri) || [];
+    const isMedia = files.every(
+      (f) => f.mimeType.startsWith("image/") || f.mimeType.startsWith("video/"),
+    );
+    result = {
+      ...SHAREINTENT_DEFAULTVALUE,
+      files: shareIntent?.files
+        ? shareIntent.files.reduce((acc: ShareIntentFile[], f: any) => {
+            if (!f.path && !f.contentUri) return acc;
+            return [
+              ...acc,
+              {
+                path: f.path || f.contentUri || null,
+                mimeType: f.mimeType || null,
+                fileName: f.fileName || null,
+              },
+            ];
+          }, [])
+        : null,
+      type: isMedia ? "media" : "file",
     };
   }
-  return {
-    ...SHAREINTENT_DEFAULTVALUE,
-    files: shareIntent?.files
-      ? shareIntent.files.reduce((acc: ShareIntentFile[], f: any) => {
-          if (!f.path && !f.contentUri) return acc;
-          return [
-            ...acc,
-            {
-              path: f.path || f.contentUri,
-              type: IOS_SHARE_TYPE_MAPPING[f.type] || f.mimeType || null,
-              fileName: f.fileName || null,
-            },
-          ];
-        }, [])
-      : null,
-    type: shareIntent.type ?? null,
-  };
+  options.debug && console.debug("useShareIntent[parsed] ", result);
+  return result;
 };
 
 export default function useShareIntent(
@@ -159,7 +168,7 @@ export default function useShareIntent(
     const changeSubscription = addChangeListener((event) => {
       options.debug && console.debug("useShareIntent[onChange]", event);
       try {
-        setSharedIntent(parseShareIntent(event.value));
+        setSharedIntent(parseShareIntent(event.value, options));
       } catch (e) {
         options.debug && console.error("useShareIntent[onChange]", e);
         setError("Cannot parse share intent value !");

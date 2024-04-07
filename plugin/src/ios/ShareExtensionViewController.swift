@@ -1,7 +1,7 @@
 /*!
  * Native module created for Expo Share Intent (https://github.com/achorein/expo-share-intent)
  * author: achorein (https://github.com/achorein)
- * inspired by : 
+ * inspired by :
  *  - https://ajith-ab.github.io/react-native-receive-sharing-intent/docs/ios#create-share-extension
  */
 import UIKit
@@ -73,7 +73,7 @@ class ShareViewController: SLComposeServiceViewController {
   private func handleUrl (content: NSExtensionItem, attachment: NSItemProvider, index: Int) {
     attachment.loadItem(forTypeIdentifier: urlContentType, options: nil) { [weak self] data, error in
 
-      if error == nil, let item = data as? URL, let this = self {  
+      if error == nil, let item = data as? URL, let this = self {
         this.sharedText.append(item.absoluteString)
         
         // If this is the last item, save sharedText in userDefaults and redirect to host app
@@ -100,13 +100,15 @@ class ShareViewController: SLComposeServiceViewController {
 
         // Always copy
         let fileName = this.getFileName(from :url!, type: .image)
-        let newName = "\(UUID().uuidString).\(this.getExtension(from: url!, type: .image))"
+        let fileExtension = this.getExtension(from: url!, type: .image)
+        let mimeType = url!.mimeType(ext: fileExtension)
+        let newName = "\(UUID().uuidString).\(fileExtension)"
         let newPath = FileManager.default
           .containerURL(forSecurityApplicationGroupIdentifier: "group.\(this.hostAppBundleIdentifier)")!
           .appendingPathComponent(newName)
         let copied = this.copyFile(at: url!, to: newPath)
         if(copied) {
-          this.sharedMedia.append(SharedMediaFile(path: newPath.absoluteString, thumbnail: nil, fileName: fileName, duration: nil, type: .image))
+          this.sharedMedia.append(SharedMediaFile(path: newPath.absoluteString, thumbnail: nil, fileName: fileName, duration: nil, mimeType: mimeType, type: .image))
         }
   
         // If this is the last item, save imagesData in userDefaults and redirect to host app
@@ -144,13 +146,15 @@ class ShareViewController: SLComposeServiceViewController {
         
         // Always copy
         let fileName = this.getFileName(from :url, type: .video)
-        let newName = "\(UUID().uuidString).\(this.getExtension(from: url, type: .video))"
+        let fileExtension = this.getExtension(from: url, type: .video)
+        let mimeType = url.mimeType(ext: fileExtension)
+        let newName = "\(UUID().uuidString).\(fileExtension)"
         let newPath = FileManager.default
           .containerURL(forSecurityApplicationGroupIdentifier: "group.\(this.hostAppBundleIdentifier)")!
           .appendingPathComponent(newName)
         let copied = this.copyFile(at: url, to: newPath)
         if(copied) {
-          guard let sharedFile = this.getSharedMediaFile(forVideo: newPath, fileName: fileName) else {
+          guard let sharedFile = this.getSharedMediaFile(forVideo: newPath, fileName: fileName, mimeType: mimeType) else {
             return
           }
           this.sharedMedia.append(sharedFile)
@@ -176,13 +180,15 @@ class ShareViewController: SLComposeServiceViewController {
       if error == nil, let url = data as? URL, let this = self {
         // Always copy
         let fileName = this.getFileName(from :url, type: .file)
-        let newName = "\(UUID().uuidString).\(this.getExtension(from: url, type: .video))"
+        let fileExtension = this.getExtension(from: url, type: .file)
+        let mimeType = url.mimeType(ext: fileExtension)
+        let newName = "\(UUID().uuidString).\(fileExtension)"
         let newPath = FileManager.default
           .containerURL(forSecurityApplicationGroupIdentifier: "group.\(this.hostAppBundleIdentifier)")!
           .appendingPathComponent(newName)
         let copied = this.copyFile(at: url, to: newPath)
         if (copied) {
-          this.sharedMedia.append(SharedMediaFile(path: newPath.absoluteString, thumbnail: nil, fileName: fileName, duration: nil, type: .file))
+          this.sharedMedia.append(SharedMediaFile(path: newPath.absoluteString, thumbnail: nil, fileName: fileName, duration: nil, mimeType: mimeType, type: .file))
         }
         
         if index == (content.attachments?.count)! - 1 {
@@ -280,13 +286,13 @@ class ShareViewController: SLComposeServiceViewController {
     return true
   }
   
-  private func getSharedMediaFile(forVideo: URL, fileName: String) -> SharedMediaFile? {
+  private func getSharedMediaFile(forVideo: URL, fileName: String, mimeType: String) -> SharedMediaFile? {
     let asset = AVAsset(url: forVideo)
     let duration = (CMTimeGetSeconds(asset.duration) * 1000).rounded()
     let thumbnailPath = getThumbnailPath(for: forVideo)
     
     if FileManager.default.fileExists(atPath: thumbnailPath.path) {
-      return SharedMediaFile(path: forVideo.absoluteString, thumbnail: thumbnailPath.absoluteString, fileName: fileName, duration: duration, type: .video)
+      return SharedMediaFile(path: forVideo.absoluteString, thumbnail: thumbnailPath.absoluteString, fileName: fileName, duration: duration, mimeType: mimeType, type: .video)
     }
     
     var saved = false
@@ -301,7 +307,7 @@ class ShareViewController: SLComposeServiceViewController {
       saved = false
     }
     
-    return saved ? SharedMediaFile(path: forVideo.absoluteString, thumbnail: thumbnailPath.absoluteString, fileName: nil, duration: duration, type: .video) : nil
+    return saved ? SharedMediaFile(path: forVideo.absoluteString, thumbnail: thumbnailPath.absoluteString, fileName: fileName, duration: duration, mimeType: mimeType, type: .video) : nil
   }
   
   private func getThumbnailPath(for url: URL) -> URL {
@@ -313,23 +319,20 @@ class ShareViewController: SLComposeServiceViewController {
   }
   
   class SharedMediaFile: Codable {
-    var path: String; // can be image, video or url path. It can also be text content
+    var path: String; // can be image, video or url path
     var thumbnail: String?; // video thumbnail
-    var fileName: String?; // uuid + extension
+    var fileName: String; // uuid + extension
     var duration: Double?; // video duration in milliseconds
+    var mimeType: String;
     var type: SharedMediaType;
     
-    init(path: String, thumbnail: String?, fileName: String?, duration: Double?, type: SharedMediaType) {
+    init(path: String, thumbnail: String?, fileName: String, duration: Double?, mimeType: String, type: SharedMediaType) {
       self.path = path
       self.thumbnail = thumbnail
       self.fileName = fileName
       self.duration = duration
+      self.mimeType = mimeType
       self.type = type
-    }
-    
-    // Debug method to print out SharedMediaFile details in the console
-    func toString() {
-      NSLog("[SharedMediaFile] path: \(self.path)thumbnail: \(self.thumbnail!)fileName: \(self.fileName!)duration: \(self.duration!)type: \(self.type)")
     }
   }
   
@@ -344,7 +347,119 @@ class ShareViewController: SLComposeServiceViewController {
     return encodedData!
   }
 }
-    
+
+internal let mimeTypes = [
+    "html": "text/html",
+    "htm": "text/html",
+    "shtml": "text/html",
+    "css": "text/css",
+    "xml": "text/xml",
+    "gif": "image/gif",
+    "jpeg": "image/jpeg",
+    "jpg": "image/jpeg",
+    "js": "application/javascript",
+    "atom": "application/atom+xml",
+    "rss": "application/rss+xml",
+    "mml": "text/mathml",
+    "txt": "text/plain",
+    "jad": "text/vnd.sun.j2me.app-descriptor",
+    "wml": "text/vnd.wap.wml",
+    "htc": "text/x-component",
+    "png": "image/png",
+    "tif": "image/tiff",
+    "tiff": "image/tiff",
+    "wbmp": "image/vnd.wap.wbmp",
+    "ico": "image/x-icon",
+    "jng": "image/x-jng",
+    "bmp": "image/x-ms-bmp",
+    "svg": "image/svg+xml",
+    "svgz": "image/svg+xml",
+    "webp": "image/webp",
+    "woff": "application/font-woff",
+    "jar": "application/java-archive",
+    "war": "application/java-archive",
+    "ear": "application/java-archive",
+    "json": "application/json",
+    "hqx": "application/mac-binhex40",
+    "doc": "application/msword",
+    "pdf": "application/pdf",
+    "ps": "application/postscript",
+    "eps": "application/postscript",
+    "ai": "application/postscript",
+    "rtf": "application/rtf",
+    "m3u8": "application/vnd.apple.mpegurl",
+    "xls": "application/vnd.ms-excel",
+    "eot": "application/vnd.ms-fontobject",
+    "ppt": "application/vnd.ms-powerpoint",
+    "wmlc": "application/vnd.wap.wmlc",
+    "kml": "application/vnd.google-earth.kml+xml",
+    "kmz": "application/vnd.google-earth.kmz",
+    "7z": "application/x-7z-compressed",
+    "cco": "application/x-cocoa",
+    "jardiff": "application/x-java-archive-diff",
+    "jnlp": "application/x-java-jnlp-file",
+    "run": "application/x-makeself",
+    "pl": "application/x-perl",
+    "pm": "application/x-perl",
+    "prc": "application/x-pilot",
+    "pdb": "application/x-pilot",
+    "rar": "application/x-rar-compressed",
+    "rpm": "application/x-redhat-package-manager",
+    "sea": "application/x-sea",
+    "swf": "application/x-shockwave-flash",
+    "sit": "application/x-stuffit",
+    "tcl": "application/x-tcl",
+    "tk": "application/x-tcl",
+    "der": "application/x-x509-ca-cert",
+    "pem": "application/x-x509-ca-cert",
+    "crt": "application/x-x509-ca-cert",
+    "xpi": "application/x-xpinstall",
+    "xhtml": "application/xhtml+xml",
+    "xspf": "application/xspf+xml",
+    "zip": "application/zip",
+    "epub": "application/epub+zip",
+    "docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    "pptx": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    "mid": "audio/midi",
+    "midi": "audio/midi",
+    "kar": "audio/midi",
+    "mp3": "audio/mpeg",
+    "ogg": "audio/ogg",
+    "m4a": "audio/x-m4a",
+    "ra": "audio/x-realaudio",
+    "3gpp": "video/3gpp",
+    "3gp": "video/3gpp",
+    "ts": "video/mp2t",
+    "mp4": "video/mp4",
+    "mpeg": "video/mpeg",
+    "mpg": "video/mpeg",
+    "mov": "video/quicktime",
+    "webm": "video/webm",
+    "flv": "video/x-flv",
+    "m4v": "video/x-m4v",
+    "mng": "video/x-mng",
+    "asx": "video/x-ms-asf",
+    "asf": "video/x-ms-asf",
+    "wmv": "video/x-ms-wmv",
+    "avi": "video/x-msvideo"
+]
+
+extension URL {
+  func mimeType(ext: String?) -> String {
+    if #available(iOSApplicationExtension 14.0, *) {
+      if let pathExt = ext,
+        let mimeType = UTType(filenameExtension: pathExt)?.preferredMIMEType {
+        return mimeType
+      } else {
+        return "application/octet-stream"
+      }
+    } else {
+      return mimeTypes[ext?.lowercased() ?? "" ] ?? "application/octet-stream"
+    }
+  }
+}
+
 extension Array {
   subscript (safe index: UInt) -> Element? {
     return Int(index) < count ? self[Int(index)] : nil
