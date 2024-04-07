@@ -101,6 +101,7 @@ class ShareViewController: SLComposeServiceViewController {
         // Always copy
         let fileName = this.getFileName(from :url!, type: .image)
         let fileExtension = this.getExtension(from: url!, type: .image)
+        let fileSize = this.getFileSize(from: url!)
         let mimeType = url!.mimeType(ext: fileExtension)
         let newName = "\(UUID().uuidString).\(fileExtension)"
         let newPath = FileManager.default
@@ -108,7 +109,7 @@ class ShareViewController: SLComposeServiceViewController {
           .appendingPathComponent(newName)
         let copied = this.copyFile(at: url!, to: newPath)
         if(copied) {
-          this.sharedMedia.append(SharedMediaFile(path: newPath.absoluteString, thumbnail: nil, fileName: fileName, duration: nil, mimeType: mimeType, type: .image))
+          this.sharedMedia.append(SharedMediaFile(path: newPath.absoluteString, thumbnail: nil, fileName: fileName, fileSize: fileSize, duration: nil, mimeType: mimeType, type: .image))
         }
   
         // If this is the last item, save imagesData in userDefaults and redirect to host app
@@ -147,6 +148,7 @@ class ShareViewController: SLComposeServiceViewController {
         // Always copy
         let fileName = this.getFileName(from :url, type: .video)
         let fileExtension = this.getExtension(from: url, type: .video)
+        let fileSize = this.getFileSize(from: url)
         let mimeType = url.mimeType(ext: fileExtension)
         let newName = "\(UUID().uuidString).\(fileExtension)"
         let newPath = FileManager.default
@@ -154,7 +156,7 @@ class ShareViewController: SLComposeServiceViewController {
           .appendingPathComponent(newName)
         let copied = this.copyFile(at: url, to: newPath)
         if(copied) {
-          guard let sharedFile = this.getSharedMediaFile(forVideo: newPath, fileName: fileName, mimeType: mimeType) else {
+          guard let sharedFile = this.getSharedMediaFile(forVideo: newPath, fileName: fileName, fileSize: fileSize, mimeType: mimeType) else {
             return
           }
           this.sharedMedia.append(sharedFile)
@@ -181,6 +183,7 @@ class ShareViewController: SLComposeServiceViewController {
         // Always copy
         let fileName = this.getFileName(from :url, type: .file)
         let fileExtension = this.getExtension(from: url, type: .file)
+        let fileSize = this.getFileSize(from: url)
         let mimeType = url.mimeType(ext: fileExtension)
         let newName = "\(UUID().uuidString).\(fileExtension)"
         let newPath = FileManager.default
@@ -188,7 +191,7 @@ class ShareViewController: SLComposeServiceViewController {
           .appendingPathComponent(newName)
         let copied = this.copyFile(at: url, to: newPath)
         if (copied) {
-          this.sharedMedia.append(SharedMediaFile(path: newPath.absoluteString, thumbnail: nil, fileName: fileName, duration: nil, mimeType: mimeType, type: .file))
+          this.sharedMedia.append(SharedMediaFile(path: newPath.absoluteString, thumbnail: nil, fileName: fileName, fileSize: fileSize, duration: nil, mimeType: mimeType, type: .file))
         }
         
         if index == (content.attachments?.count)! - 1 {
@@ -273,6 +276,16 @@ class ShareViewController: SLComposeServiceViewController {
     return name
   }
   
+  func getFileSize(from url: URL) -> Int? {
+    do {
+      let resources = try url.resourceValues(forKeys:[.fileSizeKey])
+      return resources.fileSize
+    } catch {
+      NSLog("Error: \(error)")
+      return nil
+    }
+  }
+  
   func copyFile(at srcURL: URL, to dstURL: URL) -> Bool {
     do {
       if FileManager.default.fileExists(atPath: dstURL.path) {
@@ -286,13 +299,14 @@ class ShareViewController: SLComposeServiceViewController {
     return true
   }
   
-  private func getSharedMediaFile(forVideo: URL, fileName: String, mimeType: String) -> SharedMediaFile? {
+  private func getSharedMediaFile(forVideo: URL, fileName: String, fileSize: Int?, mimeType: String) -> SharedMediaFile? {
     let asset = AVAsset(url: forVideo)
     let duration = (CMTimeGetSeconds(asset.duration) * 1000).rounded()
     let thumbnailPath = getThumbnailPath(for: forVideo)
     
+    
     if FileManager.default.fileExists(atPath: thumbnailPath.path) {
-      return SharedMediaFile(path: forVideo.absoluteString, thumbnail: thumbnailPath.absoluteString, fileName: fileName, duration: duration, mimeType: mimeType, type: .video)
+      return SharedMediaFile(path: forVideo.absoluteString, thumbnail: thumbnailPath.absoluteString, fileName: fileName, fileSize: fileSize, duration: duration, mimeType: mimeType, type: .video)
     }
     
     var saved = false
@@ -307,7 +321,7 @@ class ShareViewController: SLComposeServiceViewController {
       saved = false
     }
     
-    return saved ? SharedMediaFile(path: forVideo.absoluteString, thumbnail: thumbnailPath.absoluteString, fileName: fileName, duration: duration, mimeType: mimeType, type: .video) : nil
+    return saved ? SharedMediaFile(path: forVideo.absoluteString, thumbnail: thumbnailPath.absoluteString, fileName: fileName, fileSize: fileSize, duration: duration, mimeType: mimeType, type: .video) : nil
   }
   
   private func getThumbnailPath(for url: URL) -> URL {
@@ -322,14 +336,16 @@ class ShareViewController: SLComposeServiceViewController {
     var path: String; // can be image, video or url path
     var thumbnail: String?; // video thumbnail
     var fileName: String; // uuid + extension
+    var fileSize: Int?;
     var duration: Double?; // video duration in milliseconds
     var mimeType: String;
     var type: SharedMediaType;
     
-    init(path: String, thumbnail: String?, fileName: String, duration: Double?, mimeType: String, type: SharedMediaType) {
+    init(path: String, thumbnail: String?, fileName: String, fileSize: Int?, duration: Double?, mimeType: String, type: SharedMediaType) {
       self.path = path
       self.thumbnail = thumbnail
       self.fileName = fileName
+      self.fileSize = fileSize
       self.duration = duration
       self.mimeType = mimeType
       self.type = type

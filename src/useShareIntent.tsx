@@ -73,6 +73,7 @@ const parseShareIntent = (value, options): ShareIntent => {
                 path: f.path || f.contentUri || null,
                 mimeType: f.mimeType || null,
                 fileName: f.fileName || null,
+                size: f.fileSize ? Number(f.fileSize) : null,
               },
             ];
           }, [])

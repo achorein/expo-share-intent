@@ -24,6 +24,7 @@ export interface ShareIntentFile {
   path: string;
   mimeType: string;
   fileName: string;
+  size: number | null;
 }
 
 export type IosShareIntent = {
@@ -37,6 +38,7 @@ export interface IosShareIntentFile {
   type: string;
   fileName: string;
   mimeType: string;
+  fileSize?: number;
 }
 
 export type AndroidShareIntent = {
@@ -49,6 +51,7 @@ export interface AndroidShareIntentFile {
   fileName: string;
   filePath: string;
   mimeType: string;
+  fileSize?: string;
   contentUri: string;
 }
 
