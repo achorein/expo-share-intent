@@ -117,11 +117,11 @@ export default const App = () => {
 const { shareIntent } = useShareIntent();
 ```
 
-| attribute            | description                                           | example                                                                                               |
-| -------------------- | ----------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| `shareIntent.text`   | raw text from text/weburl (ios) and text/\* (android) | "`some text`", "`http://example.com`", "`Hey, Click on my link : http://example.com/nickname`"        |
-| `shareIntent.webUrl` | link extracted from raw text                          | `null`, "`http://example.com`", "`http://example.com/nickname`"                                       |
-| `shareIntent.files`  | image / movies / audio / files with path and type     | `[{ path: "file:///local/path/filename", mimeType: "image/jpeg", fileName: "originalFilename.jpg" }]` |
+| attribute            | description                                                                   | example                                                                                                              |
+| -------------------- | ----------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `shareIntent.text`   | raw text from text/weburl (ios) and text/\* (android)                         | "`some text`", "`http://example.com`", "`Hey, Click on my link : http://example.com/nickname`"                       |
+| `shareIntent.webUrl` | link extracted from raw text                                                  | `null`, "`http://example.com`", "`http://example.com/nickname`"                                                      |
+| `shareIntent.files`  | image / movies / audio / files with name, path, mimetype and size (in octets) | `[{ path: "file:///local/path/filename", mimeType: "image/jpeg", fileName: "originalFilename.jpg", size: 2567402 }]` |
 
 #### Customize Content Types in `app.json`
 

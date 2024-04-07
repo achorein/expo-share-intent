@@ -58,6 +58,7 @@ const parseShareIntent = (value, options): ShareIntent => {
     };
   } else {
     const files =
+      // @ts-ignore
       shareIntent?.files?.filter((f: any) => f.path || f.contentUri) || [];
     const isMedia = files.every(
       (f) => f.mimeType.startsWith("image/") || f.mimeType.startsWith("video/"),
@@ -65,7 +66,8 @@ const parseShareIntent = (value, options): ShareIntent => {
     result = {
       ...SHAREINTENT_DEFAULTVALUE,
       files: shareIntent?.files
-        ? shareIntent.files.reduce((acc: ShareIntentFile[], f: any) => {
+        ? // @ts-ignore
+          shareIntent.files.reduce((acc: ShareIntentFile[], f: any) => {
             if (!f.path && !f.contentUri) return acc;
             return [
               ...acc,
@@ -73,6 +75,7 @@ const parseShareIntent = (value, options): ShareIntent => {
                 path: f.path || f.contentUri || null,
                 mimeType: f.mimeType || null,
                 fileName: f.fileName || null,
+                size: f.fileSize ? Number(f.fileSize) : null,
               },
             ];
           }, [])

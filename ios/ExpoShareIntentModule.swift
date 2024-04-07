@@ -62,11 +62,11 @@ public class ExpoShareIntentModule: Module {
                         if let path = getAbsolutePath(for: $0.path) {
                             if ($0.type == .video && $0.thumbnail != nil) {
                                 let thumbnail = getAbsolutePath(for: $0.thumbnail!)
-                                return SharedMediaFile.init(path: path, thumbnail: thumbnail, fileName: $0.fileName, duration: $0.duration, mimeType: $0.mimeType, type: $0.type)
+                                return SharedMediaFile.init(path: path, thumbnail: thumbnail, fileName: $0.fileName, fileSize: $0.fileSize, duration: $0.duration, mimeType: $0.mimeType, type: $0.type)
                             } else if ($0.type == .video && $0.thumbnail == nil) {
-                                return SharedMediaFile.init(path: path, thumbnail: nil, fileName: $0.fileName, duration: $0.duration, mimeType: $0.mimeType, type: $0.type)
+                                return SharedMediaFile.init(path: path, thumbnail: nil, fileName: $0.fileName, fileSize: $0.fileSize, duration: $0.duration, mimeType: $0.mimeType, type: $0.type)
                             }
-                            return SharedMediaFile.init(path: path, thumbnail: nil, fileName: $0.fileName, duration: $0.duration, mimeType: $0.mimeType, type: $0.type)
+                            return SharedMediaFile.init(path: path, thumbnail: nil, fileName: $0.fileName, fileSize: $0.fileSize, duration: $0.duration, mimeType: $0.mimeType, type: $0.type)
                         }
                         return nil
                     }
@@ -82,7 +82,7 @@ public class ExpoShareIntentModule: Module {
                     let sharedArray = decode(data: json)
                     let sharedMediaFiles: [SharedMediaFile] = sharedArray.compactMap{
                         if let path = getAbsolutePath(for: $0.path) {
-                            return SharedMediaFile.init(path: path, thumbnail: nil, fileName: $0.fileName, duration: nil, mimeType: $0.mimeType, type: $0.type)
+                            return SharedMediaFile.init(path: path, thumbnail: nil, fileName: $0.fileName, fileSize: $0.fileSize, duration: nil, mimeType: $0.mimeType, type: $0.type)
                         }
                         return nil
                     }
@@ -170,18 +170,20 @@ public class ExpoShareIntentModule: Module {
   class SharedMediaFile: Codable {
     var path: String; // can be image, video or url path
     var thumbnail: String?; // video thumbnail
-    var fileName: String; // video thumbnail
+    var fileName: String; // uuid + extension
+    var fileSize: Int?;
     var duration: Double?; // video duration in milliseconds
     var mimeType: String;
     var type: SharedMediaType;
-
-    init(path: String, thumbnail: String?, fileName: String, duration: Double?, mimeType: String, type: SharedMediaType) {
-        self.path = path
-        self.thumbnail = thumbnail
-        self.fileName = fileName
-        self.duration = duration
-        self.mimeType = mimeType
-        self.type = type
+    
+    init(path: String, thumbnail: String?, fileName: String, fileSize: Int?, duration: Double?, mimeType: String, type: SharedMediaType) {
+      self.path = path
+      self.thumbnail = thumbnail
+      self.fileName = fileName
+      self.fileSize = fileSize
+      self.duration = duration
+      self.mimeType = mimeType
+      self.type = type
     }
   }
 
