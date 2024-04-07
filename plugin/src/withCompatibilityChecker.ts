@@ -32,5 +32,15 @@ export const withCompatibilityChecker: ConfigPlugin = (config) => {
     );
   }
 
+  const extraAppExtension =
+    config.extra?.eas?.build?.experimental?.ios?.appExtensions?.filter(
+      (appExtension: any) => appExtension.targetName === "ShareExtension",
+    );
+  if (extraAppExtension && extraAppExtension.length > 1) {
+    throw new Error(
+      `[${packageInfo.name}] Incompatibility found, you have more than one appExtensions for "ShareExtension" (${extraAppExtension.length}). Please remove all "eas.build.experimental.ios.appExtensions" with targetName "ShareExtension" in your app.json! (see https://github.com/achorein/expo-share-intent?tab=readme-ov-file#ios-extension-target)`,
+    );
+  }
+
   return config;
 };
