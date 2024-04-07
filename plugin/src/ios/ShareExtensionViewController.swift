@@ -65,7 +65,7 @@ class ShareViewController: SLComposeServiceViewController {
         }
               
       } else {
-        self?.dismissWithError()
+        self?.dismissWithError(message: "Cannot load text content")
       }
     }
   }
@@ -84,7 +84,7 @@ class ShareViewController: SLComposeServiceViewController {
           this.redirectToHostApp(type: .weburl)
         }
       } else {
-        self?.dismissWithError()
+        self?.dismissWithError(message: "Cannot load url content")
       }
 
     }
@@ -118,7 +118,7 @@ class ShareViewController: SLComposeServiceViewController {
         }
         
       } else {
-        self?.dismissWithError()
+        self?.dismissWithError(message: "Cannot load image content")
       }
     }
   }
@@ -165,7 +165,7 @@ class ShareViewController: SLComposeServiceViewController {
         }
         
       } else {
-        self?.dismissWithError()
+        self?.dismissWithError(message: "Cannot load video content")
       }
     }
   }
@@ -193,32 +193,40 @@ class ShareViewController: SLComposeServiceViewController {
         }
         
       } else {
-        self?.dismissWithError()
+        self?.dismissWithError(message: "Cannot load file content")
       }
     }
   }
   
-  private func dismissWithError() {
-    print("[ERROR] Error loading data!")
-    let alert = UIAlertController(title: "Error", message: "Error loading data", preferredStyle: .alert)
+  private func dismissWithError(message: String? = nil) {
+    DispatchQueue.main.async {
+      NSLog("[ERROR] Error loading application ! \(message!)")
+      let alert = UIAlertController(title: "Error", message: "Error loading application: \(message!)", preferredStyle: .alert)
     
-    let action = UIAlertAction(title: "Error", style: .cancel) { _ in
-      self.dismiss(animated: true, completion: nil)
+      let action = UIAlertAction(title: "OK", style: .cancel) { _ in
+        self.dismiss(animated: true, completion: nil)
+        self.extensionContext!.completeRequest(returningItems: [], completionHandler: nil)
+      }
+      
+      alert.addAction(action)
+      self.present(alert, animated: true, completion: nil)
     }
-    
-    alert.addAction(action)
-    present(alert, animated: true, completion: nil)
-    extensionContext!.completeRequest(returningItems: [], completionHandler: nil)
   }
   
   private func redirectToHostApp(type: RedirectType) {
-    let url = URL(string: "\(shareProtocol)://dataUrl=\(sharedKey)#\(type)")
+    let url = URL(string: "\(shareProtocol)://dataUrl=\(sharedKey)#\(type)")!
     var responder = self as UIResponder?
     let selectorOpenURL = sel_registerName("openURL:")
   
     while (responder != nil) {
-      if (responder?.responds(to: selectorOpenURL))! {
-        let _ = responder?.perform(selectorOpenURL, with: url)
+      if let application = responder as? UIApplication {
+        if (application.canOpenURL(url)){
+          application.perform(selectorOpenURL, with: url)
+        } else {
+          NSLog("redirectToHostApp canOpenURL KO: \(shareProtocol)")
+          self.dismissWithError(message: "Application not found, invalid url scheme \(shareProtocol)")
+          return
+        }
       }
       responder = responder!.next
     }
@@ -266,7 +274,7 @@ class ShareViewController: SLComposeServiceViewController {
       }
       try FileManager.default.copyItem(at: srcURL, to: dstURL)
     } catch (let error) {
-      print("Cannot copy item at \(srcURL) to \(dstURL): \(error)")
+      NSLog("Cannot copy item at \(srcURL) to \(dstURL): \(error)")
       return false
     }
     return true
@@ -321,7 +329,7 @@ class ShareViewController: SLComposeServiceViewController {
     
     // Debug method to print out SharedMediaFile details in the console
     func toString() {
-      print("[SharedMediaFile] path: \(self.path)thumbnail: \(self.thumbnail!)fileName: \(self.fileName!)duration: \(self.duration!)type: \(self.type)")
+      NSLog("[SharedMediaFile] path: \(self.path)thumbnail: \(self.thumbnail!)fileName: \(self.fileName!)duration: \(self.duration!)type: \(self.type)")
     }
   }
   
