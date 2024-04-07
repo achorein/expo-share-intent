@@ -59,9 +59,11 @@ class ExpoShareIntentModule : Module() {
             val queryResult: Cursor = resolver.query(uri, null, null, null, null)!!
             queryResult.moveToFirst()
             val fileName = queryResult.getString(queryResult.getColumnIndex(OpenableColumns.DISPLAY_NAME))
+            val fileSize = queryResult.getString(queryResult.getColumnIndex(OpenableColumns.SIZE))
             queryResult.close()
             return mapOf(
                     "fileName" to fileName,
+                    "fileSize" to fileSize,
                     "filePath" to instance!!.getAbsolutePath(uri)!!,
                     "mimeType" to resolver.getType(uri)!!,
                     "contentUri" to uri.toString(),
