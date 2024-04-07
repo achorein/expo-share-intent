@@ -2,7 +2,16 @@
 
 > This is not an official Expo SDK package.
 
-Allow sharing **URL, text, images, videos and files** to your **iOS** and **Android** app, using a simple native module for Expo **SDK 50** (React Native)
+Allow sharing **URL, text, images, videos and files** to your **iOS** and **Android** app, using a simple native module for Expo (React Native)
+
+## Versioning
+
+Ensure you use versions that work together
+
+| Expo       | Supported `expo-share-intent` version |
+| ---------- | ------------------------------------- |
+| **SDK 50** | 1.0+                                  |
+| **SDK 49** | 0.2+                                  |
 
 [<img src="https://badge.fury.io/js/expo-share-intent.svg">](https://www.npmjs.com/package/expo-share-intent)
 
