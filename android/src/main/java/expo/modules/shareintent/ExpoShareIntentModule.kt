@@ -75,7 +75,13 @@ class ExpoShareIntentModule : Module() {
             if (intent.type!!.startsWith("text")) {
                 // text / urls
                 if (intent.action == Intent.ACTION_SEND) {
-                    notifyShareIntent(mapOf( "text" to intent.getStringExtra(Intent.EXTRA_TEXT), "type" to "text"))
+                    notifyShareIntent(mapOf(
+                        "text" to intent.getStringExtra(Intent.EXTRA_TEXT),
+                        "type" to "text",
+                        "meta" to mapOf(
+                            "title" to intent.getCharSequenceExtra(Intent.EXTRA_TITLE),
+                        )
+                    ))
                 } else if (intent.action == Intent.ACTION_VIEW) {
                     notifyShareIntent(mapOf( "text" to intent.dataString, "type" to "text"))
                 } else {

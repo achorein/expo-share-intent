@@ -13,11 +13,16 @@ export type ShareIntentOptions = {
   onResetShareIntent?: () => void;
 };
 
+export type ShareIntentMeta = {
+  title?: string;
+};
+
 export type ShareIntent = {
   files: ShareIntentFile[] | null;
   text: string | null;
   webUrl: string | null;
   type: "media" | "file" | "text" | "weburl" | null;
+  meta?: ShareIntentMeta;
 };
 
 export interface ShareIntentFile {
@@ -27,8 +32,14 @@ export interface ShareIntentFile {
   size: number | null;
 }
 
-export type IosShareIntent = {
+export type BaseNativeShareIntent = {
   text?: string;
+  files?: ShareIntentFile[];
+  type: "file" | "text";
+  meta?: ShareIntentMeta;
+};
+
+export type IosShareIntent = BaseNativeShareIntent & {
   files?: IosShareIntentFile[];
   type: "media" | "file" | "text" | "weburl";
 };
@@ -41,10 +52,8 @@ export interface IosShareIntentFile {
   fileSize?: number;
 }
 
-export type AndroidShareIntent = {
-  text?: string;
+export type AndroidShareIntent = BaseNativeShareIntent & {
   files?: AndroidShareIntentFile[];
-  type: "file" | "text";
 };
 
 export interface AndroidShareIntentFile {
