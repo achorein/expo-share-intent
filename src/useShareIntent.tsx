@@ -9,7 +9,6 @@ import {
   getShareIntent,
 } from "./ExpoShareIntentModule";
 import {
-  NativeShareIntent,
   ShareIntent,
   ShareIntentFile,
   ShareIntentOptions,
@@ -36,20 +35,27 @@ export const SHAREINTENT_OPTIONS_DEFAULT: ShareIntentOptions = {
 //   3: "file",
 // };
 
-const parseShareIntent = (value, options): ShareIntent => {
+const parseShareIntent = (
+  value: any,
+  options: ShareIntentOptions,
+): ShareIntent => {
   let result = SHAREINTENT_DEFAULTVALUE;
   if (!value) return result;
-  let shareIntent: NativeShareIntent;
+  let shareIntent: ShareIntent;
+  // If we receive a string, try to parse for a value
   if (typeof value === "string") {
     shareIntent = JSON.parse(value.replaceAll("\n", "\\n")); // iOS
   } else {
     shareIntent = value; // Android
   }
+
   if (shareIntent.text) {
+    // Try to find the webURL in the SharedIntent text
     const webUrl =
       shareIntent.text.match(
         /[(http(s)?)://(www.)?-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)/gi,
       )?.[0] || null;
+
     result = {
       ...SHAREINTENT_DEFAULTVALUE,
       text: shareIntent.text,
@@ -60,10 +66,19 @@ const parseShareIntent = (value, options): ShareIntent => {
       },
     };
   } else {
+    // If there is a filePath in the file in the ShareIntent, its media or file
     const files =
-      shareIntent?.files?.filter((f: any) => f.path || f.contentUri) || [];
+      shareIntent?.files?.filter((file) => {
+        if ("contentUri" in file) {
+          file.contentUri;
+        } else {
+          file.path;
+        }
+      }) || [];
     const isMedia = files.every(
-      (f) => f.mimeType.startsWith("image/") || f.mimeType.startsWith("video/"),
+      (file) =>
+        file.mimeType.startsWith("image/") ||
+        file.mimeType.startsWith("video/"),
     );
     result = {
       ...SHAREINTENT_DEFAULTVALUE,
@@ -84,7 +99,8 @@ const parseShareIntent = (value, options): ShareIntent => {
       type: isMedia ? "media" : "file",
     };
   }
-  options.debug && console.debug("useShareIntent[parsed] ", result);
+  options.debug &&
+    console.debug("useShareIntent[parsed] ", JSON.stringify(result, null, 4));
   return result;
 };
 
