@@ -20,7 +20,7 @@ export default function App() {
       </Text>
       {!!shareIntent.text && <Text style={styles.gap}>{shareIntent.text}</Text>}
       {!!shareIntent.meta?.title && (
-        <Text>{JSON.stringify(shareIntent.meta)}</Text>
+        <Text style={styles.gap}>{JSON.stringify(shareIntent.meta)}</Text>
       )}
       {shareIntent?.files?.map((file) => (
         <Image

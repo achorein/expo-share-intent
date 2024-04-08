@@ -32,12 +32,10 @@ export interface ShareIntentFile {
   size: number | null;
 }
 
-export type BaseNativeShareIntent = {
+interface BaseNativeShareIntent {
   text?: string;
-  files?: ShareIntentFile[];
-  type: "file" | "text";
   meta?: ShareIntentMeta;
-};
+}
 
 export type IosShareIntent = BaseNativeShareIntent & {
   files?: IosShareIntentFile[];
@@ -54,6 +52,7 @@ export interface IosShareIntentFile {
 
 export type AndroidShareIntent = BaseNativeShareIntent & {
   files?: AndroidShareIntentFile[];
+  type: "file" | "text";
 };
 
 export interface AndroidShareIntentFile {
