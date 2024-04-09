@@ -19,7 +19,7 @@
     "@react-navigation/native": "^6.1.16",
     "@react-navigation/native-stack": "^6.9.25",
     "@react-navigation/stack": "^6.3.28",
-    "expo": "~50.0.14",
+    "expo": "~50.0.15",
     "expo-splash-screen": "~0.26.4",
     "expo-status-bar": "~1.11.1",
     "patch-package": "^8.0.0",
