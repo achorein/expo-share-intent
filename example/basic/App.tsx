@@ -19,6 +19,9 @@ export default function App() {
         {hasShareIntent ? "SHARE INTENT FOUND !" : "NO SHARE INTENT DETECTED"}
       </Text>
       {!!shareIntent.text && <Text style={styles.gap}>{shareIntent.text}</Text>}
+      {!!shareIntent.meta?.title && (
+        <Text style={styles.gap}>{JSON.stringify(shareIntent.meta)}</Text>
+      )}
       {shareIntent?.files?.map((file) => (
         <Image
           key={file.path}

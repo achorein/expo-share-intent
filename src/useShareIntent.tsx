@@ -55,6 +55,9 @@ const parseShareIntent = (value, options): ShareIntent => {
       text: shareIntent.text,
       webUrl,
       type: webUrl ? "weburl" : "text",
+      meta: {
+        title: shareIntent.meta?.title ?? undefined,
+      },
     };
   } else {
     const files =
