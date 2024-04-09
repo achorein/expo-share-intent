@@ -104,7 +104,9 @@ export default function useShareIntent(
     if (options.disabled) return;
     setError(null);
     clearNativeModule &&
-      clearShareIntent(`${Constants.expoConfig?.scheme}ShareKey`);
+      clearShareIntent(
+        `${Constants.expoConfig?.scheme || options.scheme}ShareKey`,
+      );
     if (shareIntent?.text || shareIntent?.files) {
       setSharedIntent(SHAREINTENT_DEFAULTVALUE);
       options.onResetShareIntent?.();
@@ -116,7 +118,16 @@ export default function useShareIntent(
    */
   const refreshShareIntent = () => {
     options.debug && console.debug("useShareIntent[refresh]", url);
-    if (url?.startsWith(`${Constants.expoConfig?.scheme}://dataUrl`)) {
+    if (Platform.OS === "ios" && !Constants.expoConfig?.scheme) {
+      console.warn(
+        `Constants.expoConfig.scheme is empty! Falling back to options.scheme "${options.scheme}"`,
+      );
+    }
+    if (
+      url?.startsWith(
+        `${Constants.expoConfig?.scheme || options.scheme}://dataUrl`,
+      )
+    ) {
       // iOS only
       getShareIntent(url);
     } else if (Platform.OS === "android") {
