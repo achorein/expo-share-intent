@@ -1,4 +1,3 @@
-import Constants from "expo-constants";
 import { useURL } from "expo-linking";
 import { useEffect, useRef, useState } from "react";
 import { AppState, Platform } from "react-native";
@@ -15,6 +14,7 @@ import {
   ShareIntentFile,
   ShareIntentOptions,
 } from "./ExpoShareIntentModule.types";
+import { getScheme, getShareExtensionKey } from "./utils";
 
 export const SHAREINTENT_DEFAULTVALUE: ShareIntent = {
   files: null,
@@ -29,12 +29,12 @@ export const SHAREINTENT_OPTIONS_DEFAULT: ShareIntentOptions = {
   disabled: false,
 };
 
-const IOS_SHARE_TYPE_MAPPING = {
-  0: "media",
-  1: "text",
-  2: "weburl",
-  3: "file",
-};
+// const IOS_SHARE_TYPE_MAPPING = {
+//   0: "media",
+//   1: "text",
+//   2: "weburl",
+//   3: "file",
+// };
 
 const parseShareIntent = (value, options): ShareIntent => {
   let result = SHAREINTENT_DEFAULTVALUE;
@@ -103,8 +103,7 @@ export default function useShareIntent(
   const resetShareIntent = (clearNativeModule = true) => {
     if (options.disabled) return;
     setError(null);
-    clearNativeModule &&
-      clearShareIntent(`${Constants.expoConfig?.scheme}ShareKey`);
+    clearNativeModule && clearShareIntent(getShareExtensionKey(options));
     if (shareIntent?.text || shareIntent?.files) {
       setSharedIntent(SHAREINTENT_DEFAULTVALUE);
       options.onResetShareIntent?.();
@@ -116,7 +115,7 @@ export default function useShareIntent(
    */
   const refreshShareIntent = () => {
     options.debug && console.debug("useShareIntent[refresh]", url);
-    if (url?.startsWith(`${Constants.expoConfig?.scheme}://dataUrl`)) {
+    if (url?.includes(`${getScheme(options)}://dataUrl=`)) {
       // iOS only
       getShareIntent(url);
     } else if (Platform.OS === "android") {
@@ -127,11 +126,7 @@ export default function useShareIntent(
   useEffect(() => {
     if (options.disabled) return;
     options.debug &&
-      console.debug(
-        "useShareIntent[mount]",
-        Constants.expoConfig?.scheme,
-        options,
-      );
+      console.debug("useShareIntent[mount]", getScheme(options), options);
     refreshShareIntent();
   }, [url, options.disabled]);
 
