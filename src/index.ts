@@ -2,7 +2,6 @@ import Constants from "expo-constants";
 
 export { ShareIntent } from "./ExpoShareIntentModule.types";
 
-export const SHARE_EXTENSION_KEY = `${Constants.expoConfig?.scheme}ShareKey`;
 export {
   hasShareIntent,
   getShareIntent,
@@ -13,6 +12,9 @@ export {
 } from "./ExpoShareIntentModule";
 
 export { default as useShareIntent } from "./useShareIntent";
+
+export { getScheme, getShareExtensionKey } from "./utils";
+
 export {
   ShareIntentProvider,
   useShareIntentContext,

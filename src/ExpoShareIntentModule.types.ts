@@ -10,6 +10,7 @@ export type ShareIntentOptions = {
   debug?: boolean;
   resetOnBackground?: boolean;
   disabled?: boolean;
+  scheme?: string;
   onResetShareIntent?: () => void;
 };
 
