@@ -14,7 +14,12 @@ import { RootStackParamList } from "./types";
 
 import HomeScreen from "./HomeScreen";
 import ShareIntentScreen from "./ShareIntentScreen";
-import { addStateListener, hasShareIntent } from "expo-share-intent";
+import {
+  addStateListener,
+  getScheme,
+  getShareExtensionKey,
+  hasShareIntent,
+} from "expo-share-intent";
 
 const Stack = createNativeStackNavigator();
 
@@ -22,7 +27,6 @@ const PREFIX = Linking.createURL("/");
 const PACKAGE_NAME =
   Constants.expoConfig?.android?.package ||
   Constants.expoConfig?.ios?.bundleIdentifier;
-const SHARE_EXTENSION_KEY = `${Constants.expoConfig?.scheme}ShareKey`;
 
 export const navigationRef =
   createRef<NavigationContainerRef<RootStackParamList>>();
@@ -43,7 +47,7 @@ const linking: LinkingOptions<RootStackParamList> = {
   // see: https://reactnavigation.org/docs/configuring-links/#advanced-cases
   getStateFromPath(path, config) {
     // REQUIRED FOR iOS FIRST LAUNCH
-    if (path.includes(`dataUrl=${SHARE_EXTENSION_KEY}`)) {
+    if (path.includes(`dataUrl=${getShareExtensionKey()}`)) {
       // redirect to the ShareIntent Screen to handle data with the hook
       console.debug(
         "react-navigation[getStateFromPath] redirect to ShareIntent screen",
@@ -61,13 +65,13 @@ const linking: LinkingOptions<RootStackParamList> = {
   subscribe(listener: (url: string) => void): undefined | void | (() => void) {
     console.debug("react-navigation[subscribe]", PREFIX, PACKAGE_NAME);
     const onReceiveURL = ({ url }: { url: string }) => {
-      if (url.includes(SHARE_EXTENSION_KEY)) {
+      if (url.includes(getShareExtensionKey())) {
         // REQUIRED FOR iOS WHEN APP IS IN BACKGROUND
         console.debug(
           "react-navigation[onReceiveURL] Redirect to ShareIntent Screen",
           url,
         );
-        listener(`${Constants.expoConfig?.scheme}://shareintent`);
+        listener(`${getScheme()}://shareintent`);
       } else {
         console.debug("react-navigation[onReceiveURL] OPEN URL", url);
         listener(url);
@@ -80,7 +84,7 @@ const linking: LinkingOptions<RootStackParamList> = {
         event.value,
       );
       if (event.value === "pending") {
-        listener(`${Constants.expoConfig?.scheme}://shareintent`);
+        listener(`${getScheme()}://shareintent`);
       }
     });
     const urlEventSubscription = Linking.addEventListener("url", onReceiveURL);
@@ -93,7 +97,7 @@ const linking: LinkingOptions<RootStackParamList> = {
   // https://reactnavigation.org/docs/deep-linking/#third-party-integrations
   async getInitialURL() {
     // REQUIRED FOR ANDROID FIRST LAUNCH
-    const needRedirect = hasShareIntent(SHARE_EXTENSION_KEY);
+    const needRedirect = hasShareIntent(getShareExtensionKey());
     console.debug(
       "react-navigation[getInitialURL] redirect to ShareIntent screen:",
       needRedirect,

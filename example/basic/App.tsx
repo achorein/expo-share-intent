@@ -7,7 +7,6 @@ export default function App() {
     useShareIntent({
       debug: true,
       resetOnBackground: true,
-      scheme: "exposhareintentexample", // needed only when using expo-updates
     });
 
   return (
