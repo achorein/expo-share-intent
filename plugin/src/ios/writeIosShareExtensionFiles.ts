@@ -31,6 +31,10 @@ export async function writeShareExtensionFiles(
     getShareExtensionEntitlementsContent(appIdentifier);
   await fs.promises.writeFile(entitlementsFilePath, entitlementsContent);
 
+  const pricayFilePath = getPrivacyInfoFilePath(platformProjectRoot);
+  const pricayContent = getPrivacyInfoContent();
+  await fs.promises.writeFile(pricayFilePath, pricayContent);
+
   const storyboardFilePath =
     getShareExtensionStoryboardFilePath(platformProjectRoot);
   const storyboardContent = getShareExtensionStoryBoardContent();
@@ -99,6 +103,27 @@ export function getShareExtensionInfoContent(
   });
 }
 
+export function getPrivacyInfoFilePath(platformProjectRoot: string) {
+  return path.join(
+    platformProjectRoot,
+    shareExtensionName,
+    "PrivacyInfo.xcprivacy",
+  );
+}
+
+export function getPrivacyInfoContent() {
+  return plist.build({
+    NSPrivacyAccessedAPITypes: [
+      {
+        NSPrivacyAccessedAPIType: "NSPrivacyAccessedAPICategoryUserDefaults",
+        NSPrivacyAccessedAPITypeReasons: ["CA92.1"],
+      },
+    ],
+    NSPrivacyCollectedDataTypes: [],
+    NSPrivacyTracking: false,
+  });
+}
+
 //: [root]/ios/ShareExtension/ShareExtension-Info.plist
 export function getShareExtensionStoryboardFilePath(
   platformProjectRoot: string,
@@ -158,7 +183,7 @@ export function getShareExtensionViewControllerContent(
   );
   if (!scheme) {
     throw new Error(
-      "[expo-share-intent] missing custom URL scheme 'expo.scheme' in app.json ! (see https://docs.expo.dev/guides/linking/#linking-to-your-app)"
+      "[expo-share-intent] missing custom URL scheme 'expo.scheme' in app.json ! (see https://docs.expo.dev/guides/linking/#linking-to-your-app)",
     );
   }
 
