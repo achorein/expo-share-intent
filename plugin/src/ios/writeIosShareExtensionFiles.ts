@@ -18,6 +18,7 @@ export async function writeShareExtensionFiles(
   appIdentifier: string,
   parameters: Parameters,
 ) {
+  // ShareExtension-Info.plist
   const infoPlistFilePath = getShareExtensionInfoFilePath(platformProjectRoot);
   const infoPlistContent = getShareExtensionInfoContent(
     parameters.iosActivationRules,
@@ -25,21 +26,25 @@ export async function writeShareExtensionFiles(
   await fs.promises.mkdir(path.dirname(infoPlistFilePath), { recursive: true });
   await fs.promises.writeFile(infoPlistFilePath, infoPlistContent);
 
+  // ShareExtension.entitlements
   const entitlementsFilePath =
     getShareExtensionEntitlementsFilePath(platformProjectRoot);
   const entitlementsContent =
     getShareExtensionEntitlementsContent(appIdentifier);
   await fs.promises.writeFile(entitlementsFilePath, entitlementsContent);
 
+  // PrivacyInfo.xcprivacy
   const pricayFilePath = getPrivacyInfoFilePath(platformProjectRoot);
   const pricayContent = getPrivacyInfoContent();
   await fs.promises.writeFile(pricayFilePath, pricayContent);
 
+  // MainInterface.storyboard
   const storyboardFilePath =
     getShareExtensionStoryboardFilePath(platformProjectRoot);
   const storyboardContent = getShareExtensionStoryBoardContent();
   await fs.promises.writeFile(storyboardFilePath, storyboardContent);
 
+  // ShareViewController.swift
   const viewControllerFilePath =
     getShareExtensionViewControllerPath(platformProjectRoot);
   const viewControllerContent = getShareExtensionViewControllerContent(
@@ -49,7 +54,7 @@ export async function writeShareExtensionFiles(
   await fs.promises.writeFile(viewControllerFilePath, viewControllerContent);
 }
 
-//: [root]/ios/ShareExtension/ShareExtension-Entitlements.plist
+//: [root]/ios/ShareExtension/ShareExtension.entitlements
 export function getShareExtensionEntitlementsFilePath(
   platformProjectRoot: string,
 ) {
@@ -103,6 +108,7 @@ export function getShareExtensionInfoContent(
   });
 }
 
+//: [root]/ios/ShareExtension/PrivacyInfo.xcprivacy
 export function getPrivacyInfoFilePath(platformProjectRoot: string) {
   return path.join(
     platformProjectRoot,
@@ -124,7 +130,7 @@ export function getPrivacyInfoContent() {
   });
 }
 
-//: [root]/ios/ShareExtension/ShareExtension-Info.plist
+//: [root]/ios/ShareExtension/MainInterface.storyboard
 export function getShareExtensionStoryboardFilePath(
   platformProjectRoot: string,
 ) {

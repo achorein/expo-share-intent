@@ -28,14 +28,19 @@ export const withShareExtensionXcodeTarget: ConfigPlugin<Parameters> = (
     const currentProjectVersion = config.ios!.buildNumber || "1";
     const marketingVersion = config.version!;
 
+    // ShareExtension-Info.plist
     const infoPlistFilePath =
       getShareExtensionInfoFilePath(platformProjectRoot);
+    // ShareExtension.entitlements
     const entitlementsFilePath =
       getShareExtensionEntitlementsFilePath(platformProjectRoot);
+    // ShareViewController.swift
     const viewControllerFilePath =
       getShareExtensionViewControllerPath(platformProjectRoot);
+    // MainInterface.storyboard
     const storyboardFilePath =
       getShareExtensionStoryboardFilePath(platformProjectRoot);
+    // PrivacyInfo.xcprivacy
     const privacyFilePath = getPrivacyInfoFilePath(platformProjectRoot);
 
     await writeShareExtensionFiles(
@@ -63,7 +68,6 @@ export const withShareExtensionXcodeTarget: ConfigPlugin<Parameters> = (
     );
 
     // Add a new PBXResourcesBuildPhase for the Resources used by the Share Extension
-    // (MainInterface.storyboard)
     pbxProject.addBuildPhase(
       [],
       "PBXResourcesBuildPhase",
@@ -74,17 +78,18 @@ export const withShareExtensionXcodeTarget: ConfigPlugin<Parameters> = (
     // Create a separate PBXGroup for the shareExtension's files
     const pbxGroupKey = pbxProject.pbxCreateGroup(extensionName, extensionName);
 
-    // Add files which are not part of any build phase (plist)
+    // Add files which are not part of any build phase (ShareExtension-Info.plist)
     pbxProject.addFile(infoPlistFilePath, pbxGroupKey);
 
-    // Add source files to our PbxGroup and our newly created PBXSourcesBuildPhase
+    // Add source files to our PbxGroup and our newly created PBXSourcesBuildPhase (ShareViewController.swift)
     pbxProject.addSourceFile(
       viewControllerFilePath,
       { target: target.uuid },
       pbxGroupKey,
     );
 
-    //  Add the resource file and include it into the target PbxResourcesBuildPhase and PbxGroup
+    // Add the resource file and include it into the target PbxResourcesBuildPhase and PbxGroup
+    // (MainInterface.storyboard / PrivacyInfo.xcprivacy)
     pbxProject.addResourceFile(
       storyboardFilePath,
       { target: target.uuid },
