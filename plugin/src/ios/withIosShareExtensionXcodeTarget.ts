@@ -5,6 +5,7 @@ import {
   shareExtensionName,
 } from "./constants";
 import {
+  getPrivacyInfoFilePath,
   getShareExtensionEntitlementsFilePath,
   getShareExtensionInfoFilePath,
   getShareExtensionStoryboardFilePath,
@@ -35,6 +36,7 @@ export const withShareExtensionXcodeTarget: ConfigPlugin<Parameters> = (
       getShareExtensionViewControllerPath(platformProjectRoot);
     const storyboardFilePath =
       getShareExtensionStoryboardFilePath(platformProjectRoot);
+    const privacyFilePath = getPrivacyInfoFilePath(platformProjectRoot);
 
     await writeShareExtensionFiles(
       platformProjectRoot,
@@ -85,6 +87,11 @@ export const withShareExtensionXcodeTarget: ConfigPlugin<Parameters> = (
     //  Add the resource file and include it into the target PbxResourcesBuildPhase and PbxGroup
     pbxProject.addResourceFile(
       storyboardFilePath,
+      { target: target.uuid },
+      pbxGroupKey,
+    );
+    pbxProject.addResourceFile(
+      privacyFilePath,
       { target: target.uuid },
       pbxGroupKey,
     );
