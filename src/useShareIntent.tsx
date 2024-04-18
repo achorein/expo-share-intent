@@ -93,7 +93,7 @@ const parseShareIntent = (
                 size: file.fileSize ? Number(file.fileSize) : null,
               },
             ];
-          }, [] as ShareIntentFile[])
+          }, [])
         : null,
       type: isMedia ? "media" : "file",
     };
