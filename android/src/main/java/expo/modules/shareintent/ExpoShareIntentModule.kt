@@ -54,7 +54,7 @@ class ExpoShareIntentModule : Module() {
         }
 
         @SuppressLint("Range")
-        private fun getFileInfo(uri: Uri): Map<String, String> {
+        private fun getFileInfo(uri: Uri): Map<String, String?> {
             val resolver: ContentResolver = instance?.currentActivity?.contentResolver!!
             val queryResult: Cursor = resolver.query(uri, null, null, null, null)!!
             queryResult.moveToFirst()
@@ -64,7 +64,7 @@ class ExpoShareIntentModule : Module() {
             return mapOf(
                     "fileName" to fileName,
                     "fileSize" to fileSize,
-                    "filePath" to instance!!.getAbsolutePath(uri)!!,
+                    "filePath" to instance?.getAbsolutePath(uri),
                     "mimeType" to resolver.getType(uri)!!,
                     "contentUri" to uri.toString(),
             )
@@ -91,15 +91,14 @@ class ExpoShareIntentModule : Module() {
                 // files / medias
                 if (intent.action == Intent.ACTION_SEND) {
                     @Suppress("DEPRECATION") // see inline function at the end of the file
-                    val uri = intent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM);
+                    val uri = intent.parcelable<Uri>(Intent.EXTRA_STREAM);
                     if (uri != null) {
                         notifyShareIntent(mapOf( "files" to arrayOf(getFileInfo(uri), "type" to "file")))
                     } else {
                         notifyError("empty uri for file sharing: " + intent.action)
                     }
                 } else if (intent.action == Intent.ACTION_SEND_MULTIPLE) {
-                    @Suppress("DEPRECATION") // see inline function at the end of the file
-                    val uris = intent.getParcelableArrayListExtra<Uri>(Intent.EXTRA_STREAM)
+                    val uris = intent.parcelableArrayList<Uri>(Intent.EXTRA_STREAM)
                     if (uris != null) {
                         notifyShareIntent(mapOf( "files" to uris.map { getFileInfo(it) }, "type" to "file"))
                     } else {
@@ -109,6 +108,19 @@ class ExpoShareIntentModule : Module() {
                     notifyError("Invalid action for file sharing: " + intent.action)
                 }
             }
+        }
+
+        /*
+         * https://stackoverflow.com/questions/73019160/the-getparcelableextra-method-is-deprecated
+         */
+        private inline fun <reified T : Parcelable> Intent.parcelable(key: String): T? = when {
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> getParcelableExtra(key, T::class.java)
+            else -> @Suppress("DEPRECATION") getParcelableExtra(key) as? T
+        }
+
+        private inline fun <reified T : Parcelable> Intent.parcelableArrayList(key: String): ArrayList<T>? = when {
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> getParcelableArrayListExtra(key, T::class.java)
+            else -> @Suppress("DEPRECATION") getParcelableArrayListExtra(key)
         }
     }
 
@@ -157,54 +169,59 @@ class ExpoShareIntentModule : Module() {
      * @author paulburke
      */
     fun getAbsolutePath(uri: Uri): String? {
+        try {
+            // DocumentProvider
+            if (DocumentsContract.isDocumentUri(context, uri)) {
+                // ExternalStorageProvider
+                if (isExternalStorageDocument(uri)) {
+                    val docId = DocumentsContract.getDocumentId(uri)
+                    val split = docId.split(":".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+                    val type = split[0]
 
-        // DocumentProvider
-        if (DocumentsContract.isDocumentUri(context, uri)) {
-            // ExternalStorageProvider
-            if (isExternalStorageDocument(uri)) {
-                val docId = DocumentsContract.getDocumentId(uri)
-                val split = docId.split(":".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
-                val type = split[0]
+                    return if ("primary".equals(type, ignoreCase = true)) {
+                        Environment.getExternalStorageDirectory().toString() + "/" + split[1]
+                    } else {
+                        getDataColumn(uri, null, null)
+                    }
+                } else if (isDownloadsDocument(uri)) {
+                    return try {
+                        val id = DocumentsContract.getDocumentId(uri)
+                        val contentUri = ContentUris.withAppendedId(
+                                Uri.parse("content://downloads/public_downloads"), java.lang.Long.valueOf(id))
 
-                return if ("primary".equals(type, ignoreCase = true)) {
-                    Environment.getExternalStorageDirectory().toString() + "/" + split[1]
-                } else {
-                    getDataColumn(uri, null, null)
-                }
-            } else if (isDownloadsDocument(uri)) {
-                return try {
-                    val id = DocumentsContract.getDocumentId(uri)
-                    val contentUri = ContentUris.withAppendedId(
-                            Uri.parse("content://downloads/public_downloads"), java.lang.Long.valueOf(id))
+                        getDataColumn(contentUri, null, null)
+                    } catch (exception: Exception) {
+                        getDataColumn(uri, null, null)
+                    }
+                } else if (isMediaDocument(uri)) {
+                    val docId = DocumentsContract.getDocumentId(uri)
+                    val split = docId.split(":".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+                    val type = split[0]
 
-                    getDataColumn(contentUri, null, null)
-                } catch (exception: Exception) {
-                    getDataColumn(uri, null, null)
-                }
-            } else if (isMediaDocument(uri)) {
-                val docId = DocumentsContract.getDocumentId(uri)
-                val split = docId.split(":".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
-                val type = split[0]
+                    var contentUri: Uri? = null
+                    when (type) {
+                        "image" -> contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+                        "video" -> contentUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+                        "audio" -> contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
+                    }
 
-                var contentUri: Uri? = null
-                when (type) {
-                    "image" -> contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-                    "video" -> contentUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI
-                    "audio" -> contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
-                }
+                    if (contentUri == null) return null
 
-                if (contentUri == null) return null
+                    val selection = "_id=?"
+                    val selectionArgs = arrayOf(split[1])
+                    return getDataColumn(contentUri, selection, selectionArgs)
+                }// MediaProvider
+                // DownloadsProvider
+            } else if ("content".equals(uri.scheme, ignoreCase = true)) {
+                return getDataColumn(uri, null, null)
+            }
 
-                val selection = "_id=?"
-                val selectionArgs = arrayOf(split[1])
-                return getDataColumn(contentUri, selection, selectionArgs)
-            }// MediaProvider
-            // DownloadsProvider
-        } else if ("content".equals(uri.scheme, ignoreCase = true)) {
-            return getDataColumn(uri, null, null)
+            return uri.path
+        } catch (e: Exception) {
+            e.printStackTrace()
+            notifyError("cannot retreive absoluteFilePath for $uri: ${e.message}")
+            return null
         }
-
-        return uri.path
     }
 
     /**
@@ -296,18 +313,5 @@ class ExpoShareIntentModule : Module() {
      */
     private fun isMediaDocument(uri: Uri): Boolean {
         return "com.android.providers.media.documents" == uri.authority
-    }
-
-    /*
-     * https://stackoverflow.com/questions/73019160/the-getparcelableextra-method-is-deprecated
-     */
-    inline fun <reified T : Parcelable> Intent.parcelable(key: String): T? = when {
-        Build.VERSION.SDK_INT >= 33 -> getParcelableExtra(key, T::class.java)
-        else -> @Suppress("DEPRECATION") getParcelableExtra(key) as? T
-    }
-
-    inline fun <reified T : Parcelable> Bundle.parcelableArrayList(key: String): ArrayList<T>? = when {
-        Build.VERSION.SDK_INT >= 33 -> getParcelableArrayList(key, T::class.java)
-        else -> @Suppress("DEPRECATION") getParcelableArrayList(key)
     }
 }
