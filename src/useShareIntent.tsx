@@ -43,7 +43,7 @@ const parseShareIntent = (
 ): ShareIntent => {
   let result = SHAREINTENT_DEFAULTVALUE;
   if (!value) return result;
-  let shareIntent: ShareIntent;
+  let shareIntent;
   // ios native module send a raw string of the json, try to parse it
   if (typeof value === "string") {
     shareIntent = JSON.parse(value.replaceAll("\n", "\\n")) as IosShareIntent; // iOS

@@ -5,15 +5,6 @@ export type ChangeEventPayload = {
 export type StateEventPayload = {
   value: "pending" | "none";
 };
-/**
- * The type of shared content that both Android and iOS have in common
- */
-export type AndroidSharedMediaType = "file" | "text";
-
-/**
- * The type of shared content that iOS supports.
- */
-export type SharedMediaType = AndroidSharedMediaType | "media" | "weburl";
 
 /**
  * Options for configuring the `useShareIntent` hook.
@@ -35,6 +26,9 @@ export type ShareIntentOptions = {
    * @default false
    */
   disabled?: boolean;
+  /**
+   * Optional force application scheme to retreive ShareIntent on iOS.
+   */
   scheme?: string;
   /**
    * Optional callback function that is triggered when the shared media resets.
@@ -51,15 +45,15 @@ export type ShareIntentMeta = {
  */
 interface BaseShareIntent {
   text?: string | null;
+  meta?: ShareIntentMeta;
 }
 /**
  * Shared intent to represent both platforms.
  */
 export interface ShareIntent extends BaseShareIntent {
   files: ShareIntentFile[] | null;
-  type: SharedMediaType | null;
   webUrl: string | null;
-  meta?: ShareIntentMeta;
+  type: "media" | "file" | "text" | "weburl" | null;
 }
 
 /**
@@ -67,7 +61,7 @@ export interface ShareIntent extends BaseShareIntent {
  */
 export interface AndroidShareIntent extends BaseShareIntent {
   files?: AndroidShareIntentFile[];
-  type: AndroidSharedMediaType;
+  type: "file" | "text";
 }
 
 /**
@@ -75,7 +69,7 @@ export interface AndroidShareIntent extends BaseShareIntent {
  */
 export interface IosShareIntent extends BaseShareIntent {
   files?: IosShareIntentFile[];
-  type: SharedMediaType;
+  type: "media" | "file" | "text" | "weburl" | null;
 }
 
 /**
@@ -88,22 +82,20 @@ export interface ShareIntentFile {
   size: number | null;
 }
 export interface IosShareIntentFile {
-  fileSize?: number; //TODO: Consolidate with size from ShareIntentFile
-  fileName: string;
-  mimeType: string;
-  path: string; //TODO: Consolidate all 3 into filePath/path
-  type: string; //TODO: Eliminate? Duplicate with mimeType
+  fileSize?: number; // in octet
+  fileName: string; // original filename
+  mimeType: string; // ex: image/png
+  path: string; // computed full path of file
+  type: "0" | "1" | "2" | "3"; // native type ("0": media, "1": text, "2": weburl, "3": file)
 }
 
 export interface AndroidShareIntentFile {
-  contentUri: string; // What is the difference between this and filePath?
-  filePath: string; // TODO: Consolidate with other filePath/path to make consistent
-  fileSize?: string; // TODO: Consolidate with size from ShareIntent
-  fileName: string;
-  mimeType: string;
+  contentUri: string; // original android uri of file
+  filePath: string; // computed full path of file
+  fileSize?: string; // in octet
+  fileName: string; // original filename
+  mimeType: string; // ex: image/png
 }
 
 export type NativeShareIntent = AndroidShareIntent | IosShareIntent;
-export type NativeShareIntentFiles =
-  | AndroidShareIntentFile
-  | IosShareIntentFile;
+export type NativeShareIntentFile = AndroidShareIntentFile | IosShareIntentFile;
