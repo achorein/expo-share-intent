@@ -62,11 +62,11 @@ public class ExpoShareIntentModule: Module {
                         if let path = getAbsolutePath(for: $0.path) {
                             if ($0.type == .video && $0.thumbnail != nil) {
                                 let thumbnail = getAbsolutePath(for: $0.thumbnail!)
-                                return SharedMediaFile.init(path: path, thumbnail: thumbnail, fileName: $0.fileName, fileSize: $0.fileSize, duration: $0.duration, mimeType: $0.mimeType, type: $0.type)
+                                return SharedMediaFile.init(path: path, thumbnail: thumbnail, fileName: $0.fileName, fileSize: $0.fileSize, width: $0.width, height: $0.height, duration: $0.duration, mimeType: $0.mimeType, type: $0.type)
                             } else if ($0.type == .video && $0.thumbnail == nil) {
-                                return SharedMediaFile.init(path: path, thumbnail: nil, fileName: $0.fileName, fileSize: $0.fileSize, duration: $0.duration, mimeType: $0.mimeType, type: $0.type)
+                                return SharedMediaFile.init(path: path, thumbnail: nil, fileName: $0.fileName, fileSize: $0.fileSize, width: $0.width, height: $0.height, duration: $0.duration, mimeType: $0.mimeType, type: $0.type)
                             }
-                            return SharedMediaFile.init(path: path, thumbnail: nil, fileName: $0.fileName, fileSize: $0.fileSize, duration: $0.duration, mimeType: $0.mimeType, type: $0.type)
+                            return SharedMediaFile.init(path: path, thumbnail: nil, fileName: $0.fileName, fileSize: $0.fileSize, width: $0.width, height: $0.height, duration: $0.duration, mimeType: $0.mimeType, type: $0.type)
                         }
                         return nil
                     }
@@ -82,7 +82,7 @@ public class ExpoShareIntentModule: Module {
                     let sharedArray = decode(data: json)
                     let sharedMediaFiles: [SharedMediaFile] = sharedArray.compactMap{
                         if let path = getAbsolutePath(for: $0.path) {
-                            return SharedMediaFile.init(path: path, thumbnail: nil, fileName: $0.fileName, fileSize: $0.fileSize, duration: nil, mimeType: $0.mimeType, type: $0.type)
+                            return SharedMediaFile.init(path: path, thumbnail: nil, fileName: $0.fileName, fileSize: $0.fileSize, width: nil, height: nil, duration: nil, mimeType: $0.mimeType, type: $0.type)
                         }
                         return nil
                     }
@@ -134,23 +134,20 @@ public class ExpoShareIntentModule: Module {
     if(phAsset == nil) {
         return nil
     }
-    let (url, _) = getFullSizeImageURLAndOrientation(for: phAsset!)
-    return url
+    return getImageURL(for: phAsset!)
   }
 
-  private func getFullSizeImageURLAndOrientation(for asset: PHAsset)-> (String?, Int) {
+  private func getImageURL(for asset: PHAsset)-> String? {
     var url: String? = nil
-    var orientation: Int = 0
     let semaphore = DispatchSemaphore(value: 0)
     let options2 = PHContentEditingInputRequestOptions()
     options2.isNetworkAccessAllowed = true
     asset.requestContentEditingInput(with: options2){(input, info) in
-        orientation = Int(input?.fullSizeImageOrientation ?? 0)
         url = input?.fullSizeImageURL?.path
         semaphore.signal()
     }
     semaphore.wait()
-    return (url, orientation)
+    return url
   }
 
   private func decode(data: Data) -> [SharedMediaFile] {
@@ -172,15 +169,19 @@ public class ExpoShareIntentModule: Module {
     var thumbnail: String?; // video thumbnail
     var fileName: String; // uuid + extension
     var fileSize: Int?;
+    var width: Int?; // for image
+    var height: Int?; // for image
     var duration: Double?; // video duration in milliseconds
     var mimeType: String;
     var type: SharedMediaType;
     
-    init(path: String, thumbnail: String?, fileName: String, fileSize: Int?, duration: Double?, mimeType: String, type: SharedMediaType) {
+    init(path: String, thumbnail: String?, fileName: String, fileSize: Int?, width: Int?, height: Int?, duration: Double?, mimeType: String, type: SharedMediaType) {
       self.path = path
       self.thumbnail = thumbnail
       self.fileName = fileName
       self.fileSize = fileSize
+      self.width = width
+      self.height = height
       self.duration = duration
       self.mimeType = mimeType
       self.type = type

@@ -95,6 +95,10 @@ export function getShareExtensionInfoContent(
     CFBundleExecutable: "$(EXECUTABLE_NAME)",
     CFBundleInfoDictionaryVersion: "6.0",
     CFBundlePackageType: "$(PRODUCT_BUNDLE_PACKAGE_TYPE)",
+    SFSafariContextMenu: {
+      Text: "Share with Share Extension",
+      Command: "Share",
+    },
     NSExtension: {
       NSExtensionAttributes: {
         NSExtensionActivationRule: activationRules || {
