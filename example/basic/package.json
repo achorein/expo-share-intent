@@ -16,7 +16,7 @@
     "postinstall": "patch-package"
   },
   "dependencies": {
-    "expo": "~50.0.15",
+    "expo": "~50.0.17",
     "expo-dev-client": "~3.3.11",
     "expo-splash-screen": "~0.26.4",
     "expo-status-bar": "~1.11.1",
