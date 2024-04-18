@@ -19,11 +19,11 @@ Ensure you use versions that work together
 ![share-intent-2](https://github.com/achorein/expo-share-intent/assets/6529851/c1f5382a-7934-4ae3-9cef-734a71d23933)
 ![share-intent-3](https://github.com/achorein/expo-share-intent/assets/6529851/e6734ace-36d5-4036-ab89-1a60afb2c703)
 
-
 ## Table of Contents
 
 - [Usage](#usage)
-  - [Configure Content Types](#configure-content-types-in-appjson)
+  - [Configure Content Types](#customize-content-types-in-appjson)
+  - [Share Intent content](#share-intent-content)
   - [Expo Router](#expo-router)
   - [React Navigation](#react-navigation)
 - [Troubleshooting / FAQ](#troubleshooting---faq)
