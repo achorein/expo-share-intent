@@ -14,6 +14,7 @@ import android.content.ContentUris
 import android.content.Context
 import android.content.Intent
 import android.database.Cursor
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
@@ -61,12 +62,28 @@ class ExpoShareIntentModule : Module() {
             val fileName = queryResult.getString(queryResult.getColumnIndex(OpenableColumns.DISPLAY_NAME))
             val fileSize = queryResult.getString(queryResult.getColumnIndex(OpenableColumns.SIZE))
             queryResult.close()
+
+            val mimeType = resolver.getType(uri)!!
+
+            var imageHeight: String? = null;
+            var imageWidth: String? = null;
+            if (mimeType.startsWith("image/")) {
+                val options = BitmapFactory.Options().apply {
+                    inJustDecodeBounds = true
+                }
+                BitmapFactory.decodeStream(resolver.openInputStream(uri), null, options)
+                imageHeight = options.outHeight.toString()
+                imageWidth = options.outWidth.toString()
+            }
+
             return mapOf(
+                    "contentUri" to uri.toString(),
+                    "filePath" to instance?.getAbsolutePath(uri),
                     "fileName" to fileName,
                     "fileSize" to fileSize,
-                    "filePath" to instance?.getAbsolutePath(uri),
-                    "mimeType" to resolver.getType(uri)!!,
-                    "contentUri" to uri.toString(),
+                    "mimeType" to mimeType,
+                    "width" to imageWidth,
+                    "height" to imageHeight
             )
         }
 
