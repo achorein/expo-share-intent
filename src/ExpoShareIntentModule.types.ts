@@ -6,11 +6,33 @@ export type StateEventPayload = {
   value: "pending" | "none";
 };
 
+/**
+ * Options for configuring the `useShareIntent` hook.
+ */
 export type ShareIntentOptions = {
+  /**
+   * If `true`, includes additional logs for debugging.
+   * @default false
+   */
   debug?: boolean;
+  /**
+   * If `true`, resets the shared content when the
+   * app goes into the background / foreground.
+   * @default true
+   */
   resetOnBackground?: boolean;
+  /**
+   * If `true`, disables shared intent.
+   * @default false
+   */
   disabled?: boolean;
+  /**
+   * Optional force application scheme to retreive ShareIntent on iOS.
+   */
   scheme?: string;
+  /**
+   * Optional callback function that is triggered when the shared media resets.
+   */
   onResetShareIntent?: () => void;
 };
 
@@ -18,51 +40,70 @@ export type ShareIntentMeta = {
   title?: string;
 };
 
-export type ShareIntent = {
+/**
+ * Base type for what shared content is common between both platforms.
+ */
+interface BaseShareIntent {
+  meta?: ShareIntentMeta;
+  text?: string | null;
+}
+
+/**
+ * Shared intent to represent both platforms.
+ */
+export type ShareIntent = BaseShareIntent & {
   files: ShareIntentFile[] | null;
-  text: string | null;
-  webUrl: string | null;
   type: "media" | "file" | "text" | "weburl" | null;
-  meta?: ShareIntentMeta;
+  webUrl: string | null;
 };
 
-export interface ShareIntentFile {
-  path: string;
-  mimeType: string;
-  fileName: string;
-  size: number | null;
-}
-
-interface BaseNativeShareIntent {
-  text?: string;
-  meta?: ShareIntentMeta;
-}
-
-export type IosShareIntent = BaseNativeShareIntent & {
-  files?: IosShareIntentFile[];
-  type: "media" | "file" | "text" | "weburl";
-};
-
-export interface IosShareIntentFile {
-  path: string;
-  type: string;
-  fileName: string;
-  mimeType: string;
-  fileSize?: number;
-}
-
-export type AndroidShareIntent = BaseNativeShareIntent & {
+/**
+ * Shared intent type for Android.
+ */
+export interface AndroidShareIntent extends BaseShareIntent {
   files?: AndroidShareIntentFile[];
   type: "file" | "text";
-};
-
-export interface AndroidShareIntentFile {
-  fileName: string;
-  filePath: string;
-  mimeType: string;
-  fileSize?: string;
-  contentUri: string;
 }
 
-export type NativeShareIntent = IosShareIntent | AndroidShareIntent;
-export type NativeShareIntentFile = IosShareIntentFile | AndroidShareIntentFile;
+/**
+ * Shared intent type for iOS.
+ */
+export interface IosShareIntent extends BaseShareIntent {
+  files?: IosShareIntentFile[];
+  type: "media" | "file" | "text" | "weburl";
+}
+
+/**
+ * ShareIntentFile that is common among both platforms
+ */
+export type ShareIntentFile = {
+  fileName: string;
+  mimeType: string;
+  path: string;
+  size: number | null;
+};
+
+/**
+ * ShareIntentFile in iOS
+ */
+export interface IosShareIntentFile {
+  fileSize?: number; // in octet
+  fileName: string; // original filename
+  mimeType: string; // ex: image/png
+  path: string; // computed full path of file
+  type: "0" | "1" | "2" | "3"; // native type ("0": media, "1": text, "2": weburl, "3": file)
+}
+
+/**
+ * ShareIntentFile in Android
+ */
+export interface AndroidShareIntentFile {
+  contentUri: string; // original android uri of file
+  mimeType: string; // ex: image/png
+  fileName: string; // original filename
+  filePath: string; // computed full path of file
+  fileSize?: string; // in octet
+}
+
+export type NativeShareIntent = AndroidShareIntent | IosShareIntent;
+export type NativeShareIntentFile = AndroidShareIntentFile | IosShareIntentFile;
