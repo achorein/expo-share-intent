@@ -1,6 +1,7 @@
 import { Button, Image, StyleSheet, Text, View } from "react-native";
 
 import { useShareIntent, ShareIntentFile } from "expo-share-intent";
+import { Fragment } from "react";
 
 export default function App() {
   const { hasShareIntent, shareIntent, resetShareIntent, error } =
@@ -27,16 +28,12 @@ export default function App() {
 
       {/* FILES */}
       {shareIntent?.files?.map((file) => (
-        <>
+        <Fragment key={file.path}>
           {file.mimeType.startsWith("image/") && (
-            <Image
-              key={file.path}
-              source={{ uri: file.path }}
-              style={[styles.image]}
-            />
+            <Image source={{ uri: file.path }} style={[styles.image]} />
           )}
-          <FileMeta key={file.path} file={file} />
-        </>
+          <FileMeta file={file} />
+        </Fragment>
       ))}
 
       {/* FOOTER */}
