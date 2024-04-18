@@ -9,7 +9,8 @@ import {
   getShareIntent,
 } from "./ExpoShareIntentModule";
 import {
-  NativeShareIntent,
+  AndroidShareIntent,
+  IosShareIntent,
   ShareIntent,
   ShareIntentFile,
   ShareIntentOptions,
@@ -36,20 +37,27 @@ export const SHAREINTENT_OPTIONS_DEFAULT: ShareIntentOptions = {
 //   3: "file",
 // };
 
-const parseShareIntent = (value, options): ShareIntent => {
+const parseShareIntent = (
+  value: string | AndroidShareIntent,
+  options: ShareIntentOptions,
+): ShareIntent => {
   let result = SHAREINTENT_DEFAULTVALUE;
   if (!value) return result;
-  let shareIntent: NativeShareIntent;
+  let shareIntent;
+  // ios native module send a raw string of the json, try to parse it
   if (typeof value === "string") {
-    shareIntent = JSON.parse(value.replaceAll("\n", "\\n")); // iOS
+    shareIntent = JSON.parse(value.replaceAll("\n", "\\n")) as IosShareIntent; // iOS
   } else {
     shareIntent = value; // Android
   }
+
   if (shareIntent.text) {
+    // Try to find the webURL in the SharedIntent text
     const webUrl =
       shareIntent.text.match(
         /[(http(s)?)://(www.)?-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)/gi,
       )?.[0] || null;
+
     result = {
       ...SHAREINTENT_DEFAULTVALUE,
       text: shareIntent.text,
@@ -60,23 +68,27 @@ const parseShareIntent = (value, options): ShareIntent => {
       },
     };
   } else {
+    // Ensure we got a valid file. some array value are emply
     const files =
-      shareIntent?.files?.filter((f: any) => f.path || f.contentUri) || [];
+      shareIntent?.files?.filter((file: any) => file.path || file.contentUri) ||
+      [];
     const isMedia = files.every(
-      (f) => f.mimeType.startsWith("image/") || f.mimeType.startsWith("video/"),
+      (file) =>
+        file.mimeType.startsWith("image/") ||
+        file.mimeType.startsWith("video/"),
     );
     result = {
       ...SHAREINTENT_DEFAULTVALUE,
       files: shareIntent?.files
-        ? shareIntent.files.reduce((acc: ShareIntentFile[], f: any) => {
-            if (!f.path && !f.contentUri) return acc;
+        ? shareIntent.files.reduce((acc: ShareIntentFile[], file: any) => {
+            if (!file.path && !file.contentUri) return acc;
             return [
               ...acc,
               {
-                path: f.path || f.contentUri || null,
-                mimeType: f.mimeType || null,
-                fileName: f.fileName || null,
-                size: f.fileSize ? Number(f.fileSize) : null,
+                path: file.path || file.contentUri || null,
+                mimeType: file.mimeType || null,
+                fileName: file.fileName || null,
+                size: file.fileSize ? Number(file.fileSize) : null,
               },
             ];
           }, [])
@@ -84,7 +96,8 @@ const parseShareIntent = (value, options): ShareIntent => {
       type: isMedia ? "media" : "file",
     };
   }
-  options.debug && console.debug("useShareIntent[parsed] ", result);
+  options.debug &&
+    console.debug("useShareIntent[parsed] ", JSON.stringify(result, null, 4));
   return result;
 };
 
