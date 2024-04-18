@@ -41,11 +41,6 @@ export type ShareIntentMeta = {
 };
 
 /**
- * The type of shared content that iOS supports.
- */
-// export type SharedMediaType = AndroidSharedMediaType | "media" | "weburl";
-
-/**
  * Base type for what shared content is common between both platforms.
  */
 interface BaseShareIntent {
