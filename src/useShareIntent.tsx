@@ -9,6 +9,8 @@ import {
   getShareIntent,
 } from "./ExpoShareIntentModule";
 import {
+  AndroidShareIntent,
+  IosShareIntent,
   ShareIntent,
   ShareIntentFile,
   ShareIntentOptions,
@@ -36,15 +38,15 @@ export const SHAREINTENT_OPTIONS_DEFAULT: ShareIntentOptions = {
 // };
 
 const parseShareIntent = (
-  value: any,
+  value: string | AndroidShareIntent,
   options: ShareIntentOptions,
 ): ShareIntent => {
   let result = SHAREINTENT_DEFAULTVALUE;
   if (!value) return result;
   let shareIntent: ShareIntent;
-  // If we receive a string, try to parse for a value
+  // ios native module send a raw string of the json, try to parse it
   if (typeof value === "string") {
-    shareIntent = JSON.parse(value.replaceAll("\n", "\\n")); // iOS
+    shareIntent = JSON.parse(value.replaceAll("\n", "\\n")) as IosShareIntent; // iOS
   } else {
     shareIntent = value; // Android
   }
@@ -66,15 +68,10 @@ const parseShareIntent = (
       },
     };
   } else {
-    // If there is a filePath in the file in the ShareIntent, its media or file
+    // Ensure we got a valid file. some array value are emply
     const files =
-      shareIntent?.files?.filter((file) => {
-        if ("contentUri" in file) {
-          file.contentUri;
-        } else {
-          file.path;
-        }
-      }) || [];
+      shareIntent?.files?.filter((file: any) => file.path || file.contentUri) ||
+      [];
     const isMedia = files.every(
       (file) =>
         file.mimeType.startsWith("image/") ||
@@ -83,15 +80,15 @@ const parseShareIntent = (
     result = {
       ...SHAREINTENT_DEFAULTVALUE,
       files: shareIntent?.files
-        ? shareIntent.files.reduce((acc: ShareIntentFile[], f: any) => {
-            if (!f.path && !f.contentUri) return acc;
+        ? shareIntent.files.reduce((acc: ShareIntentFile[], file: any) => {
+            if (!file.path && !file.contentUri) return acc;
             return [
               ...acc,
               {
-                path: f.path || f.contentUri || null,
-                mimeType: f.mimeType || null,
-                fileName: f.fileName || null,
-                size: f.fileSize ? Number(f.fileSize) : null,
+                path: file.path || file.contentUri || null,
+                mimeType: file.mimeType || null,
+                fileName: file.fileName || null,
+                size: file.fileSize ? Number(file.fileSize) : null,
               },
             ];
           }, [])
