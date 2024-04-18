@@ -17,7 +17,8 @@ Ensure you use versions that work together
 
 ![share-intent-1](https://github.com/achorein/expo-share-intent/assets/6529851/47c38ed0-060f-49d7-94ef-d0c59504ee43)
 ![share-intent-2](https://github.com/achorein/expo-share-intent/assets/6529851/c1f5382a-7934-4ae3-9cef-734a71d23933)
-![share-intent-3](https://github.com/achorein/expo-share-intent/assets/6529851/08c4c061-65b0-4fb0-b812-a17d5bb96479)
+![share-intent-3](https://github.com/achorein/expo-share-intent/assets/6529851/e6734ace-36d5-4036-ab89-1a60afb2c703)
+
 
 ## Table of Contents
 
