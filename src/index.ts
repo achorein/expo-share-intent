@@ -1,6 +1,7 @@
-import Constants from "expo-constants";
-
-export { ShareIntent } from "./ExpoShareIntentModule.types";
+export type {
+  ShareIntent,
+  ShareIntentFile,
+} from "./ExpoShareIntentModule.types";
 
 export {
   hasShareIntent,

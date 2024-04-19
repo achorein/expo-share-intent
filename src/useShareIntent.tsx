@@ -90,6 +90,8 @@ const parseShareIntent = (
                 path: file.path || file.contentUri || null,
                 mimeType: file.mimeType || null,
                 fileName: file.fileName || null,
+                width: file.width ? Number(file.width) : null,
+                height: file.height ? Number(file.height) : null,
                 size: file.fileSize ? Number(file.fileSize) : null,
               },
             ];

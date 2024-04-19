@@ -81,6 +81,8 @@ export type ShareIntentFile = {
   mimeType: string;
   path: string;
   size: number | null;
+  width: number | null;
+  height: number | null;
 };
 
 /**
@@ -92,6 +94,8 @@ export interface IosShareIntentFile {
   mimeType: string; // ex: image/png
   path: string; // computed full path of file
   type: "0" | "1" | "2" | "3"; // native type ("0": media, "1": text, "2": weburl, "3": file)
+  width: number | null;
+  height: number | null;
 }
 
 /**
@@ -103,6 +107,8 @@ export interface AndroidShareIntentFile {
   fileName: string; // original filename
   filePath: string; // computed full path of file
   fileSize?: string; // in octet
+  width: number | null;
+  height: number | null;
 }
 
 export type NativeShareIntent = AndroidShareIntent | IosShareIntent;
