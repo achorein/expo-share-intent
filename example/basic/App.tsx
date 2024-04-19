@@ -59,5 +59,6 @@ const styles = StyleSheet.create({
   },
   error: {
     color: "red",
+    marginTop: 20,
   },
 });
