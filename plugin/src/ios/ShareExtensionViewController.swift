@@ -98,6 +98,15 @@ class ShareViewController: SLComposeServiceViewController {
         if let dataURL = data as? URL { url = dataURL }
         else if let imageData = data as? UIImage { url = this.saveScreenshot(imageData) }
 
+        var pixelWidth: Int? = nil
+        var pixelHeight: Int? = nil
+        if let imageSource = CGImageSourceCreateWithURL(url! as CFURL, nil) {
+            if let imageProperties = CGImageSourceCopyPropertiesAtIndex(imageSource, 0, nil) as Dictionary? {
+              pixelWidth = imageProperties[kCGImagePropertyPixelWidth] as? Int
+              pixelHeight = imageProperties[kCGImagePropertyPixelHeight] as? Int
+            }
+        }
+
         // Always copy
         let fileName = this.getFileName(from :url!, type: .image)
         let fileExtension = this.getExtension(from: url!, type: .image)
@@ -109,7 +118,7 @@ class ShareViewController: SLComposeServiceViewController {
           .appendingPathComponent(newName)
         let copied = this.copyFile(at: url!, to: newPath)
         if(copied) {
-          this.sharedMedia.append(SharedMediaFile(path: newPath.absoluteString, thumbnail: nil, fileName: fileName, fileSize: fileSize, duration: nil, mimeType: mimeType, type: .image))
+          this.sharedMedia.append(SharedMediaFile(path: newPath.absoluteString, thumbnail: nil, fileName: fileName, fileSize: fileSize, width: pixelWidth, height: pixelHeight,  duration: nil, mimeType: mimeType, type: .image))
         }
   
         // If this is the last item, save imagesData in userDefaults and redirect to host app
@@ -191,7 +200,7 @@ class ShareViewController: SLComposeServiceViewController {
           .appendingPathComponent(newName)
         let copied = this.copyFile(at: url, to: newPath)
         if (copied) {
-          this.sharedMedia.append(SharedMediaFile(path: newPath.absoluteString, thumbnail: nil, fileName: fileName, fileSize: fileSize, duration: nil, mimeType: mimeType, type: .file))
+          this.sharedMedia.append(SharedMediaFile(path: newPath.absoluteString, thumbnail: nil, fileName: fileName, fileSize: fileSize, width: nil, height: nil, duration: nil, mimeType: mimeType, type: .file))
         }
         
         if index == (content.attachments?.count)! - 1 {
@@ -306,7 +315,7 @@ class ShareViewController: SLComposeServiceViewController {
     
     
     if FileManager.default.fileExists(atPath: thumbnailPath.path) {
-      return SharedMediaFile(path: forVideo.absoluteString, thumbnail: thumbnailPath.absoluteString, fileName: fileName, fileSize: fileSize, duration: duration, mimeType: mimeType, type: .video)
+      return SharedMediaFile(path: forVideo.absoluteString, thumbnail: thumbnailPath.absoluteString, fileName: fileName, fileSize: fileSize, width: nil, height: nil, duration: duration, mimeType: mimeType, type: .video)
     }
     
     var saved = false
@@ -321,7 +330,7 @@ class ShareViewController: SLComposeServiceViewController {
       saved = false
     }
     
-    return saved ? SharedMediaFile(path: forVideo.absoluteString, thumbnail: thumbnailPath.absoluteString, fileName: fileName, fileSize: fileSize, duration: duration, mimeType: mimeType, type: .video) : nil
+    return saved ? SharedMediaFile(path: forVideo.absoluteString, thumbnail: thumbnailPath.absoluteString, fileName: fileName, fileSize: fileSize, width: nil, height: nil, duration: duration, mimeType: mimeType, type: .video) : nil
   }
   
   private func getThumbnailPath(for url: URL) -> URL {
@@ -337,15 +346,19 @@ class ShareViewController: SLComposeServiceViewController {
     var thumbnail: String?; // video thumbnail
     var fileName: String; // uuid + extension
     var fileSize: Int?;
+    var width: Int?; // for image
+    var height: Int?; // for image
     var duration: Double?; // video duration in milliseconds
     var mimeType: String;
     var type: SharedMediaType;
     
-    init(path: String, thumbnail: String?, fileName: String, fileSize: Int?, duration: Double?, mimeType: String, type: SharedMediaType) {
+    init(path: String, thumbnail: String?, fileName: String, fileSize: Int?, width: Int?, height: Int?, duration: Double?, mimeType: String, type: SharedMediaType) {
       self.path = path
       self.thumbnail = thumbnail
       self.fileName = fileName
       self.fileSize = fileSize
+      self.width = width
+      self.height = height
       self.duration = duration
       self.mimeType = mimeType
       self.type = type
