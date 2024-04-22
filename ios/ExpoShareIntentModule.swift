@@ -98,7 +98,7 @@ public class ExpoShareIntentModule: Module {
                     latestText =  sharedArray.joined(separator: ",")
                     let optionalString = latestText;
                     if let unwrapped = optionalString {
-                        return "{ \"text\": \"\(unwrapped)\", \"type\": \"\(url.fragment!)\" }";
+                        return try? ShareIntentText(text: unwrapped, type: url.fragment!).toJSON()
                     }
                     return latestText!;
                 } else {
@@ -110,7 +110,7 @@ public class ExpoShareIntentModule: Module {
             let optionalString = latestText;
             // now unwrap it
             if let unwrapwebUrl = optionalString {
-                return "{ \"text\": \"\(unwrapwebUrl)\", \"type\": \"\(url.fragment!)\" }";
+                return try? ShareIntentText(text: unwrapwebUrl, type: url.fragment!).toJSON()
             } else {
                 return "empty"
             }
@@ -164,6 +164,11 @@ public class ExpoShareIntentModule: Module {
     return json
   }
 
+  struct ShareIntentText: Codable {
+    let text: String
+    let type: String // text / weburl
+  }
+
   class SharedMediaFile: Codable {
     var path: String; // can be image, video or url path
     var thumbnail: String?; // video thumbnail
@@ -197,5 +202,13 @@ public class ExpoShareIntentModule: Module {
   @objc
   static func requiresMainQueueSetup() -> Bool {
     return true
+  }
+}
+
+extension Encodable {
+  func toJSON() throws -> String? {
+      let jsonData = try? JSONEncoder().encode(self)
+      let jsonString = String(data: jsonData!, encoding: .utf8)
+      return jsonString
   }
 }
