@@ -13,6 +13,8 @@ Ensure you use versions that work together
 | **SDK 50** | 1.0+                                  |
 | **SDK 49** | 0.2+                                  |
 
+> iOS privacy manifest is available since v1.4.1
+
 [<img src="https://badge.fury.io/js/expo-share-intent.svg">](https://www.npmjs.com/package/expo-share-intent)
 
 ![share-intent-1](https://github.com/achorein/expo-share-intent/assets/6529851/47c38ed0-060f-49d7-94ef-d0c59504ee43)
