@@ -24,7 +24,7 @@ const withShareMenu: ConfigPlugin<Parameters> = createRunOncePlugin(
     return withPlugins(config, [
       // IOS
       withAppEntitlements,
-      withShareExtensionConfig,
+      () => withShareExtensionConfig(config, params),
       () => withShareExtensionXcodeTarget(config, params),
       // Android
       () => withAndroidIntentFilters(config, params),

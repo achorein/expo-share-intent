@@ -5,4 +5,5 @@ export type Parameters = {
   androidMainActivityAttributes?: CustomParameter;
   androidIntentFilters?: ("text/*" | "image/*" | "video/*" | "*/*")[];
   androidMultiIntentFilters?: ("image/*" | "video/*" | "*/*")[];
+  disableExperimental?: boolean;
 };
