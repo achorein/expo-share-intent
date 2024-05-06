@@ -59,18 +59,9 @@ export const withShareExtensionConfig: ConfigPlugin<Parameters> = (
       ...extConfig.entitlements,
       ...getShareExtensionEntitlements(appIdentifier),
     };
+  } else {
+    console.debug(`[expo-share-intent] experimental config disabled`);
   }
-
-  // Assume config.extra.eas is already correctly configured outside this plugin
-  // and should not be modified here.
-  // Initialize necessary local variables for setup but do not alter config
-  // let appExtensions = [
-  //   {
-  //     targetName: extName,
-  //     bundleIdentifier: shareExtensionIdentifier,
-  //     entitlements: getShareExtensionEntitlements(appIdentifier),
-  //   },
-  // ];
 
   return config;
 };
