@@ -1,14 +1,14 @@
 apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android'
-apply plugin: 'maven-publish'
 
 group = 'expo.modules.shareintent'
-version = '0.1.0'
+version = '2.0.0'
 
 def expoModulesCorePlugin = new File(project(":expo-modules-core").projectDir.absolutePath, "ExpoModulesCorePlugin.gradle")
 
 apply from: expoModulesCorePlugin
 applyKotlinExpoModulesCorePlugin()
+useCoreDependencies()
+// use the managed Android SDK versions from expo-modules-core
 useDefaultAndroidSdkVersions()
 
 buildscript {
@@ -17,33 +17,14 @@ buildscript {
     rootProject.ext.has(prop) ? rootProject.ext.get(prop) : fallback
   }
 
-  // Ensures backward compatibility
-  ext.getKotlinVersion = {
-    if (ext.has("kotlinVersion")) {
-      ext.kotlinVersion()
-    } else {
-      ext.safeExtGet("kotlinVersion", "1.8.10")
-    }
-  }
-
-  repositories {
-    mavenCentral()
-  }
-
-  dependencies {
-    classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${getKotlinVersion()}")
-  }
 }
 
 android {
   def agpVersion = com.android.Version.ANDROID_GRADLE_PLUGIN_VERSION
 
-  namespace "expo.modules.shareintent"
+  namespace "${group}"
   defaultConfig {
     versionCode 1
-    versionName "0.1.0"
+    versionName "${version}"
   }
-}
-
-dependencies {
 }
