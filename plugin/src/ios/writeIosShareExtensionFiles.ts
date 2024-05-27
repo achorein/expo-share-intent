@@ -184,10 +184,17 @@ export function getShareExtensionViewControllerContent(
   scheme: string,
   appIdentifier: string,
 ) {
+  let updatedScheme = scheme;
+  if (Array.isArray(scheme)) {
+    console.debug(
+      `[expo-share-intent] multiple scheme detected (${scheme.join(",")}), using:${updatedScheme}`,
+    );
+    updatedScheme = scheme[0];
+  }
   console.debug(
-    `[expo-share-intent] add ios share extension (scheme:${scheme} appIdentifier:${appIdentifier})`,
+    `[expo-share-intent] add ios share extension (scheme:${updatedScheme} appIdentifier:${appIdentifier})`,
   );
-  if (!scheme) {
+  if (!updatedScheme) {
     throw new Error(
       "[expo-share-intent] missing custom URL scheme 'expo.scheme' in app.json ! (see https://docs.expo.dev/guides/linking/#linking-to-your-app)",
     );
@@ -199,6 +206,6 @@ export function getShareExtensionViewControllerContent(
   );
 
   return content
-    .replaceAll("<SCHEME>", scheme)
+    .replaceAll("<SCHEME>", updatedScheme)
     .replaceAll("<APPIDENTIFIER>", appIdentifier);
 }
