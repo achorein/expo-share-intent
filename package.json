@@ -57,8 +57,8 @@
   },
   "dependencies": {
     "@expo/config-plugins": "~8.0.0",
-    "expo-constants": "~15.4.6",
-    "expo-linking": "~6.2.2"
+    "expo-constants": "^16.0.2",
+    "expo-linking": "^6.3.1"
   },
   "resolutions": {
     "string-width": "^4",
