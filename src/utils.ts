@@ -10,12 +10,21 @@ export const getScheme = (options?: ShareIntentOptions) => {
     return options.scheme;
   }
   if (Constants.expoConfig?.scheme) {
-    options?.debug &&
-      console.debug(
-        "expoShareIntent[scheme] from expoConfig:",
-        Constants.expoConfig?.scheme,
-      );
-    return Constants.expoConfig?.scheme;
+    let updatedScheme = Constants.expoConfig?.scheme;
+    if (Array.isArray(Constants.expoConfig?.scheme)) {
+      updatedScheme = updatedScheme[0];
+      options?.debug &&
+        console.debug(
+          `expoShareIntent[scheme] from expoConfig: multiple scheme detected (${Constants.expoConfig?.scheme.join(",")}), using:${updatedScheme}`,
+        );
+    } else {
+      options?.debug &&
+        console.debug(
+          "expoShareIntent[scheme] from expoConfig:",
+          updatedScheme,
+        );
+    }
+    return updatedScheme;
   }
   const deepLinkUrl = createURL("dataUrl=");
   const extracted = deepLinkUrl.match(/^([^:]+)/gi)?.[0] || null;
