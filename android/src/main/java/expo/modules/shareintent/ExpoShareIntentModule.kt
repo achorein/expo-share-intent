@@ -182,6 +182,10 @@ class ExpoShareIntentModule : Module() {
             ExpoShareIntentSingleton.isPending
         }
 
+        Function("closeApp") { _: String ->
+            android.os.Process.killProcess(android.os.Process.myPid())
+        }
+
         OnNewIntent {
             handleShareIntent(it)
         }
