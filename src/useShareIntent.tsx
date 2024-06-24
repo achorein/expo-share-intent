@@ -85,7 +85,11 @@ const parseShareIntent = (
             return [
               ...acc,
               {
-                path: file.path || file.contentUri || null,
+                path:
+                  file.path ||
+                  (file.filePath ? `file://${file.filePath}` : null) ||
+                  file.contentUri ||
+                  null,
                 mimeType: file.mimeType || null,
                 fileName: file.fileName || null,
                 width: file.width ? Number(file.width) : null,
@@ -99,7 +103,7 @@ const parseShareIntent = (
     };
   }
   options.debug &&
-    console.debug("useShareIntent[parsed] ", JSON.stringify(result, null, 4));
+    console.debug("useShareIntent[parsed] ", JSON.stringify(result, null, 2));
   return result;
 };
 
@@ -180,7 +184,11 @@ export default function useShareIntent(
       return;
     }
     const changeSubscription = addChangeListener((event) => {
-      options.debug && console.debug("useShareIntent[onChange]", event);
+      options.debug &&
+        console.debug(
+          "useShareIntent[onChange]",
+          JSON.stringify(event, null, 2),
+        );
       try {
         setSharedIntent(parseShareIntent(event.value, options));
       } catch (e) {
