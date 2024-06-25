@@ -1,4 +1,5 @@
 import plist from "@expo/plist";
+import { ConfigPlugin } from "@expo/config-plugins";
 import fs from "node:fs";
 import path from "node:path";
 
@@ -17,11 +18,13 @@ export async function writeShareExtensionFiles(
   scheme: string,
   appIdentifier: string,
   parameters: Parameters,
+  appName: ConfigPlugin<Parameters>["name"],
 ) {
   // ShareExtension-Info.plist
   const infoPlistFilePath = getShareExtensionInfoFilePath(platformProjectRoot);
   const infoPlistContent = getShareExtensionInfoContent(
     parameters.iosActivationRules,
+    appName,
   );
   await fs.promises.mkdir(path.dirname(infoPlistFilePath), { recursive: true });
   await fs.promises.writeFile(infoPlistFilePath, infoPlistContent);
@@ -86,10 +89,11 @@ export function getShareExtensionInfoFilePath(platformProjectRoot: string) {
 
 export function getShareExtensionInfoContent(
   activationRules: Parameters["iosActivationRules"],
+  appName: ConfigPlugin<Parameters>["name"],
 ) {
   return plist.build({
     CFBundleName: "$(PRODUCT_NAME)",
-    CFBundleDisplayName: "$(PRODUCT_NAME) Share Extension",
+    CFBundleDisplayName: `${appName} - Share Extension`,
     CFBundleIdentifier: "$(PRODUCT_BUNDLE_IDENTIFIER)",
     CFBundleDevelopmentRegion: "$(DEVELOPMENT_LANGUAGE)",
     CFBundleExecutable: "$(EXECUTABLE_NAME)",
