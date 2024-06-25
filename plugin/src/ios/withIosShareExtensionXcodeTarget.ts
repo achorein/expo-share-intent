@@ -48,6 +48,7 @@ export const withShareExtensionXcodeTarget: ConfigPlugin<Parameters> = (
       scheme,
       appIdentifier,
       parameters,
+      config.name,
     );
 
     const pbxProject = config.modResults;
