@@ -42,6 +42,11 @@ public class ExpoShareIntentModule: Module {
         // for Android only
         return false
     }
+
+    Function("closeApp") { (key: String) in
+        exit(0);
+        return true
+    }
   }
 
   private var initialMedia: [SharedMediaFile]? = nil

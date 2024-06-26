@@ -29,6 +29,10 @@ export function hasShareIntent(key: string): boolean {
   return ExpoShareIntentModule.hasShareIntent(key ?? getShareExtensionKey());
 }
 
+export function closeApp(): boolean {
+  return ExpoShareIntentModule.closeApp();
+}
+
 const emitter = new EventEmitter(
   ExpoShareIntentModule ?? NativeModulesProxy.ExpoShareIntentModule,
 );
