@@ -27,7 +27,7 @@ export const SHAREINTENT_DEFAULTVALUE: ShareIntent = {
 export const SHAREINTENT_OPTIONS_DEFAULT: ShareIntentOptions = {
   debug: false,
   resetOnBackground: true,
-  disabled: false,
+  disabled: Platform.OS === "web",
 };
 
 // const IOS_SHARE_TYPE_MAPPING = {
@@ -202,8 +202,8 @@ export default function useShareIntent(
     });
     setIsReady(true);
     return () => {
-      changeSubscription.remove();
-      errorSubscription.remove();
+      changeSubscription?.remove();
+      errorSubscription?.remove();
     };
   }, [options.disabled]);
 
