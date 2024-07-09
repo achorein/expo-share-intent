@@ -23,13 +23,21 @@ const withShareMenu: ConfigPlugin<Parameters> = createRunOncePlugin(
   (config, params = {}) => {
     return withPlugins(config, [
       // IOS
-      withAppEntitlements,
-      () => withShareExtensionConfig(config, params),
-      () => withShareExtensionXcodeTarget(config, params),
+      ...(!params.disableIOS
+        ? [
+            withAppEntitlements,
+            () => withShareExtensionConfig(config, params),
+            () => withShareExtensionXcodeTarget(config, params),
+          ]
+        : []),
       // Android
-      () => withAndroidIntentFilters(config, params),
-      () => withAndroidMainActivityAttributes(config, params),
-      withCompatibilityChecker,
+      ...(!params.disableAndroid
+        ? [
+            () => withAndroidIntentFilters(config, params),
+            () => withAndroidMainActivityAttributes(config, params),
+          ]
+        : []),
+      () => withCompatibilityChecker(config, params),
     ]);
   },
   pkg.name,

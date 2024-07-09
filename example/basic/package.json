@@ -16,14 +16,14 @@
     "postinstall": "patch-package"
   },
   "dependencies": {
-    "expo": "~51.0.14",
-    "expo-dev-client": "~4.0.18",
+    "expo": "~51.0.17",
+    "expo-dev-client": "~4.0.19",
     "expo-splash-screen": "~0.27.5",
     "expo-status-bar": "~1.12.1",
-    "expo-updates": "~0.25.17",
+    "expo-updates": "~0.25.18",
     "patch-package": "^8.0.0",
     "react": "18.2.0",
-    "react-native": "0.74.2"
+    "react-native": "0.74.3"
   },
   "devDependencies": {
     "@babel/core": "^7.24.0",
