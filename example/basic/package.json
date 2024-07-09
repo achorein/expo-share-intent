@@ -16,6 +16,7 @@
     "postinstall": "patch-package"
   },
   "dependencies": {
+    "@expo/metro-runtime": "~3.2.1",
     "expo": "~51.0.17",
     "expo-dev-client": "~4.0.19",
     "expo-splash-screen": "~0.27.5",
@@ -23,7 +24,9 @@
     "expo-updates": "~0.25.18",
     "patch-package": "^8.0.0",
     "react": "18.2.0",
-    "react-native": "0.74.3"
+    "react-native": "0.74.3",
+    "react-dom": "18.2.0",
+    "react-native-web": "~0.19.10"
   },
   "devDependencies": {
     "@babel/core": "^7.24.0",
