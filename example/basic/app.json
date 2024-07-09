@@ -26,7 +26,9 @@
             "NSExtensionActivationSupportsFileWithMaxCount": 1
           },
           "androidIntentFilters": ["text/*", "image/*"],
-          "androidMultiIntentFilters": ["image/*"]
+          "androidMultiIntentFilters": ["image/*"],
+          "disableIOS": false,
+          "disableAndroid": false
         }
       ],
       ["expo-updates"]
