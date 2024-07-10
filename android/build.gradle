@@ -1,8 +1,5 @@
 apply plugin: 'com.android.library'
 
-group = 'expo.modules.shareintent'
-version = '2.0.0'
-
 def expoModulesCorePlugin = new File(project(":expo-modules-core").projectDir.absolutePath, "ExpoModulesCorePlugin.gradle")
 
 apply from: expoModulesCorePlugin
@@ -23,9 +20,9 @@ buildscript {
 android {
   def agpVersion = com.android.Version.ANDROID_GRADLE_PLUGIN_VERSION
 
-  namespace "${group}"
+  namespace "expo.modules.shareintent"
   defaultConfig {
     versionCode 1
-    versionName "${version}"
+    versionName "2.0.0"
   }
 }
