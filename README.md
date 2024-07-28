@@ -47,7 +47,7 @@ npm install expo-share-intent
 For the moment this package need a post-install script
 
 - copy the [xcode patch](https://github.com/achorein/expo-share-intent/blob/main/example/basic/patches/xcode%2B3.0.1.patch) in you `patches` project directory (like example)
-- add post-install script
+- add post-install script to `package.json`
 
 ```json
   "scripts": {
