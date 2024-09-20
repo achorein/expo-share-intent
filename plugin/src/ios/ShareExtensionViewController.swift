@@ -36,14 +36,17 @@ class ShareViewController: SLComposeServiceViewController {
         for (index, attachment) in (contents).enumerated() {
           if attachment.hasItemConformingToTypeIdentifier(imageContentType) {
             handleImages(content: content, attachment: attachment, index: index)
-          } else if attachment.hasItemConformingToTypeIdentifier(textContentType) {
-            handleText(content: content, attachment: attachment, index: index)
+          } else if attachment.hasItemConformingToTypeIdentifier(videoContentType) {
+            handleVideos(content: content, attachment: attachment, index: index)
           } else if attachment.hasItemConformingToTypeIdentifier(fileURLType) {
             handleFiles(content: content, attachment: attachment, index: index)
           } else if attachment.hasItemConformingToTypeIdentifier(urlContentType) {
             handleUrl(content: content, attachment: attachment, index: index)
-          } else if attachment.hasItemConformingToTypeIdentifier(videoContentType) {
-            handleVideos(content: content, attachment: attachment, index: index)
+          } else if attachment.hasItemConformingToTypeIdentifier(textContentType) {
+            handleText(content: content, attachment: attachment, index: index)
+          } else {
+            NSLog("[ERROR] content type not handle !\(String(describing: content))")
+            self.dismissWithError(message: "content type not handle \(String(describing: content)))")
           }
         }
       }
@@ -52,8 +55,10 @@ class ShareViewController: SLComposeServiceViewController {
   
   private func handleText (content: NSExtensionItem, attachment: NSItemProvider, index: Int) {
     attachment.loadItem(forTypeIdentifier: textContentType, options: nil) { [weak self] data, error in
-      
-      if error == nil, let item = data as? String, let this = self {
+      if (error != nil) {
+        NSLog("[ERROR] Cannot load text content !\(String(describing: error))")
+        self?.dismissWithError(message: "Cannot load text content \(String(describing: error))")
+      } else if let item = data as? String, let this = self {
         this.sharedText.append(item)
           
         // If this is the last item, save sharedText in userDefaults and redirect to host app
@@ -65,15 +70,18 @@ class ShareViewController: SLComposeServiceViewController {
         }
               
       } else {
-        self?.dismissWithError(message: "Cannot load text content")
+        NSLog("[ERROR] Cannot load text content !\(String(describing: content))")
+        self?.dismissWithError(message: "text content is empty \(String(describing: content)))")
       }
     }
   }
               
   private func handleUrl (content: NSExtensionItem, attachment: NSItemProvider, index: Int) {
     attachment.loadItem(forTypeIdentifier: urlContentType, options: nil) { [weak self] data, error in
-
-      if error == nil, let item = data as? URL, let this = self {
+      if (error != nil) {
+        NSLog("[ERROR] Cannot load url content !\(String(describing: error))")
+        self?.dismissWithError(message: "Cannot load url content \(String(describing: error))")
+      } else if let item = data as? URL, let this = self {
         this.sharedText.append(item.absoluteString)
         
         // If this is the last item, save sharedText in userDefaults and redirect to host app
@@ -84,9 +92,8 @@ class ShareViewController: SLComposeServiceViewController {
           this.redirectToHostApp(type: .weburl)
         }
       } else {
-        self?.dismissWithError(message: "Cannot load url content")
+        self?.dismissWithError(message: "url is empty")
       }
-
     }
   }
   
