@@ -50,7 +50,8 @@ export const withShareExtensionConfig: ConfigPlugin<Parameters> = (
         targetName: extName,
         bundleIdentifier: shareExtensionIdentifier,
       });
-      extConfigIndex = 0;
+      extConfigIndex =
+        config.extra.eas.build.experimental.ios.appExtensions.length - 1;
     }
 
     const extConfig =
