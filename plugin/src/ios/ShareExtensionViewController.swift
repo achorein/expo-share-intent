@@ -101,10 +101,20 @@ class ShareViewController: SLComposeServiceViewController {
         var pixelWidth: Int? = nil
         var pixelHeight: Int? = nil
         if let imageSource = CGImageSourceCreateWithURL(url! as CFURL, nil) {
-            if let imageProperties = CGImageSourceCopyPropertiesAtIndex(imageSource, 0, nil) as Dictionary? {
-              pixelWidth = imageProperties[kCGImagePropertyPixelWidth] as? Int
-              pixelHeight = imageProperties[kCGImagePropertyPixelHeight] as? Int
+          if let imageProperties = CGImageSourceCopyPropertiesAtIndex(imageSource, 0, nil) as Dictionary? {
+            pixelWidth = imageProperties[kCGImagePropertyPixelWidth] as? Int
+            pixelHeight = imageProperties[kCGImagePropertyPixelHeight] as? Int
+            // Check orientation and flip size if required
+            if let orientationNumber = imageProperties[kCGImagePropertyOrientation] as! CFNumber? {
+              var orientation: Int = 0;
+              CFNumberGetValue(orientationNumber, .intType, &orientation);
+              if (orientation > 4) {
+                var temp: Int? = pixelWidth;
+                pixelWidth = pixelHeight;
+                pixelHeight = temp;
+              }
             }
+          }
         }
 
         // Always copy
