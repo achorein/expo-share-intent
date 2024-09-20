@@ -83,7 +83,7 @@ export type ShareIntentFile = {
   size: number | null;
   width: number | null;
   height: number | null;
-  duration?: number | null;
+  duration: number | null;
 };
 
 /**
@@ -97,7 +97,7 @@ export interface IosShareIntentFile {
   type: "0" | "1" | "2" | "3"; // native type ("0": media, "1": text, "2": weburl, "3": file)
   width: number | null;
   height: number | null;
-  duration: number | null;
+  duration: number | null; // in ms
 }
 
 /**
@@ -111,6 +111,7 @@ export interface AndroidShareIntentFile {
   fileSize?: string; // in octet
   width: number | null;
   height: number | null;
+  duration: number | null; // in ms
 }
 
 export type NativeShareIntent = AndroidShareIntent | IosShareIntent;
