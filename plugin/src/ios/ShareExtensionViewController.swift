@@ -20,10 +20,6 @@ class ShareViewController: UIViewController {
   let textContentType = kUTTypeText as String
   let urlContentType = kUTTypeURL as String
   let fileURLType = kUTTypeFileURL as String;
-  
-  override func isContentValid() -> Bool {
-    return true
-  }
       
   override func viewDidLoad() {
     super.viewDidLoad();
