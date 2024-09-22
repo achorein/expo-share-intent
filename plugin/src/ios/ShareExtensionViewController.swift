@@ -9,7 +9,7 @@ import Social
 import MobileCoreServices
 import Photos
 
-class ShareViewController: SLComposeServiceViewController {
+class ShareViewController: UIViewController {
   let hostAppBundleIdentifier = "<APPIDENTIFIER>"
   let shareProtocol = "<SCHEME>"
   let sharedKey = "<SCHEME>ShareKey"
@@ -251,12 +251,11 @@ class ShareViewController: SLComposeServiceViewController {
   private func redirectToHostApp(type: RedirectType) {
     let url = URL(string: "\(shareProtocol)://dataUrl=\(sharedKey)#\(type)")!
     var responder = self as UIResponder?
-    let selectorOpenURL = sel_registerName("openURL:")
   
     while (responder != nil) {
       if let application = responder as? UIApplication {
         if (application.canOpenURL(url)){
-          application.perform(selectorOpenURL, with: url)
+          application.open(url)
         } else {
           NSLog("redirectToHostApp canOpenURL KO: \(shareProtocol)")
           self.dismissWithError(message: "Application not found, invalid url scheme \(shareProtocol)")
