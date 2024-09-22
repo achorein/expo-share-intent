@@ -89,7 +89,7 @@ class ExpoShareIntentModule : Module() {
 
         fun handleShareIntent(intent: Intent) {
             if (intent.type == null) return
-            if (intent.type!!.startsWith("text")) {
+            if (intent.type!!.startsWith("text/plain")) {
                 // text / urls
                 if (intent.action == Intent.ACTION_SEND) {
                     notifyShareIntent(mapOf(

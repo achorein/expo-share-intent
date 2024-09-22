@@ -21,7 +21,7 @@
     "expo-dev-client": "~4.0.26",
     "expo-splash-screen": "~0.27.5",
     "expo-status-bar": "~1.12.1",
-    "expo-updates": "~0.25.24",
+    "expo-updates": "~0.25.25",
     "patch-package": "^8.0.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
