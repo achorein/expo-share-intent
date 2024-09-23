@@ -4,8 +4,8 @@ import fs from "node:fs";
 import path from "node:path";
 
 import {
-  shareExtensionName,
-  getAppGroups,
+  getShareExtensionName,
+  getAppGroup,
   shareExtensionEntitlementsFileName,
   shareExtensionInfoFileName,
   shareExtensionStoryBoardFileName,
@@ -21,7 +21,10 @@ export async function writeShareExtensionFiles(
   appName: ConfigPlugin<Parameters>["name"],
 ) {
   // ShareExtension-Info.plist
-  const infoPlistFilePath = getShareExtensionInfoFilePath(platformProjectRoot);
+  const infoPlistFilePath = getShareExtensionInfoFilePath(
+    platformProjectRoot,
+    parameters,
+  );
   const infoPlistContent = getShareExtensionInfoContent(
     parameters.iosActivationRules,
     appName,
@@ -30,29 +33,40 @@ export async function writeShareExtensionFiles(
   await fs.promises.writeFile(infoPlistFilePath, infoPlistContent);
 
   // ShareExtension.entitlements
-  const entitlementsFilePath =
-    getShareExtensionEntitlementsFilePath(platformProjectRoot);
-  const entitlementsContent =
-    getShareExtensionEntitlementsContent(appIdentifier);
+  const entitlementsFilePath = getShareExtensionEntitlementsFilePath(
+    platformProjectRoot,
+    parameters,
+  );
+  const entitlementsContent = getShareExtensionEntitlementsContent(
+    appIdentifier,
+    parameters,
+  );
   await fs.promises.writeFile(entitlementsFilePath, entitlementsContent);
 
   // PrivacyInfo.xcprivacy
-  const pricayFilePath = getPrivacyInfoFilePath(platformProjectRoot);
+  const pricayFilePath = getPrivacyInfoFilePath(
+    platformProjectRoot,
+    parameters,
+  );
   const pricayContent = getPrivacyInfoContent();
   await fs.promises.writeFile(pricayFilePath, pricayContent);
 
   // MainInterface.storyboard
-  const storyboardFilePath =
-    getShareExtensionStoryboardFilePath(platformProjectRoot);
+  const storyboardFilePath = getShareExtensionStoryboardFilePath(
+    platformProjectRoot,
+    parameters,
+  );
   const storyboardContent = getShareExtensionStoryBoardContent();
   await fs.promises.writeFile(storyboardFilePath, storyboardContent);
 
   // ShareViewController.swift
-  const viewControllerFilePath =
-    getShareExtensionViewControllerPath(platformProjectRoot);
+  const viewControllerFilePath = getShareExtensionViewControllerPath(
+    platformProjectRoot,
+    parameters,
+  );
   const viewControllerContent = getShareExtensionViewControllerContent(
     scheme,
-    appIdentifier,
+    getAppGroup(appIdentifier, parameters),
   );
   await fs.promises.writeFile(viewControllerFilePath, viewControllerContent);
 }
@@ -60,29 +74,41 @@ export async function writeShareExtensionFiles(
 //: [root]/ios/ShareExtension/ShareExtension.entitlements
 export function getShareExtensionEntitlementsFilePath(
   platformProjectRoot: string,
+  parameters: Parameters,
 ) {
   return path.join(
     platformProjectRoot,
-    shareExtensionName,
+    getShareExtensionName(parameters),
     shareExtensionEntitlementsFileName,
   );
 }
 
-export function getShareExtensionEntitlements(appIdentifier: string) {
+export function getShareExtensionEntitlements(
+  appIdentifier: string,
+  parameters: Parameters,
+) {
   return {
-    "com.apple.security.application-groups": getAppGroups(appIdentifier),
+    "com.apple.security.application-groups": [
+      getAppGroup(appIdentifier, parameters),
+    ],
   };
 }
 
-export function getShareExtensionEntitlementsContent(appIdentifier: string) {
-  return plist.build(getShareExtensionEntitlements(appIdentifier));
+export function getShareExtensionEntitlementsContent(
+  appIdentifier: string,
+  parameters: Parameters,
+) {
+  return plist.build(getShareExtensionEntitlements(appIdentifier, parameters));
 }
 
 //: [root]/ios/ShareExtension/ShareExtension-Info.plist
-export function getShareExtensionInfoFilePath(platformProjectRoot: string) {
+export function getShareExtensionInfoFilePath(
+  platformProjectRoot: string,
+  parameters: Parameters,
+) {
   return path.join(
     platformProjectRoot,
-    shareExtensionName,
+    getShareExtensionName(parameters),
     shareExtensionInfoFileName,
   );
 }
@@ -113,10 +139,13 @@ export function getShareExtensionInfoContent(
 }
 
 //: [root]/ios/ShareExtension/PrivacyInfo.xcprivacy
-export function getPrivacyInfoFilePath(platformProjectRoot: string) {
+export function getPrivacyInfoFilePath(
+  platformProjectRoot: string,
+  parameters: Parameters,
+) {
   return path.join(
     platformProjectRoot,
-    shareExtensionName,
+    getShareExtensionName(parameters),
     "PrivacyInfo.xcprivacy",
   );
 }
@@ -137,10 +166,11 @@ export function getPrivacyInfoContent() {
 //: [root]/ios/ShareExtension/MainInterface.storyboard
 export function getShareExtensionStoryboardFilePath(
   platformProjectRoot: string,
+  parameters: Parameters,
 ) {
   return path.join(
     platformProjectRoot,
-    shareExtensionName,
+    getShareExtensionName(parameters),
     shareExtensionStoryBoardFileName,
   );
 }
@@ -176,17 +206,18 @@ export function getShareExtensionStoryBoardContent() {
 //: [root]/ios/ShareExtension/ShareViewController.swift
 export function getShareExtensionViewControllerPath(
   platformProjectRoot: string,
+  parameters: Parameters,
 ) {
   return path.join(
     platformProjectRoot,
-    shareExtensionName,
+    getShareExtensionName(parameters),
     shareExtensionViewControllerFileName,
   );
 }
 
 export function getShareExtensionViewControllerContent(
   scheme: string,
-  appIdentifier: string,
+  groupIdentifier: string,
 ) {
   let updatedScheme = scheme;
   if (Array.isArray(scheme)) {
@@ -196,7 +227,7 @@ export function getShareExtensionViewControllerContent(
     updatedScheme = scheme[0];
   }
   console.debug(
-    `[expo-share-intent] add ios share extension (scheme:${updatedScheme} appIdentifier:${appIdentifier})`,
+    `[expo-share-intent] add ios share extension (scheme:${updatedScheme} groupIdentifier:${groupIdentifier})`,
   );
   if (!updatedScheme) {
     throw new Error(
@@ -211,5 +242,5 @@ export function getShareExtensionViewControllerContent(
 
   return content
     .replaceAll("<SCHEME>", updatedScheme)
-    .replaceAll("<APPIDENTIFIER>", appIdentifier);
+    .replaceAll("<GROUPIDENTIFIER>", groupIdentifier);
 }

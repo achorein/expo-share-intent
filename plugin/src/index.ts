@@ -25,7 +25,7 @@ const withShareMenu: ConfigPlugin<Parameters> = createRunOncePlugin(
       // IOS
       ...(!params.disableIOS
         ? [
-            withAppEntitlements,
+            () => withAppEntitlements(config, params),
             () => withShareExtensionConfig(config, params),
             () => withShareExtensionXcodeTarget(config, params),
           ]
