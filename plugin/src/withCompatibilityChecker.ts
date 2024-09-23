@@ -1,5 +1,6 @@
 import { ConfigPlugin, WarningAggregator } from "@expo/config-plugins";
 
+import { getShareExtensionName } from "./ios/constants";
 import { Parameters } from "./types";
 import packageInfo from "../../package.json";
 
@@ -42,11 +43,23 @@ export const withCompatibilityChecker: ConfigPlugin<Parameters> = (
 
     const extraAppExtension =
       config.extra?.eas?.build?.experimental?.ios?.appExtensions?.filter(
-        (appExtension: any) => appExtension.targetName === "ShareExtension",
+        (appExtension: any) =>
+          appExtension.targetName === getShareExtensionName(params),
       );
     if (extraAppExtension && extraAppExtension.length > 1) {
       throw new Error(
-        `[${packageInfo.name}] Incompatibility found, you have more than one appExtensions for "ShareExtension" (${extraAppExtension.length}). Please remove all "eas.build.experimental.ios.appExtensions" with targetName "ShareExtension" in your app.json! (see https://github.com/achorein/expo-share-intent?tab=readme-ov-file#ios-extension-target)`,
+        `[${packageInfo.name}] Incompatibility found, you have more than one appExtensions for "${getShareExtensionName(params)}" (${extraAppExtension.length}). Please remove all "eas.build.experimental.ios.appExtensions" with targetName "${getShareExtensionName(params)}" in your app.json! (see https://github.com/achorein/expo-share-intent?tab=readme-ov-file#ios-extension-target)`,
+      );
+    }
+
+    if (params.iosShareExtensionName?.includes(" ")) {
+      throw new Error(
+        `[${packageInfo.name}] Incompatibility found, iosShareExtensionName should not contains spaces "${getShareExtensionName(params)}" in your app.json!`,
+      );
+    }
+    if (params.iosAppGroupIdentifier?.includes(" ")) {
+      throw new Error(
+        `[${packageInfo.name}] Incompatibility found, iosAppGroupIdentifier should not contains spaces "${getShareExtensionName(params)}" in your app.json!`,
       );
     }
   } else {

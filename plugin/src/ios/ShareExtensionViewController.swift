@@ -10,7 +10,7 @@ import Social
 import UIKit
 
 class ShareViewController: UIViewController {
-  let hostAppBundleIdentifier = "<APPIDENTIFIER>"
+  let hostAppGroupIdentifier = "<GROUPIDENTIFIER>"
   let shareProtocol = "<SCHEME>"
   let sharedKey = "<SCHEME>ShareKey"
   var sharedMedia: [SharedMediaFile] = []
@@ -67,7 +67,7 @@ class ShareViewController: UIViewController {
           self.sharedText.append(item)
           // If this is the last item, save sharedText in userDefaults and redirect to host app
           if index == (content.attachments?.count)! - 1 {
-            let userDefaults = UserDefaults(suiteName: "group.\(self.hostAppBundleIdentifier)")
+            let userDefaults = UserDefaults(suiteName: self.hostAppGroupIdentifier)
             userDefaults?.set(self.sharedText, forKey: self.sharedKey)
             userDefaults?.synchronize()
             self.redirectToHostApp(type: .text)
@@ -90,7 +90,7 @@ class ShareViewController: UIViewController {
           self.sharedText.append(item.absoluteString)
           // If this is the last item, save sharedText in userDefaults and redirect to host app
           if index == (content.attachments?.count)! - 1 {
-            let userDefaults = UserDefaults(suiteName: "group.\(self.hostAppBundleIdentifier)")
+            let userDefaults = UserDefaults(suiteName: self.hostAppGroupIdentifier)
             userDefaults?.set(self.sharedText, forKey: self.sharedKey)
             userDefaults?.synchronize()
             self.redirectToHostApp(type: .weburl)
@@ -148,7 +148,7 @@ class ShareViewController: UIViewController {
           let newName = "\(UUID().uuidString).\(fileExtension)"
           let newPath = FileManager.default
             .containerURL(
-              forSecurityApplicationGroupIdentifier: "group.\(self.hostAppBundleIdentifier)")!
+              forSecurityApplicationGroupIdentifier: self.hostAppGroupIdentifier)!
             .appendingPathComponent(newName)
           let copied = self.copyFile(at: url!, to: newPath)
           if copied {
@@ -161,7 +161,7 @@ class ShareViewController: UIViewController {
 
           // If this is the last item, save imagesData in userDefaults and redirect to host app
           if index == (content.attachments?.count)! - 1 {
-            let userDefaults = UserDefaults(suiteName: "group.\(self.hostAppBundleIdentifier)")
+            let userDefaults = UserDefaults(suiteName: self.hostAppGroupIdentifier)
             userDefaults?.set(self.toData(data: self.sharedMedia), forKey: self.sharedKey)
             userDefaults?.synchronize()
             self.redirectToHostApp(type: .media)
@@ -207,7 +207,7 @@ class ShareViewController: UIViewController {
           let newName = "\(UUID().uuidString).\(fileExtension)"
           let newPath = FileManager.default
             .containerURL(
-              forSecurityApplicationGroupIdentifier: "group.\(self.hostAppBundleIdentifier)")!
+              forSecurityApplicationGroupIdentifier: self.hostAppGroupIdentifier)!
             .appendingPathComponent(newName)
           let copied = self.copyFile(at: url, to: newPath)
           if copied {
@@ -222,7 +222,7 @@ class ShareViewController: UIViewController {
 
           // If this is the last item, save imagesData in userDefaults and redirect to host app
           if index == (content.attachments?.count)! - 1 {
-            let userDefaults = UserDefaults(suiteName: "group.\(self.hostAppBundleIdentifier)")
+            let userDefaults = UserDefaults(suiteName: self.hostAppGroupIdentifier)
             userDefaults?.set(self.toData(data: self.sharedMedia), forKey: self.sharedKey)
             userDefaults?.synchronize()
             self.redirectToHostApp(type: .media)
@@ -278,7 +278,7 @@ class ShareViewController: UIViewController {
     let newName = "\(UUID().uuidString).\(fileExtension)"
     let newPath = FileManager.default
       .containerURL(
-        forSecurityApplicationGroupIdentifier: "group.\(self.hostAppBundleIdentifier)")!
+        forSecurityApplicationGroupIdentifier: self.hostAppGroupIdentifier)!
       .appendingPathComponent(newName)
     let copied = self.copyFile(at: url, to: newPath)
     if copied {
@@ -290,7 +290,7 @@ class ShareViewController: UIViewController {
     }
 
     if index == (content.attachments?.count)! - 1 {
-      let userDefaults = UserDefaults(suiteName: "group.\(self.hostAppBundleIdentifier)")
+      let userDefaults = UserDefaults(suiteName: self.hostAppGroupIdentifier)
       userDefaults?.set(self.toData(data: self.sharedMedia), forKey: self.sharedKey)
       userDefaults?.synchronize()
       self.redirectToHostApp(type: .file)
@@ -438,7 +438,7 @@ class ShareViewController: UIViewController {
     let fileName = Data(url.lastPathComponent.utf8).base64EncodedString().replacingOccurrences(
       of: "==", with: "")
     let path = FileManager.default
-      .containerURL(forSecurityApplicationGroupIdentifier: "group.\(hostAppBundleIdentifier)")!
+      .containerURL(forSecurityApplicationGroupIdentifier: self.hostAppGroupIdentifier)!
       .appendingPathComponent("\(fileName).jpg")
     return path
   }
