@@ -91,25 +91,31 @@ export function getShareExtensionInfoContent(
   activationRules: Parameters["iosActivationRules"],
   appName: ConfigPlugin<Parameters>["name"],
 ) {
-  return plist.build({
-    CFBundleName: "$(PRODUCT_NAME)",
-    CFBundleDisplayName: `${appName} - Share Extension`,
-    CFBundleIdentifier: "$(PRODUCT_BUNDLE_IDENTIFIER)",
-    CFBundleDevelopmentRegion: "$(DEVELOPMENT_LANGUAGE)",
-    CFBundleExecutable: "$(EXECUTABLE_NAME)",
-    CFBundleInfoDictionaryVersion: "6.0",
-    CFBundlePackageType: "$(PRODUCT_BUNDLE_PACKAGE_TYPE)",
-    NSExtension: {
-      NSExtensionAttributes: {
-        NSExtensionActivationRule: activationRules || {
-          NSExtensionActivationSupportsWebURLWithMaxCount: 1,
-          NSExtensionActivationSupportsWebPageWithMaxCount: 1,
+  return (
+    plist
+      .build({
+        CFBundleName: "$(PRODUCT_NAME)",
+        CFBundleDisplayName: `${appName} - Share Extension`,
+        CFBundleIdentifier: "$(PRODUCT_BUNDLE_IDENTIFIER)",
+        CFBundleDevelopmentRegion: "$(DEVELOPMENT_LANGUAGE)",
+        CFBundleExecutable: "$(EXECUTABLE_NAME)",
+        CFBundleInfoDictionaryVersion: "6.0",
+        CFBundlePackageType: "$(PRODUCT_BUNDLE_PACKAGE_TYPE)",
+        NSExtension: {
+          NSExtensionAttributes: {
+            NSExtensionActivationRule: activationRules || {
+              NSExtensionActivationSupportsWebURLWithMaxCount: 1,
+              NSExtensionActivationSupportsWebPageWithMaxCount: 1,
+            },
+          },
+          NSExtensionMainStoryboard: "MainInterface",
+          NSExtensionPointIdentifier: "com.apple.share-services",
         },
-      },
-      NSExtensionMainStoryboard: "MainInterface",
-      NSExtensionPointIdentifier: "com.apple.share-services",
-    },
-  });
+      })
+      // handle custom NSExtensionActivationRule (ex: @count >= 1)
+      .replaceAll("&gt;", ">")
+      .replaceAll("&lt;", "<")
+  );
 }
 
 //: [root]/ios/ShareExtension/PrivacyInfo.xcprivacy
