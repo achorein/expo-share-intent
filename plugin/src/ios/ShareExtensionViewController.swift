@@ -54,7 +54,6 @@ class ShareViewController: UIViewController {
     }
   }
 
-  @MainActor
   private func handleText(content: NSExtensionItem, attachment: NSItemProvider, index: Int) async {
     Task.detached { [weak self] in
       if let item = try! await attachment.loadItem(forTypeIdentifier: self!.textContentType)
