@@ -15,6 +15,7 @@ import android.content.Context
 import android.content.Intent
 import android.database.Cursor
 import android.graphics.BitmapFactory
+import android.media.MediaMetadataRetriever;
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
@@ -65,15 +66,23 @@ class ExpoShareIntentModule : Module() {
 
             val mimeType = resolver.getType(uri)!!
 
-            var imageHeight: String? = null;
-            var imageWidth: String? = null;
+            var mediaWidth: String? = null;
+            var mediaHeight: String? = null;
+            var mediaDuration: String? = null;
             if (mimeType.startsWith("image/")) {
                 val options = BitmapFactory.Options().apply {
                     inJustDecodeBounds = true
                 }
                 BitmapFactory.decodeStream(resolver.openInputStream(uri), null, options)
-                imageHeight = options.outHeight.toString()
-                imageWidth = options.outWidth.toString()
+                mediaHeight = options.outHeight.toString()
+                mediaWidth = options.outWidth.toString()
+            }
+            if (mimeType.startsWith("video/")) {
+                val retriever = MediaMetadataRetriever()
+                retriever.setDataSource(instance?.getAbsolutePath(uri))
+                mediaWidth = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)?.toInt().toString() ?: null
+                mediaHeight = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)?.toInt().toString() ?: null
+                mediaDuration = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toInt().toString() ?: null
             }
 
             return mapOf(
@@ -82,8 +91,9 @@ class ExpoShareIntentModule : Module() {
                     "fileName" to fileName,
                     "fileSize" to fileSize,
                     "mimeType" to mimeType,
-                    "width" to imageWidth,
-                    "height" to imageHeight
+                    "width" to mediaWidth,
+                    "height" to mediaHeight,
+                    "duration" to mediaDuration
             )
         }
 

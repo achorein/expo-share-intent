@@ -95,6 +95,7 @@ const parseShareIntent = (
                 width: file.width ? Number(file.width) : null,
                 height: file.height ? Number(file.height) : null,
                 size: file.fileSize ? Number(file.fileSize) : null,
+                duration: file.duration ? Number(file.duration) : null,
               },
             ];
           }, [])

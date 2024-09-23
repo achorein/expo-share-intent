@@ -58,6 +58,7 @@ function FileMeta({ file }: { file: ShareIntentFile }) {
           {file.width} x {file.height}
         </Text>
       )}
+      {file.duration && <Text>{file.duration}ms</Text>}
     </View>
   );
 }
