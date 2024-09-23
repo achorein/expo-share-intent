@@ -28,7 +28,9 @@
           "androidIntentFilters": ["text/*", "image/*", "video/*"],
           "androidMultiIntentFilters": ["image/*"],
           "disableIOS": false,
-          "disableAndroid": false
+          "disableAndroid": false,
+          "iosShareExtensionName": "ExpoShareIntentExampleExtension",
+          "iosAppGroupIdentifier": "customgroup.expo.modules.exposhareintent.example"
         }
       ],
       ["expo-updates"]

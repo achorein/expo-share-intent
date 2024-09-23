@@ -58,7 +58,7 @@ export const withShareExtensionConfig: ConfigPlugin<Parameters> = (
       config.extra.eas.build.experimental.ios.appExtensions[extConfigIndex];
     extConfig.entitlements = {
       ...extConfig.entitlements,
-      ...getShareExtensionEntitlements(appIdentifier),
+      ...getShareExtensionEntitlements(appIdentifier, params),
     };
   } else {
     console.debug(`[expo-share-intent] experimental config disabled`);
