@@ -373,14 +373,24 @@ class ShareViewController: UIViewController {
     -> SharedMediaFile?
   {
     let asset = AVAsset(url: forVideo)
-    let duration = (CMTimeGetSeconds(asset.duration) * 1000).rounded()
     let thumbnailPath = getThumbnailPath(for: forVideo)
+    let duration = (CMTimeGetSeconds(asset.duration) * 1000).rounded()
+    var trackWidth: Int? = nil
+    var trackHeight: Int? = nil
+
+    // get video info
+    let track = asset.tracks(withMediaType: AVMediaType.video).first ?? nil
+    if track != nil {
+      let size = track!.naturalSize.applying(track!.preferredTransform)
+      trackWidth = abs(Int(size.width))
+      trackHeight = abs(Int(size.height))
+    }
 
     if FileManager.default.fileExists(atPath: thumbnailPath.path) {
       return SharedMediaFile(
         path: forVideo.absoluteString, thumbnail: thumbnailPath.absoluteString, fileName: fileName,
-        fileSize: fileSize, width: nil, height: nil, duration: duration, mimeType: mimeType,
-        type: .video)
+        fileSize: fileSize, width: trackWidth, height: trackHeight, duration: duration,
+        mimeType: mimeType, type: .video)
     }
 
     var saved = false
@@ -399,8 +409,8 @@ class ShareViewController: UIViewController {
     return saved
       ? SharedMediaFile(
         path: forVideo.absoluteString, thumbnail: thumbnailPath.absoluteString, fileName: fileName,
-        fileSize: fileSize, width: nil, height: nil, duration: duration, mimeType: mimeType,
-        type: .video) : nil
+        fileSize: fileSize, width: trackWidth, height: trackHeight, duration: duration,
+        mimeType: mimeType, type: .video) : nil
   }
 
   private func getThumbnailPath(for url: URL) -> URL {
