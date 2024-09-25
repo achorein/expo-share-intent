@@ -57,7 +57,15 @@ class ExpoShareIntentModule : Module() {
 
         @SuppressLint("Range")
         private fun getFileInfo(uri: Uri): Map<String, String?> {
-            val resolver: ContentResolver = instance?.currentActivity?.contentResolver!!
+            val resolver: ContentResolver? = instance?.currentActivity?.contentResolver
+                    ?: instance?.context?.contentResolver
+            if (resolver == null) {
+                notifyError("Cannot get resolver (getFileInfo)")
+                return mapOf(
+                    "contentUri" to uri.toString(),
+                    "filePath" to instance?.getAbsolutePath(uri),
+                )
+            }
             val queryResult: Cursor = resolver.query(uri, null, null, null, null)!!
             queryResult.moveToFirst()
             val fileName = queryResult.getString(queryResult.getColumnIndex(OpenableColumns.DISPLAY_NAME))
@@ -262,7 +270,12 @@ class ExpoShareIntentModule : Module() {
      */
     private fun getDataColumn(uri: Uri, selection: String?,
                               selectionArgs: Array<String>?): String? {
-        val resolver: ContentResolver = instance?.currentActivity?.contentResolver!!
+        val resolver: ContentResolver? = instance?.currentActivity?.contentResolver
+        ?: instance?.context?.contentResolver
+        if (resolver == null) {
+            notifyError("Cannot get resolver (getDataColumn)")
+            return null
+        }
         if (uri.authority != null) {
             var cursor: Cursor? = null
             val column = "_display_name"
