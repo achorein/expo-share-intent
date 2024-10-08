@@ -1,0 +1,136 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Clean and Build dependencies",
+      "command": "rm -fr node_modules && yarn install && yarn clean && yarn prepare",
+      "type": "shell",
+      "problemMatcher": [],
+      "options": {
+        "cwd": "./"
+      }
+    },
+    {
+      "label": "Clean examples dependencies",
+      "dependsOn": [
+        "Clean basic example",
+        "Clean expo-router example",
+        "Clean react-navigation example"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "Clean basic example",
+      "command": "rm -fr node_modules .expo ios android && yarn install",
+      "type": "shell",
+      "problemMatcher": [],
+      "options": {
+        "cwd": "./example/basic"
+      }
+    },
+    {
+      "label": "Clean expo-router example",
+      "command": "rm -fr node_modules .expo ios android && yarn install",
+      "type": "shell",
+      "problemMatcher": [],
+      "options": {
+        "cwd": "./example/expo-router"
+      }
+    },
+    {
+      "label": "Clean react-navigation example",
+      "command": "rm -fr node_modules .expo ios android && yarn install",
+      "type": "shell",
+      "problemMatcher": [],
+      "options": {
+        "cwd": "./example/react-navigation"
+      }
+    },
+    {
+      "label": "Fix examples dependencies",
+      "dependsOn": [
+        "Fix basic example",
+        "Fix expo-router example",
+        "Fix react-navigation example"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "Fix basic example",
+      "command": "yarn test:fix && yarn doctor",
+      "type": "shell",
+      "problemMatcher": [],
+      "options": {
+        "cwd": "./example/basic"
+      }
+    },
+    {
+      "label": "Fix expo-router example",
+      "command": "yarn test:fix && yarn doctor",
+      "type": "shell",
+      "problemMatcher": [],
+      "options": {
+        "cwd": "./example/expo-router"
+      }
+    },
+    {
+      "label": "Fix react-navigation example",
+      "command": "yarn test:fix && yarn doctor",
+      "type": "shell",
+      "problemMatcher": [],
+      "options": {
+        "cwd": "./example/react-navigation"
+      }
+    },
+    {
+      "label": "Run basic example",
+      "command": "yarn clean && yarn ios",
+      "type": "shell",
+      "problemMatcher": [],
+      "options": {
+        "cwd": "./example/basic"
+      }
+    },
+    {
+      "label": "Run expo-router example",
+      "command": "yarn clean && yarn ios",
+      "type": "shell",
+      "problemMatcher": [],
+      "options": {
+        "cwd": "./example/expo-router"
+      }
+    },
+    {
+      "label": "Run react-navigation example",
+      "command": "yarn clean && yarn ios",
+      "type": "shell",
+      "problemMatcher": [],
+      "options": {
+        "cwd": "./example/react-navigation"
+      }
+    },
+    {
+      "label": "Build and watch expo-module",
+      "dependsOn": ["Build expo-module", "Build expo-module plugin"],
+      "problemMatcher": []
+    },
+    {
+      "label": "Build expo-module",
+      "command": "yarn prepare && yarn build",
+      "type": "shell",
+      "problemMatcher": [],
+      "options": {
+        "cwd": "./"
+      }
+    },
+    {
+      "label": "Build expo-module plugin",
+      "command": "yarn build:plugin",
+      "type": "shell",
+      "problemMatcher": [],
+      "options": {
+        "cwd": "./"
+      }
+    }
+  ]
+}
