@@ -17,11 +17,11 @@
   },
   "dependencies": {
     "@expo/metro-runtime": "~3.2.3",
-    "expo": "~51.0.35",
+    "expo": "~51.0.36",
     "expo-dev-client": "~4.0.27",
     "expo-splash-screen": "~0.27.6",
     "expo-status-bar": "~1.12.1",
-    "expo-updates": "~0.25.25",
+    "expo-updates": "~0.25.26",
     "patch-package": "^8.0.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
