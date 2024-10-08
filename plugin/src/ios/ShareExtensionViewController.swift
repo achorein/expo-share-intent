@@ -238,16 +238,16 @@ class ShareViewController: UIViewController {
   }
 
   private func handlePdf(content: NSExtensionItem, attachment: NSItemProvider, index: Int) async {
-    Task.detached { [weak self] in
-      if let url = try? await attachment.loadItem(forTypeIdentifier: self!.pdfContentType) as? URL {
+    Task.detached {
+      if let url = try? await attachment.loadItem(forTypeIdentifier: self.pdfContentType) as? URL {
         Task { @MainActor in
 
-          await self?.handleFileURL(content: content, url: url, index: index)
+          await self.handleFileURL(content: content, url: url, index: index)
 
         }
       } else {
         NSLog("[ERROR] Cannot load pdf content !\(String(describing: content))")
-        await self?.dismissWithError(
+        await self.dismissWithError(
           message: "Cannot load pdf content \(String(describing: content))")
       }
     }
@@ -258,7 +258,7 @@ class ShareViewController: UIViewController {
       if let url = try? await attachment.loadItem(forTypeIdentifier: self.fileURLType) as? URL {
         Task { @MainActor in
 
-          await self?.handleFileURL(content: content, url: url, index: index)
+          await self.handleFileURL(content: content, url: url, index: index)
 
         }
       } else {
