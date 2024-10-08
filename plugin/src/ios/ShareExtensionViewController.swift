@@ -20,6 +20,7 @@ class ShareViewController: UIViewController {
   let textContentType = kUTTypeText as String
   let urlContentType = kUTTypeURL as String
   let fileURLType = kUTTypeFileURL as String
+  let pdfContentType = kUTTypePDF as String
 
   override func viewDidLoad() {
     super.viewDidLoad()
@@ -42,6 +43,8 @@ class ShareViewController: UIViewController {
           await handleVideos(content: content, attachment: attachment, index: index)
         } else if attachment.hasItemConformingToTypeIdentifier(fileURLType) {
           await handleFiles(content: content, attachment: attachment, index: index)
+        } else if attachment.hasItemConformingToTypeIdentifier(pdfContentType) {
+          await handlePdf(content: content, attachment: attachment, index: index)
         } else if attachment.hasItemConformingToTypeIdentifier(urlContentType) {
           await handleUrl(content: content, attachment: attachment, index: index)
         } else if attachment.hasItemConformingToTypeIdentifier(textContentType) {
@@ -234,36 +237,28 @@ class ShareViewController: UIViewController {
     }
   }
 
+  private func handlePdf(content: NSExtensionItem, attachment: NSItemProvider, index: Int) async {
+    Task.detached {
+      if let url = try? await attachment.loadItem(forTypeIdentifier: self.pdfContentType) as? URL {
+        Task { @MainActor in
+
+          await self.handleFileURL(content: content, url: url, index: index)
+
+        }
+      } else {
+        NSLog("[ERROR] Cannot load pdf content !\(String(describing: content))")
+        await self.dismissWithError(
+          message: "Cannot load pdf content \(String(describing: content))")
+      }
+    }
+  }
+
   private func handleFiles(content: NSExtensionItem, attachment: NSItemProvider, index: Int) async {
     Task.detached {
       if let url = try? await attachment.loadItem(forTypeIdentifier: self.fileURLType) as? URL {
         Task { @MainActor in
 
-          // Always copy
-          let fileName = self.getFileName(from: url, type: .file)
-          let fileExtension = self.getExtension(from: url, type: .file)
-          let fileSize = self.getFileSize(from: url)
-          let mimeType = url.mimeType(ext: fileExtension)
-          let newName = "\(UUID().uuidString).\(fileExtension)"
-          let newPath = FileManager.default
-            .containerURL(
-              forSecurityApplicationGroupIdentifier: "group.\(self.hostAppBundleIdentifier)")!
-            .appendingPathComponent(newName)
-          let copied = self.copyFile(at: url, to: newPath)
-          if copied {
-            self.sharedMedia.append(
-              SharedMediaFile(
-                path: newPath.absoluteString, thumbnail: nil, fileName: fileName,
-                fileSize: fileSize, width: nil, height: nil, duration: nil, mimeType: mimeType,
-                type: .file))
-          }
-
-          if index == (content.attachments?.count)! - 1 {
-            let userDefaults = UserDefaults(suiteName: "group.\(self.hostAppBundleIdentifier)")
-            userDefaults?.set(self.toData(data: self.sharedMedia), forKey: self.sharedKey)
-            userDefaults?.synchronize()
-            self.redirectToHostApp(type: .file)
-          }
+          await self.handleFileURL(content: content, url: url, index: index)
 
         }
       } else {
@@ -271,6 +266,34 @@ class ShareViewController: UIViewController {
         await self.dismissWithError(
           message: "Cannot load file content \(String(describing: content))")
       }
+    }
+  }
+
+  private func handleFileURL(content: NSExtensionItem, url: URL, index: Int) async {
+    // Always copy
+    let fileName = self.getFileName(from: url, type: .file)
+    let fileExtension = self.getExtension(from: url, type: .file)
+    let fileSize = self.getFileSize(from: url)
+    let mimeType = url.mimeType(ext: fileExtension)
+    let newName = "\(UUID().uuidString).\(fileExtension)"
+    let newPath = FileManager.default
+      .containerURL(
+        forSecurityApplicationGroupIdentifier: "group.\(self.hostAppBundleIdentifier)")!
+      .appendingPathComponent(newName)
+    let copied = self.copyFile(at: url, to: newPath)
+    if copied {
+      self.sharedMedia.append(
+        SharedMediaFile(
+          path: newPath.absoluteString, thumbnail: nil, fileName: fileName,
+          fileSize: fileSize, width: nil, height: nil, duration: nil, mimeType: mimeType,
+          type: .file))
+    }
+
+    if index == (content.attachments?.count)! - 1 {
+      let userDefaults = UserDefaults(suiteName: "group.\(self.hostAppBundleIdentifier)")
+      userDefaults?.set(self.toData(data: self.sharedMedia), forKey: self.sharedKey)
+      userDefaults?.synchronize()
+      self.redirectToHostApp(type: .file)
     }
   }
 

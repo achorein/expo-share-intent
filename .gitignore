@@ -3,7 +3,8 @@
 .DS_Store
 
 # VSCode
-.vscode/
+.vscode/*
+!.vscode/tasks.json
 jsconfig.json
 
 # Xcode
