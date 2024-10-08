@@ -53,9 +53,11 @@ public class ExpoShareIntentModule: Module {
     private var latestText: String? = nil
 
     private func handleUrl(url: URL?) -> String? {
-        let appDomain = Bundle.main.bundleIdentifier!
+        let appGroupIdentifier =
+            Bundle.main.object(forInfoDictionaryKey: "com.apple.security.application-groups")
+            as? String
         if let url = url {
-            let userDefaults = UserDefaults(suiteName: "group.\(appDomain)")
+            let userDefaults = UserDefaults(suiteName: appGroupIdentifier)
             if url.fragment == "media" {
                 if let key = url.host?.components(separatedBy: "=").last {
                     if let json = userDefaults?.object(forKey: key) as? Data {
@@ -141,7 +143,7 @@ public class ExpoShareIntentModule: Module {
             "onError",
             [
                 "value":
-                    "invalid group name. Please check your share extention bundle name is same as `group.\(appDomain)`"
+                    "invalid group name. Please check your share extention bundle name is same as `\(String(describing: appGroupIdentifier))`"
             ])
         return "error"
     }
