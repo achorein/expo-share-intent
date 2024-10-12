@@ -90,6 +90,12 @@ class ExpoShareIntentModule : Module() {
                 retriever.setDataSource(instance?.getAbsolutePath(uri))
                 mediaWidth = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)?.toInt().toString() ?: null
                 mediaHeight = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)?.toInt().toString() ?: null
+                // Check orientation and flip size if required
+                val metaRotation = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION)?.toInt() ?: 0;
+                if (metaRotation == 90 || metaRotation == 270) {
+                    mediaWidth = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)?.toInt().toString() ?: null
+                    mediaHeight = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)?.toInt().toString() ?: null
+                }
                 mediaDuration = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toInt().toString() ?: null
             }
 
@@ -125,7 +131,6 @@ class ExpoShareIntentModule : Module() {
             } else {
                 // files / medias
                 if (intent.action == Intent.ACTION_SEND) {
-                    @Suppress("DEPRECATION") // see inline function at the end of the file
                     val uri = intent.parcelable<Uri>(Intent.EXTRA_STREAM);
                     if (uri != null) {
                         notifyShareIntent(mapOf( "files" to arrayOf(getFileInfo(uri), "type" to "file")))
