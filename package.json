@@ -73,7 +73,7 @@
     "react-native": "*"
   },
   "devDependencies": {
-    "@release-it/conventional-changelog": "^8.0.1",
+    "@release-it/conventional-changelog": "^9.0.0",
     "@types/react": "^18.2.0",
     "@types/react-native": "^0.73.0",
     "dotenv-cli": "^7.4.2",
@@ -81,6 +81,6 @@
     "expo-module-scripts": "^3.5.1",
     "expo-modules-core": "^1.12.9",
     "prettier": "^3.2.5",
-    "release-it": "^17.2.1"
+    "release-it": "^17.8.2"
   }
 }
