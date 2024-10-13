@@ -807,7 +807,7 @@
   dependencies:
     uuid "^8.0.0"
 
-"@expo/cli@0.18.30":
+"@expo/cli@0.18.30", "@expo/cli@^0.18.30":
   version "0.18.30"
   resolved "https://registry.yarnpkg.com/@expo/cli/-/cli-0.18.30.tgz#0cb4829aa11e98ae350a5c15958b9816e9a1d2f0"
   integrity sha512-V90TUJh9Ly8stYo8nwqIqNWCsYjE28GlVFWEhAFCUOp99foiQr8HSTpiiX5GIrprcPoWmlGoY+J5fQA29R4lFg==

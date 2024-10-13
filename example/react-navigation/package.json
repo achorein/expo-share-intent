@@ -30,6 +30,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.24.0",
+    "@expo/cli": "^0.18.30",
     "@types/react": "~18.2.79",
     "babel-plugin-module-resolver": "^5.0.0",
     "eslint": "^8.50.0",
