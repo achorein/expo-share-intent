@@ -52,14 +52,9 @@ export const withCompatibilityChecker: ConfigPlugin<Parameters> = (
       );
     }
 
-    if (params.iosShareExtensionName?.includes(" ")) {
-      throw new Error(
-        `[${packageInfo.name}] Incompatibility found, iosShareExtensionName should not contains spaces "${getShareExtensionName(params)}" in your app.json!`,
-      );
-    }
     if (params.iosAppGroupIdentifier?.includes(" ")) {
       throw new Error(
-        `[${packageInfo.name}] Incompatibility found, iosAppGroupIdentifier should not contains spaces "${getShareExtensionName(params)}" in your app.json!`,
+        `[${packageInfo.name}] Incompatibility found, iosAppGroupIdentifier should not contains spaces or special characters"${getShareExtensionName(params)}" in your app.json!`,
       );
     }
   } else {
