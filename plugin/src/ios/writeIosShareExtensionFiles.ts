@@ -26,8 +26,9 @@ export async function writeShareExtensionFiles(
     parameters,
   );
   const infoPlistContent = getShareExtensionInfoContent(
-    parameters.iosActivationRules,
     appName,
+    appIdentifier,
+    parameters,
   );
   await fs.promises.mkdir(path.dirname(infoPlistFilePath), { recursive: true });
   await fs.promises.writeFile(infoPlistFilePath, infoPlistContent);
@@ -114,12 +115,14 @@ export function getShareExtensionInfoFilePath(
 }
 
 export function getShareExtensionInfoContent(
-  activationRules: Parameters["iosActivationRules"],
   appName: ConfigPlugin<Parameters>["name"],
+  appIdentifier: string,
+  parameters: Parameters,
 ) {
   return plist.build({
     CFBundleName: "$(PRODUCT_NAME)",
-    CFBundleDisplayName: `${appName} - Share Extension`,
+    CFBundleDisplayName:
+      parameters.iosShareExtensionName || `${appName} - Share Extension`,
     CFBundleIdentifier: "$(PRODUCT_BUNDLE_IDENTIFIER)",
     CFBundleDevelopmentRegion: "$(DEVELOPMENT_LANGUAGE)",
     CFBundleExecutable: "$(EXECUTABLE_NAME)",
@@ -127,7 +130,7 @@ export function getShareExtensionInfoContent(
     CFBundlePackageType: "$(PRODUCT_BUNDLE_PACKAGE_TYPE)",
     NSExtension: {
       NSExtensionAttributes: {
-        NSExtensionActivationRule: activationRules || {
+        NSExtensionActivationRule: parameters.iosActivationRules || {
           NSExtensionActivationSupportsWebURLWithMaxCount: 1,
           NSExtensionActivationSupportsWebPageWithMaxCount: 1,
         },
@@ -135,6 +138,8 @@ export function getShareExtensionInfoContent(
       NSExtensionMainStoryboard: "MainInterface",
       NSExtensionPointIdentifier: "com.apple.share-services",
     },
+    // use in ExpoShareIntentModule.swift
+    AppGroupIdentifier: getAppGroup(appIdentifier, parameters),
   });
 }
 

@@ -9,6 +9,7 @@ import { withAndroidIntentFilters } from "./android/withAndroidIntentFilters";
 import { withAndroidMainActivityAttributes } from "./android/withAndroidMainActivityAttributes";
 // iOS
 import { withAppEntitlements } from "./ios/withIosAppEntitlements";
+import { withIosAppInfoPlist } from "./ios/withIosAppInfoPlist";
 import { withShareExtensionConfig } from "./ios/withIosShareExtensionConfig";
 import { withShareExtensionXcodeTarget } from "./ios/withIosShareExtensionXcodeTarget";
 import { Parameters } from "./types";
@@ -25,6 +26,7 @@ const withShareMenu: ConfigPlugin<Parameters> = createRunOncePlugin(
       // IOS
       ...(!params.disableIOS
         ? [
+            () => withIosAppInfoPlist(config, params),
             () => withAppEntitlements(config, params),
             () => withShareExtensionConfig(config, params),
             () => withShareExtensionXcodeTarget(config, params),
