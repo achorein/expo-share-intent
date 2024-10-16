@@ -7,12 +7,14 @@ export const shareExtensionEntitlementsFileName = `${shareExtensionName}.entitle
 export const shareExtensionStoryBoardFileName = "MainInterface.storyboard";
 export const shareExtensionViewControllerFileName = "ShareViewController.swift";
 
-export const getShareExtensionName = (parameters?: Parameters) =>
-  parameters?.iosShareExtensionName || "ShareExtension";
+export const getShareExtensionName = (parameters?: Parameters) => {
+  if (!parameters?.iosShareExtensionName) return "ShareExtension";
+  return parameters.iosShareExtensionName.replace(/[^a-zA-Z0-9]/g, "");
+};
 
 export const getAppGroup = (identifier: string, parameters: Parameters) => {
   return parameters.iosAppGroupIdentifier || `group.${identifier}`;
 };
 
 export const getShareExtensionBundledIdentifier = (appIdentifier: string) =>
-  `${appIdentifier}.share-extension`;
+  `${appIdentifier}.shareextension`;

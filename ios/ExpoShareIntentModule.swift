@@ -35,7 +35,8 @@ public class ExpoShareIntentModule: Module {
         }
 
         Function("clearShareIntent") { (sharedKey: String) in
-            let userDefaults = UserDefaults(suiteName: "group.\(Bundle.main.bundleIdentifier!)")
+            let appGroupIdentifier = self.getAppGroupIdentifier()
+            let userDefaults = UserDefaults(suiteName: appGroupIdentifier)
             userDefaults?.set(nil, forKey: sharedKey)
             userDefaults?.synchronize()
         }
@@ -53,9 +54,8 @@ public class ExpoShareIntentModule: Module {
     private var latestText: String? = nil
 
     private func handleUrl(url: URL?) -> String? {
-        let appGroupIdentifier =
-            Bundle.main.object(forInfoDictionaryKey: "com.apple.security.application-groups")
-            as? String
+        let appGroupIdentifier = self.getAppGroupIdentifier()
+        NSLog("HandleUrl \(String(describing: url)) \(String(describing: appGroupIdentifier))")
         if let url = url {
             let userDefaults = UserDefaults(suiteName: appGroupIdentifier)
             if url.fragment == "media" {
@@ -143,9 +143,24 @@ public class ExpoShareIntentModule: Module {
             "onError",
             [
                 "value":
-                    "invalid group name. Please check your share extention bundle name is same as `\(String(describing: appGroupIdentifier))`"
+                    "Cannot retreive appGroupIdentifier. Please check your share extention iosAppGroupIdentifier. `\(String(describing: appGroupIdentifier))`"
             ])
         return "error"
+    }
+
+    private func getAppGroupIdentifier() -> String? {
+        let appGroupIdentifier: String? =
+            Bundle.main.object(forInfoDictionaryKey: "AppGroupIdentifier")
+            as? String
+        if appGroupIdentifier == nil {
+            self.sendEvent(
+                "onError",
+                [
+                    "value":
+                        "appGroupIdentifier is nil `\(String(describing: appGroupIdentifier))`"
+                ])
+        }
+        return appGroupIdentifier
     }
 
     private func getAbsolutePath(for identifier: String) -> String? {

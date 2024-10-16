@@ -25,12 +25,12 @@
             "NSExtensionActivationSupportsMovieWithMaxCount": 1,
             "NSExtensionActivationSupportsFileWithMaxCount": 1
           },
+          "iosShareExtensionName": "ExpoShareIntent Example Extension",
+          "iosAppGroupIdentifier": "customgroup.expo.modules.exposhareintent.example",
           "androidIntentFilters": ["text/*", "image/*", "video/*"],
           "androidMultiIntentFilters": ["image/*"],
           "disableIOS": false,
-          "disableAndroid": false,
-          "iosShareExtensionName": "ExpoShareIntentExampleExtension",
-          "iosAppGroupIdentifier": "customgroup.expo.modules.exposhareintent.example"
+          "disableAndroid": false
         }
       ],
       ["expo-updates"]
