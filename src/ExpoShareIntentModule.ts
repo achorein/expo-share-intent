@@ -1,7 +1,7 @@
 import {
   requireOptionalNativeModule,
   EventEmitter,
-  Subscription,
+  EventSubscription,
 } from "expo-modules-core";
 
 import {
@@ -36,19 +36,19 @@ const emitter = ExpoShareIntentModule
 
 export function addErrorListener(
   listener: (event: ChangeEventPayload) => void,
-): Subscription | null {
+): EventSubscription | null {
   return emitter?.addListener<ChangeEventPayload>("onError", listener) || null;
 }
 
 export function addChangeListener(
   listener: (event: ChangeEventPayload) => void,
-): Subscription | null {
+): EventSubscription | null {
   return emitter?.addListener<ChangeEventPayload>("onChange", listener) || null;
 }
 
 export function addStateListener(
   listener: (event: StateEventPayload) => void,
-): Subscription | null {
+): EventSubscription | null {
   return (
     emitter?.addListener<StateEventPayload>("onStateChange", listener) || null
   );
