@@ -3,12 +3,13 @@ import { requireOptionalNativeModule, NativeModule } from "expo-modules-core";
 import {
   ChangeEventPayload,
   ErrorEventPayload,
+  StateEventPayload,
 } from "./ExpoShareIntentModule.types";
 
 type ExpoShareIntentModuleEvents = {
-  onError: (event: string) => void;
+  onError: (event: ErrorEventPayload) => void;
   onChange: (event: ChangeEventPayload) => void;
-  onStateChange: (event: ErrorEventPayload) => void;
+  onStateChange: (event: StateEventPayload) => void;
 };
 
 declare class ExpoShareIntentModuleType extends NativeModule<ExpoShareIntentModuleEvents> {

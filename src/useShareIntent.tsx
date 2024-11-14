@@ -1,13 +1,9 @@
-import { useURL } from "expo-linking";
+import { useEventListener } from "expo";
+import { useLinkingURL } from "expo-linking";
 import { useEffect, useRef, useState } from "react";
 import { AppState, Platform } from "react-native";
 
-import {
-  addChangeListener,
-  addErrorListener,
-  clearShareIntent,
-  getShareIntent,
-} from "./ExpoShareIntentModule";
+import ExpoShareIntentModule from "./ExpoShareIntentModule";
 import {
   AndroidShareIntent,
   IosShareIntent,
@@ -111,19 +107,34 @@ const parseShareIntent = (
 export default function useShareIntent(
   options: ShareIntentOptions = SHAREINTENT_OPTIONS_DEFAULT,
 ) {
-  const url = useURL();
+  const url = useLinkingURL();
+  useEventListener(ExpoShareIntentModule!, "onChange", (event) => {
+    options.debug &&
+      console.debug("useShareIntent[onChange]", JSON.stringify(event, null, 2));
+    try {
+      setSharedIntent(parseShareIntent(event.value, options));
+    } catch (e) {
+      options.debug && console.error("useShareIntent[onChange]", e);
+      setError("Cannot parse share intent value !");
+    }
+  });
+  useEventListener(ExpoShareIntentModule!, "onError", (event) => {
+    options.debug && console.debug("useShareIntent[error]", event?.value);
+    setError(event?.value);
+  });
+  useEventListener(ExpoShareIntentModule!, "onStateChange", (event) => {});
 
   const appState = useRef(AppState.currentState);
   const [shareIntent, setSharedIntent] = useState<ShareIntent>(
     SHAREINTENT_DEFAULTVALUE,
   );
   const [error, setError] = useState<string | null>(null);
-  const [isReady, setIsReady] = useState(false);
 
   const resetShareIntent = (clearNativeModule = true) => {
     if (options.disabled) return;
     setError(null);
-    clearNativeModule && clearShareIntent(getShareExtensionKey(options));
+    clearNativeModule &&
+      ExpoShareIntentModule?.clearShareIntent(getShareExtensionKey(options));
     if (shareIntent?.text || shareIntent?.files) {
       setSharedIntent(SHAREINTENT_DEFAULTVALUE);
       options.onResetShareIntent?.();
@@ -137,9 +148,11 @@ export default function useShareIntent(
     options.debug && console.debug("useShareIntent[refresh]", url);
     if (url?.includes(`${getScheme(options)}://dataUrl=`)) {
       // iOS only
-      getShareIntent(url);
+      ExpoShareIntentModule?.getShareIntent(url);
     } else if (Platform.OS === "android") {
-      getShareIntent();
+      ExpoShareIntentModule?.getShareIntent("");
+    } else {
+      options.debug && console.debug("useShareIntent[refresh] cannot refresh");
     }
   };
 
@@ -175,41 +188,8 @@ export default function useShareIntent(
     };
   }, [url, shareIntent, options.disabled]);
 
-  /**
-   * Detect Native Module response
-   */
-  useEffect(() => {
-    if (options.disabled) {
-      options.debug &&
-        console.debug("expo-share-intent module is disabled by configuration!");
-      return;
-    }
-    const changeSubscription = addChangeListener((event) => {
-      options.debug &&
-        console.debug(
-          "useShareIntent[onChange]",
-          JSON.stringify(event, null, 2),
-        );
-      try {
-        setSharedIntent(parseShareIntent(event.value, options));
-      } catch (e) {
-        options.debug && console.error("useShareIntent[onChange]", e);
-        setError("Cannot parse share intent value !");
-      }
-    });
-    const errorSubscription = addErrorListener((event) => {
-      options.debug && console.debug("useShareIntent[error]", event?.value);
-      setError(event?.value);
-    });
-    setIsReady(true);
-    return () => {
-      changeSubscription?.remove();
-      errorSubscription?.remove();
-    };
-  }, [options.disabled]);
-
   return {
-    isReady,
+    isReady: !options.disabled,
     hasShareIntent: !!(shareIntent?.text || shareIntent?.files),
     shareIntent,
     resetShareIntent,
