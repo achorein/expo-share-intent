@@ -16,7 +16,6 @@
     "postinstall": "patch-package"
   },
   "dependencies": {
-    "@expo/metro-runtime": "~4.0.0",
     "expo": "^52.0.6",
     "expo-dev-client": "~5.0.1",
     "expo-linking": "~7.0.2",
@@ -34,7 +33,7 @@
     "@expo/cli": "^0.21.3",
     "@types/react": "~18.3.12",
     "babel-plugin-module-resolver": "^5.0.2",
-    "eslint": "^9.14.0",
+    "eslint": "^8.57.1",
     "eslint-config-universe": "^14.0.0",
     "prettier": "^3.3.3",
     "typescript": "~5.6.3"
@@ -43,6 +42,11 @@
   "expo": {
     "autolinking": {
       "nativeModulesDir": "../.."
+    },
+    "doctor": {
+      "reactNativeDirectoryCheck": {
+        "listUnknownPackages": false
+      }
     }
   }
 }
