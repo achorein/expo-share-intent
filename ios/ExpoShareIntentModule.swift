@@ -44,6 +44,11 @@ public class ExpoShareIntentModule: Module {
             // for Android only
             return false
         }
+
+        Function("closeApp") { (key: String) in
+            exit(0);
+            return true
+        }
     }
 
     private var initialMedia: [SharedMediaFile]? = nil
@@ -51,6 +56,8 @@ public class ExpoShareIntentModule: Module {
 
     private var initialText: String? = nil
     private var latestText: String? = nil
+
+  }
 
     private func handleUrl(url: URL?) -> String? {
         let appDomain = Bundle.main.bundleIdentifier!

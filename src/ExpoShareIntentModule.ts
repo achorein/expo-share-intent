@@ -34,6 +34,10 @@ const emitter = ExpoShareIntentModule
   ? new EventEmitter(ExpoShareIntentModule)
   : null;
 
+export function closeApp(): boolean {
+  return ExpoShareIntentModule.closeApp();
+}
+
 export function addErrorListener(
   listener: (event: ChangeEventPayload) => void,
 ): Subscription | null {
