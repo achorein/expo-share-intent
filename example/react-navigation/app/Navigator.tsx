@@ -15,10 +15,9 @@ import { RootStackParamList } from "./types";
 import HomeScreen from "./HomeScreen";
 import ShareIntentScreen from "./ShareIntentScreen";
 import {
-  addStateListener,
+  ShareIntentModule,
   getScheme,
   getShareExtensionKey,
-  hasShareIntent,
 } from "expo-share-intent";
 
 const Stack = createNativeStackNavigator();
@@ -77,27 +76,32 @@ const linking: LinkingOptions<RootStackParamList> = {
         listener(url);
       }
     };
-    const shareIntentEventSubscription = addStateListener((event) => {
-      // REQUIRED FOR ANDROID WHEN APP IS IN BACKGROUND
-      console.debug(
-        "react-navigation[subscribe] shareIntentStateListener",
-        event.value,
-      );
-      if (event.value === "pending") {
-        listener(`${getScheme()}://shareintent`);
-      }
-    });
+    const shareIntentEventSubscription = ShareIntentModule?.addListener(
+      "onStateChange",
+      (event) => {
+        // REQUIRED FOR ANDROID WHEN APP IS IN BACKGROUND
+        console.debug(
+          "react-navigation[subscribe] shareIntentStateListener",
+          event.value,
+        );
+        if (event.value === "pending") {
+          listener(`${getScheme()}://shareintent`);
+        }
+      },
+    );
     const urlEventSubscription = Linking.addEventListener("url", onReceiveURL);
     return () => {
       // Clean up the event listeners
-      shareIntentEventSubscription.remove();
+      shareIntentEventSubscription?.remove();
       urlEventSubscription.remove();
     };
   },
   // https://reactnavigation.org/docs/deep-linking/#third-party-integrations
   async getInitialURL() {
     // REQUIRED FOR ANDROID FIRST LAUNCH
-    const needRedirect = hasShareIntent(getShareExtensionKey());
+    const needRedirect = ShareIntentModule?.hasShareIntent(
+      getShareExtensionKey(),
+    );
     console.debug(
       "react-navigation[getInitialURL] redirect to ShareIntent screen:",
       needRedirect,
@@ -106,7 +110,7 @@ const linking: LinkingOptions<RootStackParamList> = {
       return `${Constants.expoConfig?.scheme}://shareintent`;
     }
     // As a fallback, do the default deep link handling
-    const url = await Linking.getInitialURL();
+    const url = await Linking.getLinkingURL();
     return url;
   },
 };
