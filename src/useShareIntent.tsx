@@ -1,4 +1,3 @@
-import { useEventListener } from "expo";
 import { useLinkingURL } from "expo-linking";
 import { useEffect, useRef, useState } from "react";
 import { AppState, Platform } from "react-native";

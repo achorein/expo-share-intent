@@ -94,7 +94,7 @@ const linking: LinkingOptions<RootStackParamList> = {
       async (event) => {
         // REQUIRED FOR IOS WHEN APP IS IN BACKGROUND
         console.debug(
-          "react-navigation[subscribe] shareIntentListener",
+          "react-navigation[subscribe] shareIntentValueListener",
           event.value,
         );
         const url = await linking.getInitialURL!();
