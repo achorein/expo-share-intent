@@ -43,7 +43,7 @@ yarn add expo-share-intent
 npm install expo-share-intent
 ```
 
-**Requirement**
+**Requirement: `patch-package`**
 
 For the moment this package need a post-install script
 
@@ -64,6 +64,13 @@ yarn add patch-package
 ```
 
 > More info in [#13](https://github.com/achorein/expo-share-intent/issues/13) and [FAQ](https://github.com/achorein/expo-share-intent/edit/main/README.md#config-sync-failed)
+
+**Requirement: `expo-linking`**
+
+Since Expo52, you also need to install `expo-linking` in your app :
+```
+expo install expo-linking
+```
 
 **Into your `app.json`:**
 
