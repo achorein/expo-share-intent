@@ -76,7 +76,7 @@ const linking: LinkingOptions<RootStackParamList> = {
         listener(url);
       }
     };
-    const shareIntentEventSubscription = ShareIntentModule?.addListener(
+    const shareIntentStateSubscription = ShareIntentModule?.addListener(
       "onStateChange",
       (event) => {
         // REQUIRED FOR ANDROID WHEN APP IS IN BACKGROUND
@@ -89,15 +89,31 @@ const linking: LinkingOptions<RootStackParamList> = {
         }
       },
     );
+    const shareIntentValueSubscription = ShareIntentModule?.addListener(
+      "onChange",
+      async (event) => {
+        // REQUIRED FOR IOS WHEN APP IS IN BACKGROUND
+        console.debug(
+          "react-navigation[subscribe] shareIntentListener",
+          event.value,
+        );
+        const url = await linking.getInitialURL!();
+        if (url) {
+          onReceiveURL({ url });
+        }
+      },
+    );
     const urlEventSubscription = Linking.addEventListener("url", onReceiveURL);
     return () => {
       // Clean up the event listeners
-      shareIntentEventSubscription?.remove();
+      shareIntentStateSubscription?.remove();
+      shareIntentValueSubscription?.remove();
       urlEventSubscription.remove();
     };
   },
   // https://reactnavigation.org/docs/deep-linking/#third-party-integrations
   async getInitialURL() {
+    console.debug("react-navigation[getInitialURL] ?");
     // REQUIRED FOR ANDROID FIRST LAUNCH
     const needRedirect = ShareIntentModule?.hasShareIntent(
       getShareExtensionKey(),
