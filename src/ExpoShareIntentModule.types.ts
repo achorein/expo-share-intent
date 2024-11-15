@@ -2,6 +2,10 @@ export type ChangeEventPayload = {
   value: string;
 };
 
+export type ErrorEventPayload = {
+  value: string;
+};
+
 export type StateEventPayload = {
   value: "pending" | "none";
 };

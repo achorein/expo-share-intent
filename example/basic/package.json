@@ -16,32 +16,37 @@
     "postinstall": "patch-package"
   },
   "dependencies": {
-    "@expo/metro-runtime": "~3.2.3",
-    "expo": "~51.0.37",
-    "expo-dev-client": "~4.0.27",
-    "expo-splash-screen": "~0.27.6",
-    "expo-status-bar": "~1.12.1",
-    "expo-updates": "~0.25.26",
+    "expo": "~52.0.7",
+    "expo-dev-client": "~5.0.1",
+    "expo-linking": "~7.0.2",
+    "expo-splash-screen": "~0.29.10",
+    "expo-status-bar": "~2.0.0",
+    "expo-updates": "~0.26.7",
     "patch-package": "^8.0.0",
-    "react": "18.2.0",
-    "react-dom": "18.2.0",
-    "react-native": "0.74.5",
-    "react-native-web": "~0.19.10"
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "react-native": "0.76.2",
+    "react-native-web": "~0.19.13"
   },
   "devDependencies": {
-    "@babel/core": "^7.24.0",
-    "@expo/cli": "^0.18.30",
-    "@types/react": "~18.2.79",
-    "babel-plugin-module-resolver": "^5.0.0",
-    "eslint": "^8.50.0",
-    "eslint-config-universe": "^12.0.0",
-    "prettier": "^3.0.3",
-    "typescript": "~5.3.3"
+    "@babel/core": "^7.26.0",
+    "@expo/cli": "^0.21.3",
+    "@types/react": "~18.3.12",
+    "babel-plugin-module-resolver": "^5.0.2",
+    "eslint": "^8.57.1",
+    "eslint-config-universe": "^14.0.0",
+    "prettier": "^3.3.3",
+    "typescript": "~5.6.3"
   },
   "private": true,
   "expo": {
     "autolinking": {
       "nativeModulesDir": "../.."
+    },
+    "doctor": {
+      "reactNativeDirectoryCheck": {
+        "listUnknownPackages": false
+      }
     }
   }
 }
