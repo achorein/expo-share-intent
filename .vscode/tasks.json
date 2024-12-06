@@ -3,7 +3,7 @@
   "tasks": [
     {
       "label": "Clean and Build dependencies",
-      "command": "rm -fr node_modules && yarn install && yarn clean && yarn prepare",
+      "command": "nvm use && rm -fr node_modules && yarn install && yarn clean && yarn prepare",
       "type": "shell",
       "problemMatcher": [],
       "options": {
@@ -21,7 +21,7 @@
     },
     {
       "label": "Clean basic example",
-      "command": "rm -fr node_modules .expo ios android && yarn install",
+      "command": "nvm use && rm -fr node_modules .expo ios android && yarn install",
       "type": "shell",
       "problemMatcher": [],
       "options": {
@@ -30,7 +30,7 @@
     },
     {
       "label": "Clean expo-router example",
-      "command": "rm -fr node_modules .expo ios android && yarn install",
+      "command": "nvm use && rm -fr node_modules .expo ios android && yarn install",
       "type": "shell",
       "problemMatcher": [],
       "options": {
@@ -39,7 +39,7 @@
     },
     {
       "label": "Clean react-navigation example",
-      "command": "rm -fr node_modules .expo ios android && yarn install",
+      "command": "nvm use && rm -fr node_modules .expo ios android && yarn install",
       "type": "shell",
       "problemMatcher": [],
       "options": {
@@ -57,7 +57,7 @@
     },
     {
       "label": "Fix basic example",
-      "command": "yarn test:fix && yarn doctor",
+      "command": "nvm use && yarn test:fix && yarn doctor",
       "type": "shell",
       "problemMatcher": [],
       "options": {
@@ -66,7 +66,7 @@
     },
     {
       "label": "Fix expo-router example",
-      "command": "yarn test:fix && yarn doctor",
+      "command": "nvm use && yarn test:fix && yarn doctor",
       "type": "shell",
       "problemMatcher": [],
       "options": {
@@ -75,7 +75,7 @@
     },
     {
       "label": "Fix react-navigation example",
-      "command": "yarn test:fix && yarn doctor",
+      "command": "nvm use && yarn test:fix && yarn doctor",
       "type": "shell",
       "problemMatcher": [],
       "options": {
@@ -84,7 +84,7 @@
     },
     {
       "label": "Run basic example",
-      "command": "yarn clean && yarn ios",
+      "command": "nvm use && yarn clean && yarn ios",
       "type": "shell",
       "problemMatcher": [],
       "options": {
@@ -93,7 +93,7 @@
     },
     {
       "label": "Run expo-router example",
-      "command": "yarn clean && yarn ios",
+      "command": "nvm use && yarn clean && yarn ios",
       "type": "shell",
       "problemMatcher": [],
       "options": {
@@ -102,7 +102,7 @@
     },
     {
       "label": "Run react-navigation example",
-      "command": "yarn clean && yarn ios",
+      "command": "nvm use && yarn clean && yarn ios",
       "type": "shell",
       "problemMatcher": [],
       "options": {
@@ -116,7 +116,7 @@
     },
     {
       "label": "Build expo-module",
-      "command": "yarn prepare && yarn build",
+      "command": "nvm use && yarn prepare && yarn build",
       "type": "shell",
       "problemMatcher": [],
       "options": {
@@ -125,7 +125,7 @@
     },
     {
       "label": "Build expo-module plugin",
-      "command": "yarn build:plugin",
+      "command": "nvm use && yarn build:plugin",
       "type": "shell",
       "problemMatcher": [],
       "options": {
