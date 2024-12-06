@@ -53,6 +53,11 @@ export const withShareExtensionXcodeTarget: ConfigPlugin<Parameters> = (
 
     const pbxProject = config.modResults;
 
+    // Check if the extension target already exists. If so, abort the process since the steps below are already done.
+    if (!!pbxProject.pbxTargetByName(extensionName)) {
+      return config;
+    }
+
     const target = pbxProject.addTarget(
       extensionName,
       "app_extension",
