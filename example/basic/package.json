@@ -13,7 +13,9 @@
     "test:fix": "expo install --fix",
     "doctor": "npx --yes expo-doctor@latest",
     "lint": "eslint .",
-    "postinstall": "patch-package"
+    "postinstall": "patch-package",
+    "open:ios": "open -a \"Xcode\" ios",
+    "open:android": "open -a \"Android Studio\" android"
   },
   "dependencies": {
     "@expo/metro-runtime": "~3.2.3",

@@ -120,6 +120,16 @@ export const withShareExtensionXcodeTarget: ConfigPlugin<Parameters> = (
       pbxGroupKey,
     );
 
+    if (!pbxProject.hash.project.objects["PBXTargetDependency"]) {
+      pbxProject.hash.project.objects["PBXTargetDependency"] = {};
+    }
+    if (!pbxProject.hash.project.objects["PBXContainerItemProxy"]) {
+      pbxProject.hash.project.objects["PBXContainerItemProxy"] = {};
+    }
+    pbxProject.addTargetDependency(pbxProject.getFirstTarget().uuid, [
+      target.uuid,
+    ]);
+
     const configurations = pbxProject.pbxXCBuildConfigurationSection();
     for (const key in configurations) {
       if (typeof configurations[key].buildSettings !== "undefined") {
