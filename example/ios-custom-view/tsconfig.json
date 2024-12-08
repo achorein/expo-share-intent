@@ -1,0 +1,10 @@
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    "paths": {
+      "expo-share-intent": ["../../src/index"],
+      "expo-share-intent/*": ["../../src/*"]
+    }
+  }
+}

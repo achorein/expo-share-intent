@@ -68,6 +68,7 @@ export async function writeShareExtensionFiles(
   const viewControllerContent = getShareExtensionViewControllerContent(
     scheme,
     getAppGroup(appIdentifier, parameters),
+    parameters,
   );
   await fs.promises.writeFile(viewControllerFilePath, viewControllerContent);
 }
@@ -223,6 +224,7 @@ export function getShareExtensionViewControllerPath(
 export function getShareExtensionViewControllerContent(
   scheme: string,
   groupIdentifier: string,
+  parameters: Parameters,
 ) {
   let updatedScheme = scheme;
   if (Array.isArray(scheme)) {
@@ -247,5 +249,13 @@ export function getShareExtensionViewControllerContent(
 
   return content
     .replaceAll("<SCHEME>", updatedScheme)
-    .replaceAll("<GROUPIDENTIFIER>", groupIdentifier);
+    .replaceAll("<GROUPIDENTIFIER>", groupIdentifier)
+    .replaceAll(
+      "<CUSTOMIMPORT>",
+      parameters.experimentialIosCustomView ? "import React" : "",
+    )
+    .replaceAll(
+      "<USECUSTOMVIEW>",
+      parameters.experimentialIosCustomView ? "true" : "false",
+    );
 }

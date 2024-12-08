@@ -9,10 +9,13 @@ import Photos
 import Social
 import UIKit
 
+<CUSTOMIMPORT>
+
 class ShareViewController: UIViewController {
   let hostAppGroupIdentifier = "<GROUPIDENTIFIER>"
   let shareProtocol = "<SCHEME>"
   let sharedKey = "<SCHEME>ShareKey"
+  let useReactCustomView = <USECUSTOMVIEW>
   var sharedMedia: [SharedMediaFile] = []
   var sharedText: [String] = []
   let imageContentType = kUTTypeImage as String
@@ -21,9 +24,22 @@ class ShareViewController: UIViewController {
   let urlContentType = kUTTypeURL as String
   let fileURLType = kUTTypeFileURL as String
   let pdfContentType = kUTTypePDF as String
+  var rctBridge: RCTBridge?
+  var rootView: RCTRootView?
 
   override func viewDidLoad() {
     super.viewDidLoad()
+    if useReactCustomView { loadReactCustomView() }
+  }
+
+  override func viewDidDisappear(_ animated: Bool) {
+    super.viewDidDisappear(animated)
+    if useReactCustomView {
+      rootView?.removeFromSuperview()
+      rootView = nil
+      rctBridge?.invalidate()
+      rctBridge = nil
+    }
   }
 
   override func viewDidAppear(_ animated: Bool) {
@@ -57,6 +73,42 @@ class ShareViewController: UIViewController {
     }
   }
 
+  private func loadReactCustomView() {
+    var bundleURL = Bundle.main.url(forResource: "main", withExtension: "jsbundle")
+    if bundleURL == nil {
+      bundleURL = RCTBundleURLProvider.sharedSettings().jsBundleURL(forBundleRoot: "index")
+    }
+    // TODO: Use async initialisation with a loading state
+    if bundleURL != nil {
+      if let bridge = RCTBridge(bundleURL: bundleURL, moduleProvider: nil, launchOptions: nil)
+        as RCTBridge?
+      {
+        rctBridge = bridge
+        if let view = RCTRootView(
+          bridge: bridge, moduleName: "ShareIntentViewComponent", initialProperties: nil)
+          as RCTRootView?
+        {
+          view.backgroundColor = UIColor.white
+          view.frame = CGRect(
+            x: self.view.bounds.minX,
+            y: self.view.bounds.height - 500,
+            width: self.view.bounds.width,
+            height: 500
+          )
+          view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+          rootView = view
+          self.view.addSubview(view)
+        } else {
+          dismissWithError(message: "ShareIntentViewComponent not found!")
+        }
+      } else {
+        dismissWithError(message: "No RCTBridge found!")
+      }
+    } else {
+      dismissWithError(message: "No jsbundle found!")
+    }
+  }
+
   private func handleText(content: NSExtensionItem, attachment: NSItemProvider, index: Int) async {
     Task.detached {
       if let item = try! await attachment.loadItem(forTypeIdentifier: self.textContentType)
@@ -67,10 +119,14 @@ class ShareViewController: UIViewController {
           self.sharedText.append(item)
           // If this is the last item, save sharedText in userDefaults and redirect to host app
           if index == (content.attachments?.count)! - 1 {
-            let userDefaults = UserDefaults(suiteName: self.hostAppGroupIdentifier)
-            userDefaults?.set(self.sharedText, forKey: self.sharedKey)
-            userDefaults?.synchronize()
-            self.redirectToHostApp(type: .text)
+            if self.useReactCustomView {
+              self.rootView?.appProperties = ["type": "text", "text": self.sharedText.last!]
+            } else {
+              let userDefaults = UserDefaults(suiteName: self.hostAppGroupIdentifier)
+              userDefaults?.set(self.sharedText, forKey: self.sharedKey)
+              userDefaults?.synchronize()
+              self.redirectToHostApp(type: .text)
+            }
           }
 
         }
@@ -90,10 +146,14 @@ class ShareViewController: UIViewController {
           self.sharedText.append(item.absoluteString)
           // If this is the last item, save sharedText in userDefaults and redirect to host app
           if index == (content.attachments?.count)! - 1 {
-            let userDefaults = UserDefaults(suiteName: self.hostAppGroupIdentifier)
-            userDefaults?.set(self.sharedText, forKey: self.sharedKey)
-            userDefaults?.synchronize()
-            self.redirectToHostApp(type: .weburl)
+            if self.useReactCustomView {
+              self.rootView?.appProperties = ["type": "weburl", "text": self.sharedText.last!]
+            } else {
+              let userDefaults = UserDefaults(suiteName: self.hostAppGroupIdentifier)
+              userDefaults?.set(self.sharedText, forKey: self.sharedKey)
+              userDefaults?.synchronize()
+              self.redirectToHostApp(type: .weburl)
+            }
           }
 
         }
@@ -161,10 +221,16 @@ class ShareViewController: UIViewController {
 
           // If this is the last item, save imagesData in userDefaults and redirect to host app
           if index == (content.attachments?.count)! - 1 {
-            let userDefaults = UserDefaults(suiteName: self.hostAppGroupIdentifier)
-            userDefaults?.set(self.toData(data: self.sharedMedia), forKey: self.sharedKey)
-            userDefaults?.synchronize()
-            self.redirectToHostApp(type: .media)
+            if self.useReactCustomView {
+              self.rootView?.appProperties = [
+                "type": "media", "files": self.toData(data: self.sharedMedia),
+              ]
+            } else {
+              let userDefaults = UserDefaults(suiteName: self.hostAppGroupIdentifier)
+              userDefaults?.set(self.toData(data: self.sharedMedia), forKey: self.sharedKey)
+              userDefaults?.synchronize()
+              self.redirectToHostApp(type: .media)
+            }
           }
 
         }
@@ -222,10 +288,16 @@ class ShareViewController: UIViewController {
 
           // If this is the last item, save imagesData in userDefaults and redirect to host app
           if index == (content.attachments?.count)! - 1 {
-            let userDefaults = UserDefaults(suiteName: self.hostAppGroupIdentifier)
-            userDefaults?.set(self.toData(data: self.sharedMedia), forKey: self.sharedKey)
-            userDefaults?.synchronize()
-            self.redirectToHostApp(type: .media)
+            if self.useReactCustomView {
+              self.rootView?.appProperties = [
+                "type": "media", "files": self.toData(data: self.sharedMedia),
+              ]
+            } else {
+              let userDefaults = UserDefaults(suiteName: self.hostAppGroupIdentifier)
+              userDefaults?.set(self.toData(data: self.sharedMedia), forKey: self.sharedKey)
+              userDefaults?.synchronize()
+              self.redirectToHostApp(type: .media)
+            }
           }
 
         }
@@ -290,10 +362,16 @@ class ShareViewController: UIViewController {
     }
 
     if index == (content.attachments?.count)! - 1 {
-      let userDefaults = UserDefaults(suiteName: self.hostAppGroupIdentifier)
-      userDefaults?.set(self.toData(data: self.sharedMedia), forKey: self.sharedKey)
-      userDefaults?.synchronize()
-      self.redirectToHostApp(type: .file)
+      if self.useReactCustomView {
+        self.rootView?.appProperties = [
+          "type": "file", "files": self.toData(data: self.sharedMedia),
+        ]
+      } else {
+        let userDefaults = UserDefaults(suiteName: self.hostAppGroupIdentifier)
+        userDefaults?.set(self.toData(data: self.sharedMedia), forKey: self.sharedKey)
+        userDefaults?.synchronize()
+        self.redirectToHostApp(type: .file)
+      }
     }
   }
 

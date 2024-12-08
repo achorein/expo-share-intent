@@ -156,6 +156,45 @@ export const withShareExtensionXcodeTarget: ConfigPlugin<Parameters> = (
       }
     }
 
+    if (parameters.experimentialIosCustomView) {
+      // Make extension build dependent of maain app target (react build)
+      if (!pbxProject.hash.project.objects["PBXTargetDependency"]) {
+        pbxProject.hash.project.objects["PBXTargetDependency"] = {};
+      }
+      if (!pbxProject.hash.project.objects["PBXContainerItemProxy"]) {
+        pbxProject.hash.project.objects["PBXContainerItemProxy"] = {};
+      }
+      pbxProject.addTargetDependency(pbxProject.getFirstTarget().uuid, [
+        target.uuid,
+      ]);
+
+      // Add shell script build phase "Start Packager" (jsbundle)
+      pbxProject.addBuildPhase(
+        [],
+        "PBXShellScriptBuildPhase",
+        "Start Packager",
+        target.uuid,
+        {
+          shellPath: "/bin/sh",
+          shellScript:
+            'export RCT_METRO_PORT="${RCT_METRO_PORT:=8081}"\necho "export RCT_METRO_PORT=${RCT_METRO_PORT}" > "${SRCROOT}/../node_modules/react-native/scripts/.packager.env"\nif [ -z "${RCT_NO_LAUNCH_PACKAGER+xxx}" ] ; then\n  if nc -w 5 -z localhost ${RCT_METRO_PORT} ; then\n    if ! curl -s "http://localhost:${RCT_METRO_PORT}/status" | grep -q "packager-status:running" ; then\n      echo "Port ${RCT_METRO_PORT} already in use, packager is either not running or not running correctly"\n      exit 2\n    fi\n  else\n    open "$SRCROOT/../node_modules/react-native/scripts/launchPackager.command" || echo "Can\'t start packager automatically"\n  fi\nfi\n',
+        },
+      );
+
+      // Add shell script build phase
+      const mainEntry = "index.js";
+      pbxProject.addBuildPhase(
+        [],
+        "PBXShellScriptBuildPhase",
+        "Bundle React Native code and images",
+        target.uuid,
+        {
+          shellPath: "/bin/sh",
+          shellScript: `set -e; NODE_BINARY=\${NODE_BINARY:-node}; REACT_NATIVE_SCRIPTS_PATH=$("$NODE_BINARY" --print "require(\\'path\\').dirname(require.resolve(\\'react-native/package.json\\')) + \\'/scripts\\'"); WITH_ENVIRONMENT="$REACT_NATIVE_SCRIPTS_PATH/xcode/with-environment.sh"; REACT_NATIVE_XCODE="$REACT_NATIVE_SCRIPTS_PATH/react-native-xcode.sh"; export ENTRY_FILE=${mainEntry}; /bin/sh -c "$WITH_ENVIRONMENT $REACT_NATIVE_XCODE";`,
+        },
+      );
+    }
+
     return config;
   });
 };
