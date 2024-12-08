@@ -6,6 +6,7 @@
  */
 import MobileCoreServices
 import Photos
+import React
 import Social
 import UIKit
 
@@ -21,9 +22,24 @@ class ShareViewController: UIViewController {
   let urlContentType = kUTTypeURL as String
   let fileURLType = kUTTypeFileURL as String
   let pdfContentType = kUTTypePDF as String
+  let rctBridge: RCTBridge?
+  let rootView: RCTRootView?
 
   override func viewDidLoad() {
     super.viewDidLoad()
+    let bundleURL = Bundle.main.url(forResource: "main", withExtension: "jsbundle")
+    rctBridge = RCTBridge(bundleURL: bundleURL, moduleProvider: nil, launchOptions: nil)
+    rootView = RCTRootView(
+      bridge: rctBridge, moduleName: "ShareIntentViewComponent", initialProperties: nil)
+    self.view.addSubview(rootView)
+  }
+
+  override func viewDidDisappear(_ animated: Bool) {
+    super.viewDidDisappear(animated)
+    rootView?.removeFromSuperview()
+    rootView = nil
+    rctBridge?.invalidate()
+    rctBridge = nil
   }
 
   override func viewDidAppear(_ animated: Bool) {
@@ -315,22 +331,22 @@ class ShareViewController: UIViewController {
 
   private func redirectToHostApp(type: RedirectType) {
     let url = URL(string: "\(shareProtocol)://dataUrl=\(sharedKey)#\(type)")!
-    var responder = self as UIResponder?
+    // var responder = self as UIResponder?
 
-    while responder != nil {
-      if let application = responder as? UIApplication {
-        if application.canOpenURL(url) {
-          application.open(url)
-        } else {
-          NSLog("redirectToHostApp canOpenURL KO: \(shareProtocol)")
-          self.dismissWithError(
-            message: "Application not found, invalid url scheme \(shareProtocol)")
-          return
-        }
-      }
-      responder = responder!.next
-    }
-    extensionContext!.completeRequest(returningItems: [], completionHandler: nil)
+    // while responder != nil {
+    //   if let application = responder as? UIApplication {
+    //     if application.canOpenURL(url) {
+    //       application.open(url)
+    //     } else {
+    //       NSLog("redirectToHostApp canOpenURL KO: \(shareProtocol)")
+    //       self.dismissWithError(
+    //         message: "Application not found, invalid url scheme \(shareProtocol)")
+    //       return
+    //     }
+    //   }
+    //   responder = responder!.next
+    // }
+    // extensionContext!.completeRequest(returningItems: [], completionHandler: nil)
   }
 
   enum RedirectType {

@@ -11,6 +11,7 @@ import { withAndroidMainActivityAttributes } from "./android/withAndroidMainActi
 import { withAppEntitlements } from "./ios/withIosAppEntitlements";
 import { withShareExtensionConfig } from "./ios/withIosShareExtensionConfig";
 import { withShareExtensionXcodeTarget } from "./ios/withIosShareExtensionXcodeTarget";
+import { withPodfile } from "./ios/withPodfile";
 import { Parameters } from "./types";
 import { withCompatibilityChecker } from "./withCompatibilityChecker";
 
@@ -27,6 +28,7 @@ const withShareMenu: ConfigPlugin<Parameters> = createRunOncePlugin(
         ? [
             withAppEntitlements,
             () => withShareExtensionConfig(config, params),
+            withPodfile,
             () => withShareExtensionXcodeTarget(config, params),
           ]
         : []),
