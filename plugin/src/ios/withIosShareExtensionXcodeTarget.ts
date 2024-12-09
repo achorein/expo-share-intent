@@ -2,7 +2,7 @@ import { ConfigPlugin, withXcodeProject } from "@expo/config-plugins";
 
 import {
   getShareExtensionBundledIdentifier,
-  shareExtensionName,
+  getShareExtensionName,
 } from "./constants";
 import {
   getPrivacyInfoFilePath,
@@ -19,29 +19,42 @@ export const withShareExtensionXcodeTarget: ConfigPlugin<Parameters> = (
   parameters,
 ) => {
   return withXcodeProject(config, async (config) => {
-    const extensionName = shareExtensionName;
+    const extensionName = getShareExtensionName(parameters);
     const platformProjectRoot = config.modRequest.platformProjectRoot;
     const scheme = config.scheme! as string;
     const appIdentifier = config.ios?.bundleIdentifier!;
-    const shareExtensionIdentifier =
-      getShareExtensionBundledIdentifier(appIdentifier);
+    const shareExtensionIdentifier = getShareExtensionBundledIdentifier(
+      appIdentifier,
+      parameters,
+    );
     const currentProjectVersion = config.ios!.buildNumber || "1";
     const marketingVersion = config.version!;
 
     // ShareExtension-Info.plist
-    const infoPlistFilePath =
-      getShareExtensionInfoFilePath(platformProjectRoot);
+    const infoPlistFilePath = getShareExtensionInfoFilePath(
+      platformProjectRoot,
+      parameters,
+    );
     // ShareExtension.entitlements
-    const entitlementsFilePath =
-      getShareExtensionEntitlementsFilePath(platformProjectRoot);
+    const entitlementsFilePath = getShareExtensionEntitlementsFilePath(
+      platformProjectRoot,
+      parameters,
+    );
     // ShareViewController.swift
-    const viewControllerFilePath =
-      getShareExtensionViewControllerPath(platformProjectRoot);
+    const viewControllerFilePath = getShareExtensionViewControllerPath(
+      platformProjectRoot,
+      parameters,
+    );
     // MainInterface.storyboard
-    const storyboardFilePath =
-      getShareExtensionStoryboardFilePath(platformProjectRoot);
+    const storyboardFilePath = getShareExtensionStoryboardFilePath(
+      platformProjectRoot,
+      parameters,
+    );
     // PrivacyInfo.xcprivacy
-    const privacyFilePath = getPrivacyInfoFilePath(platformProjectRoot);
+    const privacyFilePath = getPrivacyInfoFilePath(
+      platformProjectRoot,
+      parameters,
+    );
 
     await writeShareExtensionFiles(
       platformProjectRoot,
