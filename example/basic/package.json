@@ -17,9 +17,9 @@
   },
   "dependencies": {
     "@expo/metro-runtime": "~3.2.3",
-    "expo": "~51.0.37",
-    "expo-dev-client": "~4.0.27",
-    "expo-splash-screen": "~0.27.6",
+    "expo": "~51.0.39",
+    "expo-dev-client": "~4.0.29",
+    "expo-splash-screen": "~0.27.7",
     "expo-status-bar": "~1.12.1",
     "expo-updates": "~0.25.26",
     "patch-package": "^8.0.0",
