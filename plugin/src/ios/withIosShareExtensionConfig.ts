@@ -9,16 +9,18 @@ import { Parameters } from "../types";
 
 export const withShareExtensionConfig: ConfigPlugin<Parameters> = (
   config,
-  params,
+  parameters,
 ) => {
   const extName = shareExtensionName;
   const appIdentifier = config.ios!.bundleIdentifier!;
-  const shareExtensionIdentifier =
-    getShareExtensionBundledIdentifier(appIdentifier);
+  const shareExtensionIdentifier = getShareExtensionBundledIdentifier(
+    appIdentifier,
+    parameters,
+  );
 
   // When disabled this function no longer alters the config object passed to it
   // It only returns the original config to satisfy any calling conventions
-  if (!params.disableExperimental) {
+  if (!parameters.disableExperimental) {
     let extConfigIndex = null;
     config.extra?.eas?.build?.experimental?.ios?.appExtensions?.forEach(
       (ext: any, index: number) => {
@@ -58,7 +60,7 @@ export const withShareExtensionConfig: ConfigPlugin<Parameters> = (
       config.extra.eas.build.experimental.ios.appExtensions[extConfigIndex];
     extConfig.entitlements = {
       ...extConfig.entitlements,
-      ...getShareExtensionEntitlements(appIdentifier),
+      ...getShareExtensionEntitlements(appIdentifier, parameters),
     };
   } else {
     console.debug(`[expo-share-intent] experimental config disabled`);
