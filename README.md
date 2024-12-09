@@ -260,7 +260,7 @@ Everything must be handle into React Native code.
 
 I am considering adding the implementation of this custom view in the future !
 
-> if it's a must have feature for you, take a look at [react-native-share-menu](https://github.com/Expensify/react-native-share-menu)
+> if it's a must have feature for you, take a look at [expo-share-extension](https://github.com/MaxAst/expo-share-extension)
 
 ## Support
 
