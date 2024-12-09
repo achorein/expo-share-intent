@@ -1,3 +1,6 @@
+import { AppRegistry } from "react-native";
+import { ShareIntentViewComponent } from "./ShareIntentViewComponent";
+
 export type {
   ShareIntent,
   ShareIntentFile,
@@ -15,6 +18,11 @@ export {
 export { default as useShareIntent } from "./useShareIntent";
 
 export { getScheme, getShareExtensionKey } from "./utils";
+
+AppRegistry.registerComponent(
+  "ShareIntentViewComponent",
+  () => ShareIntentViewComponent,
+);
 
 export {
   ShareIntentProvider,
