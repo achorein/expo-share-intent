@@ -23,8 +23,10 @@ export const withShareExtensionXcodeTarget: ConfigPlugin<Parameters> = (
     const platformProjectRoot = config.modRequest.platformProjectRoot;
     const scheme = config.scheme! as string;
     const appIdentifier = config.ios?.bundleIdentifier!;
-    const shareExtensionIdentifier =
-      getShareExtensionBundledIdentifier(appIdentifier);
+    const shareExtensionIdentifier = getShareExtensionBundledIdentifier(
+      appIdentifier,
+      parameters,
+    );
     const currentProjectVersion = config.ios!.buildNumber || "1";
     const marketingVersion = config.version!;
 

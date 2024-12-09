@@ -16,5 +16,12 @@ export const getAppGroup = (identifier: string, parameters: Parameters) => {
   return parameters.iosAppGroupIdentifier || `group.${identifier}`;
 };
 
-export const getShareExtensionBundledIdentifier = (appIdentifier: string) =>
-  `${appIdentifier}.shareextension`;
+export const getShareExtensionBundledIdentifier = (
+  appIdentifier: string,
+  parameters: Parameters,
+) => {
+  return (
+    parameters.iosShareExtensionBundleIdentifier ||
+    `${appIdentifier}.share-extension`
+  );
+};
