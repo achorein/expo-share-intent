@@ -26,6 +26,13 @@ export const withCompatibilityChecker: ConfigPlugin<Parameters> = (
   }
 
   if (!params.disableIOS) {
+    if (params.experimentialIosCustomView) {
+      WarningAggregator.addWarningAndroid(
+        packageInfo.name,
+        `Configuring EXPERIMENTAL build for ios share extension CUSTOM VIEW! (not compatible with new architecture)`,
+      );
+    }
+
     // IOS
     if (!config.scheme) {
       throw new Error(
