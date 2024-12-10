@@ -30,6 +30,7 @@ Ensure you use versions that work together
   - [Share Intent content](#share-intent-content)
   - [Expo Router](#expo-router)
   - [React Navigation](#react-navigation)
+  - [iOS Custom View](#custom-view-)
 - [Troubleshooting / FAQ](#troubleshooting---faq)
 - [Support](#support)
 
@@ -261,7 +262,7 @@ When using `@react-native-google-signin/google-signin` you need to configure a c
 At the moment, this project does not support iOS custom view (native view in share intent context).
 Everything must be handle into React Native code.
 
-I am considering adding the implementation of this custom view in the future !
+I am considering adding the implementation of this custom view in the future ! An experimental [PR](https://github.com/achorein/expo-share-intent/pull/138) is ongoing for Expo 51.
 
 > if it's a must have feature for you, take a look at [expo-share-extension](https://github.com/MaxAst/expo-share-extension)
 
