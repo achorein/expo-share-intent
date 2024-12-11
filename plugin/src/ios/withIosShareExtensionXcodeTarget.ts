@@ -109,16 +109,26 @@ export const withShareExtensionXcodeTarget: ConfigPlugin<Parameters> = (
 
     // Add the resource file and include it into the target PbxResourcesBuildPhase and PbxGroup
     // (MainInterface.storyboard / PrivacyInfo.xcprivacy)
-    pbxProject.addResourceFile(
-      storyboardFilePath,
-      { target: target.uuid },
-      pbxGroupKey,
-    );
-    pbxProject.addResourceFile(
-      privacyFilePath,
-      { target: target.uuid },
-      pbxGroupKey,
-    );
+    try {
+      pbxProject.addResourceFile(
+        storyboardFilePath,
+        { target: target.uuid },
+        pbxGroupKey,
+      );
+      pbxProject.addResourceFile(
+        privacyFilePath,
+        { target: target.uuid },
+        pbxGroupKey,
+      );
+    } catch (e: any) {
+      if (e.message.includes("reading 'path'")) {
+        console.error(e);
+        throw new Error(
+          `[expo-share-intent] Could not add resource files to the Share Extension, please check your "patch-package" installation for xcode (see: https://github.com/achorein/expo-share-intent?tab=readme-ov-file#installation)`,
+        );
+      }
+      throw e;
+    }
 
     const configurations = pbxProject.pbxXCBuildConfigurationSection();
     for (const key in configurations) {
