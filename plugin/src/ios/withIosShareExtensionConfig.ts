@@ -2,7 +2,7 @@ import { ConfigPlugin } from "@expo/config-plugins";
 
 import {
   getShareExtensionBundledIdentifier,
-  shareExtensionName,
+  getShareExtensionName,
 } from "./constants";
 import { getShareExtensionEntitlements } from "./writeIosShareExtensionFiles";
 import { Parameters } from "../types";
@@ -11,7 +11,7 @@ export const withShareExtensionConfig: ConfigPlugin<Parameters> = (
   config,
   parameters,
 ) => {
-  const extName = shareExtensionName;
+  const extName = getShareExtensionName(parameters);
   const appIdentifier = config.ios!.bundleIdentifier!;
   const shareExtensionIdentifier = getShareExtensionBundledIdentifier(
     appIdentifier,
