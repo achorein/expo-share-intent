@@ -1,8 +1,8 @@
 # Expo Share Intent 🚀
 
-> This is not an official Expo SDK package.
+Allow sharing **URL, text, images, videos and files** to your **iOS** and **Android** app, using a simple high-performance native module for Expo (React Native).
 
-Allow sharing **URL, text, images, videos and files** to your **iOS** and **Android** app, using a simple native module for Expo (React Native)
+> The aim of this project is to have identical behavior between iOS and Android, and so to implement a single logic in the main application. In this way, when sharing data, the user is directly redirected to the main application, which will be responsible to manage the external data.
 
 | iOS                                                                                                                                                     | Android                                                                                                                   |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
@@ -28,7 +28,7 @@ Ensure you use versions that work together
   - [Share Intent content](#share-intent-content)
   - [Expo Router](#expo-router)
   - [React Navigation](#react-navigation)
-  - [iOS Custom View](#custom-view-)
+  - [iOS Custom View](#ios-custom-view-)
 - [Troubleshooting / FAQ](#troubleshooting---faq)
 - [Support](#support)
 
@@ -186,7 +186,7 @@ Simply choose content types you need :
 | androidMultiIntentFilters     | **multiple files sharing** array of MIME types : `"image/*"` / `"video/*"` / `"audio/*`/ `"*/*"`<br/>_default value_: `[]`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 | androidMainActivityAttributes | _default value_: `{ "android:launchMode": "singleTask" }`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 | disableAndroid                | Disable the android share intent. Useful if you want to use a custom implementation. _default value_: `false`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| disableIOS                    | Disable the ios share extension. Useful if you want to use a custom implementation (ex: iOS custom view). _default value_: `false`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| disableIOS                    | Disable the ios share extension. Useful if you want to use a custom implementation (ex: [iOS Custom View](#ios-custom-view-)). _default value_: `false`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 
 ### Expo Router
 
@@ -255,14 +255,21 @@ When using `@react-native-google-signin/google-signin` you need to configure a c
     },
 ```
 
-### Custom view ?
+### iOS Custom view ?
 
-At the moment, this project does not support iOS custom view (native view in share intent context).
-Everything must be handle into React Native code.
+This project does not and will not support the iOS custom view (native view in the context of sharing intent). Everything must be managed in the main application!
 
-I am considering adding the implementation of this custom view in the future ! An experimental [PR](https://github.com/achorein/expo-share-intent/pull/138) is ongoing for Expo 51.
+> Managing a custom view requires to package a complete application (seperate react-native bundle), which comes with its own set of constraints (loading time, compatibility with third-party libraries, specific mainEntry, etc.). However `expo-share-intent` aims to remain small and powerful, with easy version upgrades.
 
-> if it's a must have feature for you, take a look at [expo-share-extension](https://github.com/MaxAst/expo-share-extension)
+If iOS Custom view is a must have feature for you, simply disable iOS configuration of this plugin in your `app.json` ([`disableIOS: true`](#customize-content-types-in-appjson)) and configure the [`expo-share-extension`](https://github.com/MaxAst/expo-share-extension) package.
+
+> for archive a POC was made on this [PR](https://github.com/achorein/expo-share-intent/pull/138)
+
+### iOS Context Menu ?
+
+This project does not and will not support the iOS Context Menu!
+
+> Even if it sounds interesting, the implementation is too specific for each use case and would require a separate project.
 
 ## Support
 
