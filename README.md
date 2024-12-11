@@ -4,6 +4,10 @@
 
 Allow sharing **URL, text, images, videos and files** to your **iOS** and **Android** app, using a simple native module for Expo (React Native)
 
+| iOS                                                                                                                                                     | Android                                                                                                                   |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| ![Simulator Screen Recording - iPhone 15 Pro - 2024-12-11 at 09 09 40](https://github.com/user-attachments/assets/b98d1ec1-8ad3-410f-b09b-14b4dce52260) | ![Simulator Android - expo share intent](https://github.com/user-attachments/assets/d2c38b8f-6ec1-4c62-b7b8-dc13aeea8c93) |
+
 ## Versioning
 
 Ensure you use versions that work together
@@ -16,12 +20,6 @@ Ensure you use versions that work together
 | **SDK 49** | 0.2+                                  |
 
 > iOS privacy manifest is available since v1.4.1
-
-[<img src="https://badge.fury.io/js/expo-share-intent.svg">](https://www.npmjs.com/package/expo-share-intent)
-
-![share-intent-1](https://github.com/achorein/expo-share-intent/assets/6529851/47c38ed0-060f-49d7-94ef-d0c59504ee43)
-![share-intent-2](https://github.com/achorein/expo-share-intent/assets/6529851/c1f5382a-7934-4ae3-9cef-734a71d23933)
-![share-intent-3](https://github.com/achorein/expo-share-intent/assets/6529851/e6734ace-36d5-4036-ab89-1a60afb2c703)
 
 ## Table of Contents
 
