@@ -26,11 +26,9 @@
             "NSExtensionActivationSupportsFileWithMaxCount": 1
           },
           "iosShareExtensionName": "ExpoShareIntent Example Extension",
-          "iosAppGroupIdentifier": "customgroup.expo.modules.exposhareintent.example",
           "androidIntentFilters": ["text/*", "image/*", "video/*"],
           "androidMultiIntentFilters": ["image/*"],
-          "disableIOS": false,
-          "disableAndroid": false
+          "preprocessorInjectJS": "metas['og\\:image'] = metas['og\\:image'] || document.querySelector('img#main-image')?.getAttribute('src') ;"
         }
       ],
       ["expo-updates"]
