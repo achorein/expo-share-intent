@@ -20,12 +20,14 @@ const WebUrlComponent = ({ shareIntent }: { shareIntent: ShareIntent }) => {
         source={
           shareIntent.meta?.["og:image"]
             ? { uri: shareIntent.meta?.["og:image"] }
-            : require("./assets/icon.png")
+            : undefined
         }
         style={[styles.icon, styles.gap, { borderRadius: 5 }]}
       />
       <View style={{ flexShrink: 1, padding: 5 }}>
-        <Text style={[styles.gap]}>{shareIntent.meta?.title || ""}</Text>
+        <Text style={[styles.gap]}>
+          {shareIntent.meta?.title || "<NO TITLE>"}
+        </Text>
         <Text style={styles.gap}>{shareIntent.webUrl}</Text>
       </View>
     </View>

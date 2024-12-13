@@ -77,7 +77,7 @@ export async function writeShareExtensionFiles(
     platformProjectRoot,
     parameters,
   );
-  const preprocessorContent = getPreprocessorContent();
+  const preprocessorContent = getPreprocessorContent(parameters);
   await fs.promises.writeFile(preprocessorFilePath, preprocessorContent);
 }
 
@@ -241,7 +241,8 @@ export function getPreprocessorFilePath(
   );
 }
 
-export function getPreprocessorContent() {
+export function getPreprocessorContent(parameters: Parameters) {
+  const injection = parameters.preprocessorInjectJS || "";
   return `class ShareExtensionPreprocessor {
   run({ completionFunction }) {
     // Extract meta tags and image sources from the document
@@ -260,23 +261,7 @@ export function getPreprocessorContent() {
       }
     }
 
-    if (!metas["og:image"]) {
-      const mainImage = document.querySelector("img#main-image");
-      if (mainImage) {
-        const src = mainImage.getAttribute("src");
-        if (src) {
-          metas["og:image"] = src;
-        }
-      }
-
-      const oldHiresImage = document.querySelector("img[data-old-hires]");
-      if (oldHiresImage) {
-        const oldHires = oldHiresImage.getAttribute("data-old-hires");
-        if (oldHires) {
-          metas["og:image"] = oldHires;
-        }
-      }
-    }
+    ${injection}
 
     // Call the completion function with the extracted data
     completionFunction({

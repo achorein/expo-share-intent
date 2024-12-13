@@ -56,21 +56,33 @@ export const getShareExtensionKey = (options?: ShareIntentOptions) => {
 //   3: "file",
 // };
 
+export function parseJson<T>(
+  value: string,
+  defaultValue: T | null = null,
+): T | null {
+  try {
+    return JSON.parse(value) as T;
+  } catch (e) {
+    console.debug(e);
+    return defaultValue;
+  }
+}
+
 export const parseShareIntent = (
   value: string | AndroidShareIntent,
   options: ShareIntentOptions,
 ): ShareIntent => {
   let result = SHAREINTENT_DEFAULTVALUE;
   if (!value) return result;
-  let shareIntent;
+  let shareIntent: IosShareIntent | AndroidShareIntent | null;
   // ios native module send a raw string of the json, try to parse it
   if (typeof value === "string") {
-    shareIntent = JSON.parse(value) as IosShareIntent; // iOS
+    shareIntent = parseJson<IosShareIntent>(value); // iOS
   } else {
     shareIntent = value; // Android
   }
 
-  if (shareIntent.text) {
+  if (shareIntent?.text) {
     // Try to find the webURL in the SharedIntent text
     const webUrl =
       shareIntent.text.match(
@@ -86,13 +98,14 @@ export const parseShareIntent = (
         title: shareIntent.meta?.title ?? undefined,
       },
     };
-  } else if (shareIntent.weburls?.length) {
-    const weburl = shareIntent.weburls[0];
+  } else if ((shareIntent as IosShareIntent)?.weburls?.length) {
+    const weburl = (shareIntent as IosShareIntent).weburls![0];
     result = {
       ...SHAREINTENT_DEFAULTVALUE,
       type: "weburl",
+      text: weburl.url, // retrocompatibility
       webUrl: weburl.url,
-      meta: JSON.parse(weburl.meta),
+      meta: parseJson<Record<string, string>>(weburl.meta, {}),
     };
   } else {
     // Ensure we got a valid file. some array value are emply
