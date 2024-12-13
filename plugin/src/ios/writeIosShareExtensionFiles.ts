@@ -10,6 +10,7 @@ import {
   shareExtensionInfoFileName,
   shareExtensionStoryBoardFileName,
   shareExtensionViewControllerFileName,
+  shareExtensionPreprocessorFileName,
 } from "./constants";
 import { Parameters } from "../types";
 
@@ -70,6 +71,14 @@ export async function writeShareExtensionFiles(
     getAppGroup(appIdentifier, parameters),
   );
   await fs.promises.writeFile(viewControllerFilePath, viewControllerContent);
+
+  // ShareExtensionPreprocessor.js
+  const preprocessorFilePath = getPreprocessorFilePath(
+    platformProjectRoot,
+    parameters,
+  );
+  const preprocessorContent = getPreprocessorContent();
+  await fs.promises.writeFile(preprocessorFilePath, preprocessorContent);
 }
 
 //: [root]/ios/ShareExtension/ShareExtension.entitlements
@@ -134,6 +143,7 @@ export function getShareExtensionInfoContent(
           NSExtensionActivationSupportsWebURLWithMaxCount: 1,
           NSExtensionActivationSupportsWebPageWithMaxCount: 1,
         },
+        NSExtensionJavaScriptPreprocessingFile: "ShareExtensionPreprocessor",
       },
       NSExtensionMainStoryboard: "MainInterface",
       NSExtensionPointIdentifier: "com.apple.share-services",
@@ -218,6 +228,65 @@ export function getShareExtensionViewControllerPath(
     getShareExtensionName(parameters),
     shareExtensionViewControllerFileName,
   );
+}
+
+export function getPreprocessorFilePath(
+  platformProjectRoot: string,
+  parameters: Parameters,
+) {
+  return path.join(
+    platformProjectRoot,
+    getShareExtensionName(parameters),
+    shareExtensionPreprocessorFileName,
+  );
+}
+
+export function getPreprocessorContent() {
+  return `class ShareExtensionPreprocessor {
+  run({ completionFunction }) {
+    // Extract meta tags and image sources from the document
+    const metas = {
+      title: document.title,
+    };
+
+    // Get all meta elements
+    const metaElements = document.querySelectorAll("meta");
+    for (const meta of metaElements) {
+      const name = meta.getAttribute("name") || meta.getAttribute("property");
+      const content = meta.getAttribute("content");
+
+      if (name && content) {
+        metas[name] = content;
+      }
+    }
+
+    if (!metas["og:image"]) {
+      const mainImage = document.querySelector("img#main-image");
+      if (mainImage) {
+        const src = mainImage.getAttribute("src");
+        if (src) {
+          metas["og:image"] = src;
+        }
+      }
+
+      const oldHiresImage = document.querySelector("img[data-old-hires]");
+      if (oldHiresImage) {
+        const oldHires = oldHiresImage.getAttribute("data-old-hires");
+        if (oldHires) {
+          metas["og:image"] = oldHires;
+        }
+      }
+    }
+
+    // Call the completion function with the extracted data
+    completionFunction({
+      baseURI: document.baseURI,
+      meta: JSON.stringify(metas),
+    });
+  }
+}
+var ExtensionPreprocessingJS = new ShareExtensionPreprocessor();
+`;
 }
 
 export function getShareExtensionViewControllerContent(

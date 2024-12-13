@@ -61,7 +61,7 @@ public class ExpoShareIntentModule: Module {
             if url.fragment == "media" {
                 if let key = url.host?.components(separatedBy: "=").last {
                     if let json = userDefaults?.object(forKey: key) as? Data {
-                        let sharedArray = decode(data: json)
+                        let sharedArray = decodeMedia(data: json)
                         let sharedMediaFiles: [SharedMediaFile] = sharedArray.compactMap {
                             if let path = getAbsolutePath(for: $0.path) {
                                 if $0.type == .video && $0.thumbnail != nil {
@@ -92,7 +92,7 @@ public class ExpoShareIntentModule: Module {
             } else if url.fragment == "file" {
                 if let key = url.host?.components(separatedBy: "=").last {
                     if let json = userDefaults?.object(forKey: key) as? Data {
-                        let sharedArray = decode(data: json)
+                        let sharedArray = decodeMedia(data: json)
                         let sharedMediaFiles: [SharedMediaFile] = sharedArray.compactMap {
                             if let path = getAbsolutePath(for: $0.path) {
                                 return SharedMediaFile.init(
@@ -108,7 +108,20 @@ public class ExpoShareIntentModule: Module {
                         return "empty"
                     }
                 }
-            } else if url.fragment == "text" || url.fragment == "weburl" {
+            } else if url.fragment == "weburl" {
+                if let key = url.host?.components(separatedBy: "=").last {
+                    if let json = userDefaults?.object(forKey: key) as? Data {
+                        let sharedArray = decodeWebUrl(data: json)
+                        let sharedWebUrls: [WebUrl] = sharedArray.compactMap {
+                            return WebUrl.init(url: $0.url, meta: $0.meta)
+                        }
+                        guard let json = toJson(data: sharedWebUrls) else { return "[]" }
+                        return "{ \"weburls\": \(json), \"type\": \"\(url.fragment!)\" }"
+                    } else {
+                        return "empty"
+                    }
+                }
+            } else if url.fragment == "text" {
                 if let key = url.host?.components(separatedBy: "=").last {
                     if let sharedArray = userDefaults?.object(forKey: key) as? [String] {
                         latestText = sharedArray.joined(separator: ",")
@@ -190,8 +203,12 @@ public class ExpoShareIntentModule: Module {
         return url
     }
 
-    private func decode(data: Data) -> [SharedMediaFile] {
+    private func decodeMedia(data: Data) -> [SharedMediaFile] {
         let encodedData = try? JSONDecoder().decode([SharedMediaFile].self, from: data)
+        return encodedData!
+    }
+    private func decodeWebUrl(data: Data) -> [WebUrl] {
+        let encodedData = try? JSONDecoder().decode([WebUrl].self, from: data)
         return encodedData!
     }
 
@@ -203,10 +220,29 @@ public class ExpoShareIntentModule: Module {
         let json = String(data: encodedData!, encoding: .utf8)!
         return json
     }
+    
+    private func toJson(data: [WebUrl]?) -> String? {
+        if data == nil {
+            return nil
+        }
+        let encodedData = try? JSONEncoder().encode(data)
+        let json = String(data: encodedData!, encoding: .utf8)!
+        return json
+    }
 
     struct ShareIntentText: Codable {
         let text: String
         let type: String  // text / weburl
+    }
+
+    class WebUrl: Codable {
+        var url: String
+        var meta: String
+
+        init(url: String, meta: String) {
+            self.url = url
+            self.meta = meta
+        }
     }
 
     class SharedMediaFile: Codable {

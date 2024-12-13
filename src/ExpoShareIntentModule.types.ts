@@ -40,7 +40,7 @@ export type ShareIntentOptions = {
   onResetShareIntent?: () => void;
 };
 
-export type ShareIntentMeta = {
+export type ShareIntentMeta = Record<string, string> & {
   title?: string;
 };
 
