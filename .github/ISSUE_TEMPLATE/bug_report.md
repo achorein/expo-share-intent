@@ -1,28 +1,45 @@
 ---
-name: Bug report
-about: Create a report to help us improve
-title: ""
-labels: ""
+name: Bug Report
+about: Report a bug to help us improve the project
+title: "[BUG] iOS/Android - Your bug title here"
+labels: "bug"
 assignees: ""
 ---
 
-**Describe the bug**
+**📋 Describe the bug**
 A clear and concise description of what the bug is.
 
-**To Reproduce**
-Steps to reproduce the behavior
+**🛠️ To Reproduce**
+Please provide the exact steps to reproduce the issue:
 
-**Environment**
-give the output of the following command `npx react-native info`
+**💻 Expected Behavior**
+A clear and concise description of what you expected to happen.
 
-**Additional context**
-Add any other context about the problem here.
+**📱 Screenshots or Videos**
+If applicable, add screenshots or videos to help explain your problem.  
+(Drag and drop files or paste screenshots here.)
 
-- expo version (ex: 49) : x
-- using firebase : yes / no
-- using static build : yes / no
-- routing : (ex: basic / expo-router / react-navigation)
-- package version (ex: 1.2.0) : x.x.x
-- platform target : Android / iOS
-- device : simulator / real device
-- type: local build / expo build
+**⚙️ Environment Details**
+
+Please complete the following information:
+
+- Expo SDK Version (e.g.: 51) : x
+- Package version (e.g.: 3.1.1) : x.x.x
+- Platform target : Android / iOS
+- Routing : (e.g.: basic / expo-router / react-navigation)
+- Using firebase : yes / no
+- Using static build : yes / no
+- Device : simulator / real device
+- Type: local build / expo eas build
+
+For build issue give the output of the following command `npx react-native info`
+
+**📄 Logs**
+If possible, paste any relevant logs here (use triple backticks for formatting):
+
+```shell
+Your logs here
+...
+DEBUG  expoShareIntent[...] ...
+...
+```
