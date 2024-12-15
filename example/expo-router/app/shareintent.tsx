@@ -1,7 +1,37 @@
 import { Button, Image, StyleSheet, Text, View } from "react-native";
 
 import { useRouter } from "expo-router";
-import { useShareIntentContext } from "expo-share-intent";
+import {
+  ShareIntent as ShareIntentType,
+  useShareIntentContext,
+} from "expo-share-intent";
+
+const WebUrlComponent = ({ shareIntent }: { shareIntent: ShareIntentType }) => {
+  return (
+    <View
+      style={[
+        styles.gap,
+        styles.row,
+        { borderWidth: 1, borderRadius: 5, height: 102 },
+      ]}
+    >
+      <Image
+        source={
+          shareIntent.meta?.["og:image"]
+            ? { uri: shareIntent.meta?.["og:image"] }
+            : undefined
+        }
+        style={[styles.icon, styles.gap, { borderRadius: 5 }]}
+      />
+      <View style={{ flexShrink: 1, padding: 5 }}>
+        <Text style={[styles.gap]}>
+          {shareIntent.meta?.title || "<NO TITLE>"}
+        </Text>
+        <Text style={styles.gap}>{shareIntent.webUrl}</Text>
+      </View>
+    </View>
+  );
+};
 
 export default function ShareIntent() {
   const router = useRouter();
@@ -21,8 +51,8 @@ export default function ShareIntent() {
         </Text>
       )}
       {!!shareIntent.text && <Text style={styles.gap}>{shareIntent.text}</Text>}
-      {!!shareIntent.meta?.title && (
-        <Text style={styles.gap}>{JSON.stringify(shareIntent.meta)}</Text>
+      {shareIntent?.type === "weburl" && (
+        <WebUrlComponent shareIntent={shareIntent} />
       )}
       {shareIntent?.files?.map((file) => (
         <Image
@@ -46,6 +76,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "center",
+    paddingHorizontal: 10,
   },
   logo: {
     width: 75,
@@ -56,6 +87,16 @@ const styles = StyleSheet.create({
     width: 200,
     height: 200,
     resizeMode: "contain",
+  },
+  icon: {
+    width: 100,
+    height: 100,
+    resizeMode: "contain",
+    backgroundColor: "lightgray",
+  },
+  row: {
+    flexDirection: "row",
+    gap: 10,
   },
   gap: {
     marginBottom: 20,

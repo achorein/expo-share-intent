@@ -13,6 +13,8 @@
     "test:fix": "expo install --fix",
     "doctor": "npx --yes expo-doctor@latest",
     "lint": "eslint .",
+    "open:ios": "open -a \"Xcode\" ios",
+    "open:android": "open -a \"Android Studio\" android",
     "postinstall": "patch-package"
   },
   "dependencies": {
