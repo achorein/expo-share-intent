@@ -9,6 +9,7 @@ export type Parameters = {
   androidIntentFilters?: ("text/*" | "image/*" | "video/*" | "*/*")[];
   androidMultiIntentFilters?: ("image/*" | "video/*" | "*/*")[];
   disableExperimental?: boolean;
+  preprocessorInjectJS?: string;
   disableAndroid?: boolean;
   disableIOS?: boolean;
 };
