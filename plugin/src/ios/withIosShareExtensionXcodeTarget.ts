@@ -5,6 +5,7 @@ import {
   getShareExtensionName,
 } from "./constants";
 import {
+  getPreprocessorFilePath,
   getPrivacyInfoFilePath,
   getShareExtensionEntitlementsFilePath,
   getShareExtensionInfoFilePath,
@@ -37,21 +38,6 @@ export const withShareExtensionXcodeTarget: ConfigPlugin<Parameters> = (
     );
     // ShareExtension.entitlements
     const entitlementsFilePath = getShareExtensionEntitlementsFilePath(
-      platformProjectRoot,
-      parameters,
-    );
-    // ShareViewController.swift
-    const viewControllerFilePath = getShareExtensionViewControllerPath(
-      platformProjectRoot,
-      parameters,
-    );
-    // MainInterface.storyboard
-    const storyboardFilePath = getShareExtensionStoryboardFilePath(
-      platformProjectRoot,
-      parameters,
-    );
-    // PrivacyInfo.xcprivacy
-    const privacyFilePath = getPrivacyInfoFilePath(
       platformProjectRoot,
       parameters,
     );
@@ -102,21 +88,28 @@ export const withShareExtensionXcodeTarget: ConfigPlugin<Parameters> = (
 
     // Add source files to our PbxGroup and our newly created PBXSourcesBuildPhase (ShareViewController.swift)
     pbxProject.addSourceFile(
-      viewControllerFilePath,
+      getShareExtensionViewControllerPath(platformProjectRoot, parameters),
       { target: target.uuid },
       pbxGroupKey,
     );
 
     // Add the resource file and include it into the target PbxResourcesBuildPhase and PbxGroup
-    // (MainInterface.storyboard / PrivacyInfo.xcprivacy)
     try {
+      // ShareExtensionPreprocessor.js
       pbxProject.addResourceFile(
-        storyboardFilePath,
+        getPreprocessorFilePath(platformProjectRoot, parameters),
         { target: target.uuid },
         pbxGroupKey,
       );
+      // MainInterface.storyboard
       pbxProject.addResourceFile(
-        privacyFilePath,
+        getShareExtensionStoryboardFilePath(platformProjectRoot, parameters),
+        { target: target.uuid },
+        pbxGroupKey,
+      );
+      // PrivacyInfo.xcprivacy
+      pbxProject.addResourceFile(
+        getPrivacyInfoFilePath(platformProjectRoot, parameters),
         { target: target.uuid },
         pbxGroupKey,
       );

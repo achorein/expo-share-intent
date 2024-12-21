@@ -14,11 +14,13 @@ class ShareViewController: UIViewController {
   let shareProtocol = "<SCHEME>"
   let sharedKey = "<SCHEME>ShareKey"
   var sharedMedia: [SharedMediaFile] = []
+  var sharedWebUrl: [WebUrl] = []
   var sharedText: [String] = []
   let imageContentType = kUTTypeImage as String
   let videoContentType = kUTTypeMovie as String
   let textContentType = kUTTypeText as String
   let urlContentType = kUTTypeURL as String
+  let propertyListType = kUTTypePropertyList as String
   let fileURLType = kUTTypeFileURL as String
   let pdfContentType = kUTTypePDF as String
 
@@ -45,6 +47,8 @@ class ShareViewController: UIViewController {
           await handleFiles(content: content, attachment: attachment, index: index)
         } else if attachment.hasItemConformingToTypeIdentifier(pdfContentType) {
           await handlePdf(content: content, attachment: attachment, index: index)
+        } else if attachment.hasItemConformingToTypeIdentifier(propertyListType) {
+          await handlePrepocessing(content: content, attachment: attachment, index: index)
         } else if attachment.hasItemConformingToTypeIdentifier(urlContentType) {
           await handleUrl(content: content, attachment: attachment, index: index)
         } else if attachment.hasItemConformingToTypeIdentifier(textContentType) {
@@ -87,11 +91,11 @@ class ShareViewController: UIViewController {
       if let item = try! await attachment.loadItem(forTypeIdentifier: self.urlContentType) as? URL {
         Task { @MainActor in
 
-          self.sharedText.append(item.absoluteString)
+          self.sharedWebUrl.append(WebUrl(url: item.absoluteString, meta: ""))
           // If this is the last item, save sharedText in userDefaults and redirect to host app
           if index == (content.attachments?.count)! - 1 {
             let userDefaults = UserDefaults(suiteName: self.hostAppGroupIdentifier)
-            userDefaults?.set(self.sharedText, forKey: self.sharedKey)
+            userDefaults?.set(self.toData(data: self.sharedWebUrl), forKey: self.sharedKey)
             userDefaults?.synchronize()
             self.redirectToHostApp(type: .weburl)
           }
@@ -101,6 +105,46 @@ class ShareViewController: UIViewController {
         NSLog("[ERROR] Cannot load url content !\(String(describing: content))")
         await self.dismissWithError(
           message: "Cannot load url content \(String(describing: content))")
+      }
+    }
+  }
+
+  private func handlePrepocessing(content: NSExtensionItem, attachment: NSItemProvider, index: Int)
+    async
+  {
+    Task.detached {
+      if let item = try! await attachment.loadItem(
+        forTypeIdentifier: self.propertyListType, options: nil)
+        as? NSDictionary
+      {
+        Task { @MainActor in
+
+          if let results = item[NSExtensionJavaScriptPreprocessingResultsKey]
+            as? NSDictionary
+          {
+            NSLog(
+              "[DEBUG] NSExtensionJavaScriptPreprocessingResultsKey \(String(describing: results))"
+            )
+            self.sharedWebUrl.append(
+              WebUrl(url: results["baseURI"] as! String, meta: results["meta"] as! String))
+            // If this is the last item, save sharedText in userDefaults and redirect to host app
+            if index == (content.attachments?.count)! - 1 {
+              let userDefaults = UserDefaults(suiteName: self.hostAppGroupIdentifier)
+              userDefaults?.set(self.toData(data: self.sharedWebUrl), forKey: self.sharedKey)
+              userDefaults?.synchronize()
+              self.redirectToHostApp(type: .weburl)
+            }
+          } else {
+            NSLog("[ERROR] Cannot load preprocessing results !\(String(describing: content))")
+            self.dismissWithError(
+              message: "Cannot load preprocessing results \(String(describing: content))")
+          }
+
+        }
+      } else {
+        NSLog("[ERROR] Cannot load preprocessing content !\(String(describing: content))")
+        await self.dismissWithError(
+          message: "Cannot load preprocessing content \(String(describing: content))")
       }
     }
   }
@@ -443,6 +487,16 @@ class ShareViewController: UIViewController {
     return path
   }
 
+  class WebUrl: Codable {
+    var url: String
+    var meta: String
+
+    init(url: String, meta: String) {
+      self.url = url
+      self.meta = meta
+    }
+  }
+
   class SharedMediaFile: Codable {
     var path: String  // can be image, video or url path
     var thumbnail: String?  // video thumbnail
@@ -476,9 +530,13 @@ class ShareViewController: UIViewController {
     case file
   }
 
-  func toData(data: [SharedMediaFile]) -> Data {
+  func toData(data: [WebUrl]) -> Data? {
     let encodedData = try? JSONEncoder().encode(data)
-    return encodedData!
+    return encodedData
+  }
+  func toData(data: [SharedMediaFile]) -> Data? {
+    let encodedData = try? JSONEncoder().encode(data)
+    return encodedData
   }
 }
 

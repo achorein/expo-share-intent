@@ -36,7 +36,7 @@ export type ShareIntentOptions = {
   onResetShareIntent?: () => void;
 };
 
-export type ShareIntentMeta = {
+export type ShareIntentMeta = Record<string, string | undefined> & {
   title?: string;
 };
 
@@ -44,7 +44,7 @@ export type ShareIntentMeta = {
  * Base type for what shared content is common between both platforms.
  */
 interface BaseShareIntent {
-  meta?: ShareIntentMeta;
+  meta?: ShareIntentMeta | null;
   text?: string | null;
 }
 
@@ -70,6 +70,7 @@ export interface AndroidShareIntent extends BaseShareIntent {
  */
 export interface IosShareIntent extends BaseShareIntent {
   files?: IosShareIntentFile[];
+  weburls?: { url: string; meta: string }[];
   type: "media" | "file" | "text" | "weburl";
 }
 
