@@ -1,5 +1,10 @@
 # Expo Share Intent 🚀
 
+![npm](https://img.shields.io/npm/v/expo-share-intent.svg)
+![License](https://img.shields.io/npm/l/expo-share-intent.svg)
+![Downloads](https://img.shields.io/npm/dm/expo-share-intent.svg)
+![GitHub stars](https://img.shields.io/github/stars/achorein/expo-share-intent.svg)
+
 Allow sharing **URL, text, images, videos and files** to your **iOS** and **Android** app, using a simple high-performance native module for Expo (React Native).
 
 > The aim of this project is to have identical behavior between iOS and Android, and so to implement a single logic in the main application. In this way, when sharing data, the user is directly redirected to the main application, which will be responsible to manage the external data.
