@@ -13,7 +13,10 @@ import expo.modules.core.interfaces.ReactActivityLifecycleListener
 class ExpoShareIntentReactActivityLifecycleListener(activityContext: Context) : ReactActivityLifecycleListener {
 
     override fun onCreate(activity: Activity?, savedInstanceState: Bundle?) {
-        ExpoShareIntentSingleton.intent = activity?.intent
-        ExpoShareIntentSingleton.isPending = activity?.intent?.type != null
+        // only store when the new intent is not empty
+        if (activity?.intent?.type != null) {
+            ExpoShareIntentSingleton.intent = activity?.intent
+            ExpoShareIntentSingleton.isPending = true
+        }
     }
 }
