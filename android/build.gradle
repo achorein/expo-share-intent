@@ -4,25 +4,38 @@ def expoModulesCorePlugin = new File(project(":expo-modules-core").projectDir.ab
 
 apply from: expoModulesCorePlugin
 applyKotlinExpoModulesCorePlugin()
-useExpoPublishing()
 useCoreDependencies()
-// use the managed Android SDK versions from expo-modules-core
-useDefaultAndroidSdkVersions()
+useExpoPublishing()
 
-buildscript {
-  // Simple helper that allows the root project to override versions declared by this library.
-  ext.safeExtGet = { prop, fallback ->
-    rootProject.ext.has(prop) ? rootProject.ext.get(prop) : fallback
+// If you want to use the managed Android SDK versions from expo-modules-core, set this to true.
+// The Android SDK versions will be bumped from time to time in SDK releases and may introduce breaking changes in your module code.
+// Most of the time, you may like to manage the Android SDK versions yourself.
+def useManagedAndroidSdkVersions = true
+if (useManagedAndroidSdkVersions) {
+  useDefaultAndroidSdkVersions()
+} else {
+  buildscript {
+    // Simple helper that allows the root project to override versions declared by this library.
+    ext.safeExtGet = { prop, fallback ->
+      rootProject.ext.has(prop) ? rootProject.ext.get(prop) : fallback
+    }
   }
-
+  project.android {
+    compileSdkVersion safeExtGet("compileSdkVersion", 34)
+    defaultConfig {
+      minSdkVersion safeExtGet("minSdkVersion", 21)
+      targetSdkVersion safeExtGet("targetSdkVersion", 34)
+    }
+  }
 }
 
 android {
-  def agpVersion = com.android.Version.ANDROID_GRADLE_PLUGIN_VERSION
-
   namespace "expo.modules.shareintent"
   defaultConfig {
     versionCode 1
-    versionName "2.0.0"
+    versionName "3.0.0"
+  }
+  lintOptions {
+    abortOnError false
   }
 }
