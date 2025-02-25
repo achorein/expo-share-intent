@@ -15,7 +15,7 @@ type ExpoShareIntentModuleEvents = {
 declare class ExpoShareIntentModuleType extends NativeModule<ExpoShareIntentModuleEvents> {
   getShareIntent(url: string): string;
   clearShareIntent(key: string): Promise<void>;
-  hasShareIntent(key: string): Promise<boolean>;
+  hasShareIntent(key: string): boolean;
 }
 
 // Import the native module. it will be resolved on native platforms to ExpoShareIntentModule.ts
