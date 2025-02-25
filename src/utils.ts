@@ -85,9 +85,11 @@ export const parseShareIntent = (
   if (shareIntent?.text) {
     // Try to find the webURL in the SharedIntent text
     const webUrl =
-      shareIntent.text.match(
-        /[(http(s)?)://(www.)?-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)/gi,
-      )?.[0] || null;
+      shareIntent.text
+        .match(
+          /[(http(s)?)://(www.)?-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)/gi,
+        )
+        ?.find((link) => link.startsWith("http")) || null;
 
     result = {
       ...SHAREINTENT_DEFAULTVALUE,
