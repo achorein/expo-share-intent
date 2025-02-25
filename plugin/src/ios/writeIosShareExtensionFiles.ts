@@ -280,12 +280,12 @@ export function getShareExtensionViewControllerContent(
 ) {
   let updatedScheme = scheme;
   if (Array.isArray(scheme)) {
-    console.debug(
+    console.warn(
       `[expo-share-intent] multiple scheme detected (${scheme.join(",")}), using:${updatedScheme}`,
     );
     updatedScheme = scheme[0];
   }
-  console.debug(
+  console.warn(
     `[expo-share-intent] add ios share extension (scheme:${updatedScheme} groupIdentifier:${groupIdentifier})`,
   );
   if (!updatedScheme) {

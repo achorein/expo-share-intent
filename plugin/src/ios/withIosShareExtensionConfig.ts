@@ -63,7 +63,7 @@ export const withShareExtensionConfig: ConfigPlugin<Parameters> = (
       ...getShareExtensionEntitlements(appIdentifier, parameters),
     };
   } else {
-    console.debug(`[expo-share-intent] experimental config disabled`);
+    console.warn(`[expo-share-intent] experimental config disabled`);
   }
 
   return config;
