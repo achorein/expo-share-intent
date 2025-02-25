@@ -47,10 +47,18 @@ yarn add expo-share-intent
 npm install expo-share-intent
 ```
 
+
+
 **Requirement: `patch-package`**
 
-For the moment this package need a post-install script
+For the moment this package needs a patch.
 
+There are two methods to achieve this. 
+
+If you are using `yarn` or `npm`, you should use method 1
+If you are using `pnpm`, you can only use method 2
+
+## Method 1: post-install script
 - copy the [xcode patch](https://github.com/achorein/expo-share-intent/blob/main/example/basic/patches/xcode%2B3.0.1.patch) in you `patches` project directory (like example)
 - add post-install script to `package.json`
 
@@ -68,6 +76,43 @@ yarn add patch-package
 ```
 
 > More info in [#13](https://github.com/achorein/expo-share-intent/issues/13) and [FAQ](https://github.com/achorein/expo-share-intent/edit/main/README.md#config-sync-failed)
+
+## Method 2: pnpm patch
+
+pnpm provides a simple command to create a `node_module` patch.
+
+In your directory, run
+
+`pnpm install xcode@3.0.1`
+
+and then 
+
+`pnpm patch xcode@3.0.1`
+
+You will now be prompted to make the patch changes. The file path should show up and look something like this:
+
+`/{YOUR_DIRECTORY}/node_modules/.pnpm_patches/xcode@3.0.1`
+
+Go into this file and change one line:
+
+```
+-    if (project.pbxGroupByName(group).path)
++    if (project.pbxGroupByName(group)&&project.pbxGroupByName(group).path)
+```
+
+As prompted, when you're done you will run a command to commit your changes:
+
+`pnpm patch-commit /{YOUR_DIRECTORY}/node_modules/.pnpm_patches/xcode@3.0.1`
+
+You should now have an entry in your `package.json` file that looks like this:
+
+```
+  "pnpm": {
+    "patchedDependencies": {
+      "xcode@3.0.1": "patches/xcode@3.0.1.patch"
+    }
+  }
+```
 
 **Requirement: `expo-linking`**
 
