@@ -12,6 +12,7 @@
     },
     {
       "label": "Clean examples dependencies",
+      "dependsOrder": "sequence",
       "dependsOn": [
         "Clean basic example",
         "Clean expo-router example",
@@ -48,6 +49,7 @@
     },
     {
       "label": "Fix examples dependencies",
+      "dependsOrder": "sequence",
       "dependsOn": [
         "Fix basic example",
         "Fix expo-router example",
