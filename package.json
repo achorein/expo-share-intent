@@ -56,9 +56,9 @@
     "expo-module": "expo-module"
   },
   "dependencies": {
-    "@expo/config-plugins": "^9.0.9",
-    "expo-constants": "^17.0.2",
-    "expo-linking": "~7.0.2"
+    "@expo/config-plugins": "^10.0.2",
+    "expo-constants": "^17.1.5",
+    "expo-linking": "~7.1.4"
   },
   "resolutions": {
     "string-width": "^4",
@@ -66,8 +66,8 @@
     "wrap-ansi": "^7"
   },
   "peerDependencies": {
-    "expo": "^52",
-    "expo-constants": ">=17.0.2",
+    "expo": "^53",
+    "expo-constants": ">=17.1.5",
     "expo-linking": ">=7.0.2",
     "react": "*",
     "react-native": "*"
