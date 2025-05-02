@@ -590,6 +590,7 @@ internal let mimeTypes = [
   "cco": "application/x-cocoa",
   "jardiff": "application/x-java-archive-diff",
   "jnlp": "application/x-java-jnlp-file",
+  "pkpass": "application/vnd.apple.pkpass",
   "run": "application/x-makeself",
   "pl": "application/x-perl",
   "pm": "application/x-perl",
