@@ -22,6 +22,7 @@ class ShareViewController: UIViewController {
   let urlContentType: String = UTType.url.identifier
   let propertyListType: String = UTType.propertyList.identifier
   let fileURLType: String = UTType.fileURL.identifier
+  let pkpassContentType: String = "com.apple.pkpass"
   let pdfContentType: String = UTType.pdf.identifier
 
   override func viewDidLoad() {
@@ -45,6 +46,8 @@ class ShareViewController: UIViewController {
           await handleVideos(content: content, attachment: attachment, index: index)
         } else if attachment.hasItemConformingToTypeIdentifier(fileURLType) {
           await handleFiles(content: content, attachment: attachment, index: index)
+        } else if attachment.hasItemConformingToTypeIdentifier(pkpassContentType) {
+          await handlePkPass(content: content, attachment: attachment, index: index)
         } else if attachment.hasItemConformingToTypeIdentifier(pdfContentType) {
           await handlePdf(content: content, attachment: attachment, index: index)
         } else if attachment.hasItemConformingToTypeIdentifier(propertyListType) {
@@ -148,6 +151,49 @@ class ShareViewController: UIViewController {
       }
     }
   }
+
+  private func handlePkPass(content: NSExtensionItem, attachment: NSItemProvider, index: Int) async {
+      Task.detached {
+          NSLog("[DEBUG] Attempting to handle pkpass file for item \(index)")
+          NSLog("[DEBUG] Available type identifiers: \(attachment.registeredTypeIdentifiers)")
+  
+          do {
+              if let url = try await attachment.loadItem(forTypeIdentifier: self.pkpassContentType) as? URL {
+                  NSLog("[DEBUG] Successfully loaded pkpass as URL: \(url.absoluteString)")
+                  NSLog("[DEBUG] URL path: \(url.path), isFileURL: \(url.isFileURL)")
+                  await self.handleFileURL(content: content, url: url, index: index)
+  
+              } else if let data = try await attachment.loadItem(forTypeIdentifier: self.pkpassContentType) as? Data {
+                  NSLog("[DEBUG] Successfully loaded pkpass as Data, size: \(data.count) bytes")
+                  let tempFileName = UUID().uuidString + ".pkpass"
+                  let tempFileURL = FileManager.default.temporaryDirectory.appendingPathComponent(tempFileName)
+  
+                  // Writing data to a file is I/O, keep it off the main thread.
+                  try data.write(to: tempFileURL)
+                  NSLog("[DEBUG] Saved pkpass data to temporary file: \(tempFileURL.path)")
+  
+                  // Handle the newly created temporary file URL.
+                  await self.handleFileURL(content: content, url: tempFileURL, index: index)
+  
+              } else {
+                  // If it's neither URL nor Data, it's unexpected for pkpassContentType.
+                  NSLog("[ERROR] Cannot load pkpass content: Item was neither URL nor Data for type \(self.pkpassContentType). Attachment: \(attachment)")
+                  // Ensure dismissWithError runs on the main thread if it interacts with UI
+                  Task { @MainActor in
+                      await self.dismissWithError(message: "Cannot load pkpass content (unexpected data type).")
+                  }
+              }
+          } catch {
+              // Catch errors from loadItem or data.write
+              NSLog("[ERROR] Exception when handling pkpass: \(error.localizedDescription)")
+              // Ensure dismissWithError runs on the main thread if it interacts with UI
+              Task { @MainActor in
+                  await self.dismissWithError(message: "Error processing pkpass: \(error.localizedDescription)")
+              }
+          }
+      }
+  }
+
 
   private func handleImages(content: NSExtensionItem, attachment: NSItemProvider, index: Int) async
   {
@@ -398,6 +444,7 @@ class ShareViewController: UIViewController {
         ex = "MP4"
       case .file:
         ex = "TXT"
+        if url.lastPathComponent.lowercased().contains("pkpass") { ex = "pkpass" }
       }
     }
     return ex ?? "Unknown"
