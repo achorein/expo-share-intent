@@ -16,10 +16,10 @@
     "postinstall": "patch-package"
   },
   "dependencies": {
-    "expo": "~53.0.5",
-    "expo-constants": "~17.1.5",
-    "expo-linking": "~7.1.4",
-    "expo-router": "~5.0.4",
+    "expo": "53.0.9",
+    "expo-constants": "~17.1.6",
+    "expo-linking": "~7.1.5",
+    "expo-router": "~5.0.7",
     "expo-splash-screen": "~0.30.8",
     "expo-status-bar": "~2.2.3",
     "patch-package": "^8.0.0",
