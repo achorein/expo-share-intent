@@ -19,15 +19,15 @@
     "@react-navigation/native": "^7.0.2",
     "@react-navigation/native-stack": "^7.0.2",
     "@react-navigation/stack": "^7.0.2",
-    "expo": "53.0.9",
+    "expo": "53.0.11",
     "expo-linking": "~7.1.5",
-    "expo-splash-screen": "~0.30.8",
+    "expo-splash-screen": "~0.30.9",
     "expo-status-bar": "~2.2.3",
     "patch-package": "^8.0.0",
     "react": "19.0.0",
-    "react-native": "0.79.2",
+    "react-native": "0.79.3",
     "react-native-safe-area-context": "5.4.0",
-    "react-native-screens": "~4.10.0"
+    "react-native-screens": "~4.11.1"
   },
   "devDependencies": {
     "@babel/core": "^7.26.0",
