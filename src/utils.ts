@@ -143,6 +143,12 @@ export const parseShareIntent = (
           }, [])
         : null,
       type: isMedia ? "media" : "file",
+      meta: shareIntent.meta
+        ? {
+            ...shareIntent.meta,
+            extra: shareIntent.meta.extra ?? undefined,
+          }
+        : undefined,
     };
   }
   options.debug &&
