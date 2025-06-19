@@ -39,27 +39,79 @@ class ShareViewController: UIViewController {
         dismissWithError(message: "No content found")
         return
       }
+      var hasFiles = false
+      var hasText = false
+      var textValue: String? = nil
+      let group = DispatchGroup()
       for (index, attachment) in (attachments).enumerated() {
         if attachment.hasItemConformingToTypeIdentifier(imageContentType) {
+          hasFiles = true
+          group.enter()
           await handleImages(content: content, attachment: attachment, index: index)
+          group.leave()
         } else if attachment.hasItemConformingToTypeIdentifier(videoContentType) {
+          hasFiles = true
+          group.enter()
           await handleVideos(content: content, attachment: attachment, index: index)
+          group.leave()
         } else if attachment.hasItemConformingToTypeIdentifier(fileURLType) {
+          hasFiles = true
+          group.enter()
           await handleFiles(content: content, attachment: attachment, index: index)
+          group.leave()
         } else if attachment.hasItemConformingToTypeIdentifier(pkpassContentType) {
+          hasFiles = true
+          group.enter()
           await handlePkPass(content: content, attachment: attachment, index: index)
+          group.leave()
         } else if attachment.hasItemConformingToTypeIdentifier(pdfContentType) {
+          hasFiles = true
+          group.enter()
           await handlePdf(content: content, attachment: attachment, index: index)
+          group.leave()
         } else if attachment.hasItemConformingToTypeIdentifier(propertyListType) {
+          group.enter()
           await handlePrepocessing(content: content, attachment: attachment, index: index)
+          group.leave()
         } else if attachment.hasItemConformingToTypeIdentifier(urlContentType) {
+          group.enter()
           await handleUrl(content: content, attachment: attachment, index: index)
+          group.leave()
         } else if attachment.hasItemConformingToTypeIdentifier(textContentType) {
-          await handleText(content: content, attachment: attachment, index: index)
+          hasText = true
+          group.enter()
+          if let item = try? await attachment.loadItem(forTypeIdentifier: self.textContentType) as? String {
+            textValue = (textValue == nil) ? item : (textValue! + "\n" + item)
+          }
+          group.leave()
         } else {
           NSLog("[ERROR] content type not handle !\(String(describing: content))")
-          dismissWithError(message: "content type not handle \(String(describing: content)))")
         }
+      }
+      group.wait()
+      // If both files and text are present, store text as extra in meta
+      if hasFiles && (textValue != nil) {
+        let userDefaults = UserDefaults(suiteName: self.hostAppGroupIdentifier)
+        let meta: [String: String] = ["extra": textValue!]
+        let filesWithMeta = self.sharedMedia.map { file -> [String: Any] in
+          var dict = try! JSONSerialization.jsonObject(with: try! JSONEncoder().encode(file)) as! [String: Any]
+          dict["meta"] = meta
+          return dict
+        }
+        let jsonData = try! JSONSerialization.data(withJSONObject: ["files": filesWithMeta, "type": "file", "meta": meta], options: [])
+        userDefaults?.set(jsonData, forKey: self.sharedKey)
+        userDefaults?.synchronize()
+        self.redirectToHostApp(type: .file)
+      } else if hasFiles {
+        let userDefaults = UserDefaults(suiteName: self.hostAppGroupIdentifier)
+        userDefaults?.set(self.toData(data: self.sharedMedia), forKey: self.sharedKey)
+        userDefaults?.synchronize()
+        self.redirectToHostApp(type: .file)
+      } else if hasText, let textValue = textValue {
+        let userDefaults = UserDefaults(suiteName: self.hostAppGroupIdentifier)
+        userDefaults?.set([textValue], forKey: self.sharedKey)
+        userDefaults?.synchronize()
+        self.redirectToHostApp(type: .text)
       }
     }
   }
