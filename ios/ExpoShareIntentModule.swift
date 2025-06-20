@@ -92,37 +92,18 @@ public class ExpoShareIntentModule: Module {
             } else if url.fragment == "file" {
                 if let key = url.host?.components(separatedBy: "=").last {
                     if let json = userDefaults?.object(forKey: key) as? Data {
-                        // Try to decode as combined files+meta json
-                        if let dict = try? JSONSerialization.jsonObject(with: json) as? [String: Any],
-                           let filesArr = dict["files"] as? [[String: Any]] {
-                            let meta = dict["meta"] as? [String: String]
-                            let files = filesArr.compactMap { fileDict -> SharedMediaFile? in
-                                if let fileData = try? JSONSerialization.data(withJSONObject: fileDict),
-                                   let file = try? JSONDecoder().decode(SharedMediaFile.self, from: fileData) {
-                                    return file
-                                }
-                                return nil
+                        let sharedArray = decodeMedia(data: json)
+                        let sharedMediaFiles: [SharedMediaFile] = sharedArray.compactMap {
+                            if let path = getAbsolutePath(for: $0.path) {
+                                return SharedMediaFile.init(
+                                    path: path, thumbnail: nil, fileName: $0.fileName,
+                                    fileSize: $0.fileSize, width: nil, height: nil, duration: nil,
+                                    mimeType: $0.mimeType, type: $0.type)
                             }
-                            guard let filesJson = toJson(data: files) else { return "[]" }
-                            var metaJson = ""
-                            if let meta = meta, let metaData = try? JSONSerialization.data(withJSONObject: meta), let metaStr = String(data: metaData, encoding: .utf8) {
-                                metaJson = ", \"meta\": " + metaStr
-                            }
-                            return "{ \"files\": " + filesJson + ", \"type\": \"file\"" + metaJson + " }"
-                        } else {
-                            let sharedArray = decodeMedia(data: json)
-                            let sharedMediaFiles: [SharedMediaFile] = sharedArray.compactMap {
-                                if let path = getAbsolutePath(for: $0.path) {
-                                    return SharedMediaFile.init(
-                                        path: path, thumbnail: nil, fileName: $0.fileName,
-                                        fileSize: $0.fileSize, width: nil, height: nil, duration: nil,
-                                        mimeType: $0.mimeType, type: $0.type)
-                                }
-                                return nil
-                            }
-                            guard let json = toJson(data: sharedMediaFiles) else { return "[]" }
-                            return "{ \"files\": " + json + ", \"type\": \"file\" }"
+                            return nil
                         }
+                        guard let json = toJson(data: sharedMediaFiles) else { return "[]" }
+                        return "{ \"files\": \(json), \"type\": \"\(url.fragment!)\" }"
                     } else {
                         return "empty"
                     }
