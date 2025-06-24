@@ -19,7 +19,7 @@
     "expo": "~52.0.46",
     "expo-constants": "~17.0.8",
     "expo-linking": "~7.0.5",
-    "expo-router": "~4.0.20",
+    "expo-router": "~4.0.21",
     "expo-splash-screen": "~0.29.24",
     "expo-status-bar": "~2.0.1",
     "patch-package": "^8.0.0",
