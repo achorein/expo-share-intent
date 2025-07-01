@@ -39,7 +39,19 @@ class ShareViewController: UIViewController {
         dismissWithError(message: "No content found")
         return
       }
+      
+      // Modify viewDidAppear to process all attachments before redirecting
       for (index, attachment) in (attachments).enumerated() {
+        // In this new section, create a new struct or dictionary to aggregate all the collected intent data
+        // This structure should mirror the ShareIntent type on the JavaScript side
+        
+        // Combine text: if self.sharedText contains elements, join them into a single string and assign this to the text property of your aggregated intent data
+        // Combine web URLs and meta: if self.sharedWebUrl contains elements, take the first webUrl object. Assign its url to the webUrl property of your aggregated intent data. Parse its meta string (which is expected to be a JSON string) into a dictionary and assign it to the meta property of your aggregated intent data
+        // Combine files: if self.sharedMedia contains elements, assign this array to the files property of your aggregated intent data
+        // Determine the final type: Based on which of the text, webUrl, or files properties are populated in your aggregated intent data, set the type property
+        // Serialize and save: Convert this aggregated intent data object into Data using JSONEncoder. Save this Data to UserDefaults using self.sharedKey
+        // Redirect to host app: Finally, call self.redirectToHostApp(type: someType). You will need to add a .mixed case to the RedirectType enum to support this
+        
         if attachment.hasItemConformingToTypeIdentifier(imageContentType) {
           await handleImages(content: content, attachment: attachment, index: index)
         } else if attachment.hasItemConformingToTypeIdentifier(videoContentType) {
@@ -61,6 +73,61 @@ class ShareViewController: UIViewController {
           dismissWithError(message: "content type not handle \(String(describing: content)))")
         }
       }
+      
+      // After processing all attachments, aggregate the data
+      var aggregatedData: [String: Any] = [:]
+      
+      // Combine text
+      if !self.sharedText.isEmpty {
+        aggregatedData["text"] = self.sharedText.joined(separator: " ")
+      }
+      
+      // Combine web URLs and meta
+      if !self.sharedWebUrl.isEmpty {
+        let firstWebUrl = self.sharedWebUrl[0]
+        aggregatedData["webUrl"] = firstWebUrl.url
+        if !firstWebUrl.meta.isEmpty {
+          if let metaData = firstWebUrl.meta.data(using: .utf8),
+             let metaDict = try? JSONSerialization.jsonObject(with: metaData, options: []) as? [String: Any] {
+            aggregatedData["meta"] = metaDict
+          }
+        }
+      }
+      
+      // Combine files
+      if !self.sharedMedia.isEmpty {
+        aggregatedData["files"] = self.sharedMedia
+      }
+      
+      // Determine the final type
+      let finalType: String
+      if aggregatedData["webUrl"] != nil {
+        finalType = "weburl"
+      } else if let files = aggregatedData["files"] as? [SharedMediaFile], !files.isEmpty {
+        if files.contains(where: { $0.type == .image || $0.type == .video }) {
+          finalType = "media"
+        } else {
+          finalType = "file"
+        }
+      } else if aggregatedData["text"] != nil {
+        finalType = "text"
+      } else {
+        finalType = "mixed"
+      }
+      
+      aggregatedData["type"] = finalType
+      
+      // Serialize and save
+      if let jsonData = try? JSONSerialization.data(withJSONObject: aggregatedData, options: []) {
+        let userDefaults = UserDefaults(suiteName: self.hostAppGroupIdentifier)
+        userDefaults?.set(jsonData, forKey: self.sharedKey)
+        userDefaults?.synchronize()
+        
+        // Redirect to host app
+        self.redirectToHostApp(type: .mixed)
+      } else {
+        dismissWithError(message: "Failed to serialize aggregated intent data")
+      }
     }
   }
 
@@ -70,16 +137,8 @@ class ShareViewController: UIViewController {
         as? String
       {
         Task { @MainActor in
-
           self.sharedText.append(item)
-          // If this is the last item, save sharedText in userDefaults and redirect to host app
-          if index == (content.attachments?.count)! - 1 {
-            let userDefaults = UserDefaults(suiteName: self.hostAppGroupIdentifier)
-            userDefaults?.set(self.sharedText, forKey: self.sharedKey)
-            userDefaults?.synchronize()
-            self.redirectToHostApp(type: .text)
-          }
-
+          // The data should continue to be appended to the sharedText, sharedWebUrl, or sharedMedia arrays, but the redirection should be deferred
         }
       } else {
         NSLog("[ERROR] Cannot load text content !\(String(describing: content))")
@@ -93,16 +152,8 @@ class ShareViewController: UIViewController {
     Task.detached {
       if let item = try! await attachment.loadItem(forTypeIdentifier: self.urlContentType) as? URL {
         Task { @MainActor in
-
           self.sharedWebUrl.append(WebUrl(url: item.absoluteString, meta: ""))
-          // If this is the last item, save sharedText in userDefaults and redirect to host app
-          if index == (content.attachments?.count)! - 1 {
-            let userDefaults = UserDefaults(suiteName: self.hostAppGroupIdentifier)
-            userDefaults?.set(self.toData(data: self.sharedWebUrl), forKey: self.sharedKey)
-            userDefaults?.synchronize()
-            self.redirectToHostApp(type: .weburl)
-          }
-
+          // The data should continue to be appended to the sharedText, sharedWebUrl, or sharedMedia arrays, but the redirection should be deferred
         }
       } else {
         NSLog("[ERROR] Cannot load url content !\(String(describing: content))")
@@ -121,7 +172,6 @@ class ShareViewController: UIViewController {
         as? NSDictionary
       {
         Task { @MainActor in
-
           if let results = item[NSExtensionJavaScriptPreprocessingResultsKey]
             as? NSDictionary
           {
@@ -130,19 +180,12 @@ class ShareViewController: UIViewController {
             )
             self.sharedWebUrl.append(
               WebUrl(url: results["baseURI"] as! String, meta: results["meta"] as! String))
-            // If this is the last item, save sharedText in userDefaults and redirect to host app
-            if index == (content.attachments?.count)! - 1 {
-              let userDefaults = UserDefaults(suiteName: self.hostAppGroupIdentifier)
-              userDefaults?.set(self.toData(data: self.sharedWebUrl), forKey: self.sharedKey)
-              userDefaults?.synchronize()
-              self.redirectToHostApp(type: .weburl)
-            }
+            // The data should continue to be appended to the sharedText, sharedWebUrl, or sharedMedia arrays, but the redirection should be deferred
           } else {
             NSLog("[ERROR] Cannot load preprocessing results !\(String(describing: content))")
             self.dismissWithError(
               message: "Cannot load preprocessing results \(String(describing: content))")
           }
-
         }
       } else {
         NSLog("[ERROR] Cannot load preprocessing content !\(String(describing: content))")
@@ -249,13 +292,7 @@ class ShareViewController: UIViewController {
                 mimeType: mimeType, type: .image))
           }
 
-          // If this is the last item, save imagesData in userDefaults and redirect to host app
-          if index == (content.attachments?.count)! - 1 {
-            let userDefaults = UserDefaults(suiteName: self.hostAppGroupIdentifier)
-            userDefaults?.set(self.toData(data: self.sharedMedia), forKey: self.sharedKey)
-            userDefaults?.synchronize()
-            self.redirectToHostApp(type: .media)
-          }
+          // The data should continue to be appended to the sharedText, sharedWebUrl, or sharedMedia arrays, but the redirection should be deferred
 
         }
       } else {
@@ -310,13 +347,7 @@ class ShareViewController: UIViewController {
             self.sharedMedia.append(sharedFile)
           }
 
-          // If this is the last item, save imagesData in userDefaults and redirect to host app
-          if index == (content.attachments?.count)! - 1 {
-            let userDefaults = UserDefaults(suiteName: self.hostAppGroupIdentifier)
-            userDefaults?.set(self.toData(data: self.sharedMedia), forKey: self.sharedKey)
-            userDefaults?.synchronize()
-            self.redirectToHostApp(type: .media)
-          }
+          // The data should continue to be appended to the sharedText, sharedWebUrl, or sharedMedia arrays, but the redirection should be deferred
 
         }
       } else {
@@ -379,12 +410,7 @@ class ShareViewController: UIViewController {
           type: .file))
     }
 
-    if index == (content.attachments?.count)! - 1 {
-      let userDefaults = UserDefaults(suiteName: self.hostAppGroupIdentifier)
-      userDefaults?.set(self.toData(data: self.sharedMedia), forKey: self.sharedKey)
-      userDefaults?.synchronize()
-      self.redirectToHostApp(type: .file)
-    }
+    // The data should continue to be appended to the sharedText, sharedWebUrl, or sharedMedia arrays, but the redirection should be deferred
   }
 
   private func dismissWithError(message: String? = nil) {
@@ -428,6 +454,7 @@ class ShareViewController: UIViewController {
     case text
     case weburl
     case file
+    case mixed
   }
 
   func getExtension(from url: URL, type: SharedMediaType) -> String {
