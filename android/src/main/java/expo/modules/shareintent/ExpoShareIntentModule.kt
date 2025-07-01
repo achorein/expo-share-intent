@@ -121,37 +121,17 @@ class ExpoShareIntentModule : Module() {
                 activity.finish()
                 return
             }
-            // Initialize data containers at the beginning
-            var extractedText: String? = null
-            var extractedWebUrl: String? = null
-            var extractedFiles = mutableListOf<Map<String, String?>>()
-            var extractedMeta = mutableMapOf<String, Any?>()
-
             if (intent.type == null) return
-            
-            // Extract text and title for all intent types
-            extractedText = intent.getStringExtra(Intent.EXTRA_TEXT)
-            val title = intent.getCharSequenceExtra(Intent.EXTRA_TITLE)
-            if (title != null) {
-                extractedMeta["title"] = title
-            }
-            
             if (intent.type!!.startsWith("text/plain")) {
                 // text / urls
                 if (intent.action == Intent.ACTION_SEND) {
-                    // Extract web URL if extractedText is not null and is a valid URL
-                    if (extractedText != null && extractedText.startsWith("http")) {
-                        extractedWebUrl = extractedText
-                    }
-                    
-                    val type = if (extractedWebUrl != null) "weburl" else "text"
-                    val payload = mutableMapOf<String, Any?>("type" to type)
-                    
-                    if (extractedText != null) payload["text"] = extractedText
-                    if (extractedWebUrl != null) payload["webUrl"] = extractedWebUrl
-                    if (extractedMeta.isNotEmpty()) payload["meta"] = extractedMeta
-                    
-                    notifyShareIntent(payload)
+                    notifyShareIntent(mapOf(
+                        "text" to intent.getStringExtra(Intent.EXTRA_TEXT),
+                        "type" to "text",
+                        "meta" to mapOf(
+                            "title" to intent.getCharSequenceExtra(Intent.EXTRA_TITLE),
+                        )
+                    ))
                 } else if (intent.action == Intent.ACTION_VIEW) {
                     notifyShareIntent(mapOf( "text" to intent.dataString, "type" to "text"))
                 } else {
@@ -168,71 +148,28 @@ class ExpoShareIntentModule : Module() {
                 if (intent.action == Intent.ACTION_SEND) {
                     val uri = intent.parcelable<Uri>(Intent.EXTRA_STREAM);
                     if (uri != null) {
-                        extractedFiles.add(getFileInfo(uri))
+                        notifyShareIntent(mapOf(
+                            "files" to arrayOf(getFileInfo(uri)),
+                            "type" to "file",
+                            "meta" to if (meta.isNotEmpty()) meta else null
+                        ))
                     } else {
                         notifyError("empty uri for file sharing: " + intent.action)
-                        return
                     }
                 } else if (intent.action == Intent.ACTION_SEND_MULTIPLE) {
                     val uris = intent.parcelableArrayList<Uri>(Intent.EXTRA_STREAM)
                     if (uris != null) {
-                        for (uri in uris) {
-                            extractedFiles.add(getFileInfo(uri))
-                        }
+                        notifyShareIntent(mapOf(
+                            "files" to uris.map { getFileInfo(it) },
+                            "type" to "file",
+                            "meta" to if (meta.isNotEmpty()) meta else null
+                        ))
                     } else {
                         notifyError("empty uris array for file sharing: " + intent.action)
-                        return
                     }
                 } else {
                     notifyError("Invalid action for file sharing: " + intent.action)
-                    return
                 }
-
-                // Extract single file
-                if (intent.action == Intent.ACTION_SEND) {
-                    val uri = intent.parcelableArrayList<Uri>(Intent.EXTRA_STREAM)
-                    if (uri != null) {
-                        // This should not happen for single file, but handle gracefully
-                        notifyError("Unexpected multiple files for single file action")
-                        return
-                    }
-                }
-
-                // Extract multiple files
-                if (intent.action == Intent.ACTION_SEND_MULTIPLE) {
-                    val uri = intent.parcelable<Uri>(Intent.EXTRA_STREAM)
-                    if (uri != null) {
-                        // This should not happen for multiple files, but handle gracefully
-                        notifyError("Unexpected single file for multiple file action")
-                        return
-                    }
-                }
-
-                // Construct and send final payload
-                val finalMap = mutableMapOf<String, Any?>()
-                
-                // Add extractedText (if it's not null), extractedWebUrl (if it's not null), extractedFiles (if it's not empty), and extractedMeta (if it's not empty) to this final map
-                if (extractedText != null) finalMap["text"] = extractedText
-                if (extractedWebUrl != null) finalMap["webUrl"] = extractedWebUrl
-                if (extractedFiles.isNotEmpty()) finalMap["files"] = extractedFiles
-                if (extractedMeta.isNotEmpty()) finalMap["meta"] = extractedMeta
-
-                // Determine the type of the share intent
-                val type = when {
-                    extractedWebUrl != null -> "weburl"
-                    extractedFiles.isNotEmpty() -> when {
-                        extractedFiles.any { (it["mimeType"] as? String)?.startsWith("image/") == true } -> "media"
-                        extractedFiles.any { (it["mimeType"] as? String)?.startsWith("video/") == true } -> "media"
-                        else -> "file"
-                    }
-                    extractedText != null -> "text"
-                    else -> "mixed" // or prioritize based on your application's requirements
-                }
-                
-                finalMap["type"] = type
-
-                // Finally, call notifyShareIntent(finalMap) with this comprehensive map
-                notifyShareIntent(finalMap)
             }
         }
 
