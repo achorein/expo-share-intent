@@ -3,17 +3,49 @@ import { ConfigPlugin, withXcodeProject } from "@expo/config-plugins";
 import {
   getShareExtensionBundledIdentifier,
   getShareExtensionName,
+  shareExtensionViewControllerFileName,
+  shareExtensionStoryBoardFileName,
+  shareExtensionPreprocessorFileName,
+  shareExtensionInfoFileName,
+  shareExtensionEntitlementsFileName,
 } from "./constants";
-import {
-  getPreprocessorFilePath,
-  getPrivacyInfoFilePath,
-  getShareExtensionEntitlementsFilePath,
-  getShareExtensionInfoFilePath,
-  getShareExtensionStoryboardFilePath,
-  getShareExtensionViewControllerPath,
-  writeShareExtensionFiles,
-} from "./writeIosShareExtensionFiles";
+import { writeShareExtensionFiles } from "./writeIosShareExtensionFiles";
 import { Parameters } from "../types";
+
+//───────────────────────────────────────────────────────────────────────────
+// Helper: pull DEVELOPMENT_TEAM from the main-app target's build settings
+//───────────────────────────────────────────────────────────────────────────
+function getMainAppDevelopmentTeam(pbx: any): string | null {
+  const configs = pbx.pbxXCBuildConfigurationSection();
+
+  for (const key in configs) {
+    const config = configs[key];
+    const bs = config.buildSettings;
+    if (!bs || !bs.PRODUCT_NAME) continue;
+
+    const productName = bs.PRODUCT_NAME?.replace(/"/g, "");
+    // Ignore other extensions/widgets
+    if (
+      productName &&
+      (productName.includes("Extension") || productName.includes("Widget"))
+    ) {
+      continue;
+    }
+
+    const developmentTeam = bs.DEVELOPMENT_TEAM?.replace(/"/g, "");
+    if (developmentTeam) {
+      console.log(
+        `[expo-share-intent] Found DEVELOPMENT_TEAM='${developmentTeam}' from main app configuration.`,
+      );
+      return developmentTeam;
+    }
+  }
+
+  console.warn(
+    "[expo-share-intent] No DEVELOPMENT_TEAM found in main app build settings. Developer will need to manually add Dev Team.",
+  );
+  return null;
+}
 
 export const withShareExtensionXcodeTarget: ConfigPlugin<Parameters> = (
   config,
@@ -31,17 +63,7 @@ export const withShareExtensionXcodeTarget: ConfigPlugin<Parameters> = (
     const currentProjectVersion = config.ios!.buildNumber || "1";
     const marketingVersion = config.version!;
 
-    // ShareExtension-Info.plist
-    const infoPlistFilePath = getShareExtensionInfoFilePath(
-      platformProjectRoot,
-      parameters,
-    );
-    // ShareExtension.entitlements
-    const entitlementsFilePath = getShareExtensionEntitlementsFilePath(
-      platformProjectRoot,
-      parameters,
-    );
-
+    // Write extension files first
     await writeShareExtensionFiles(
       platformProjectRoot,
       scheme,
@@ -52,102 +74,154 @@ export const withShareExtensionXcodeTarget: ConfigPlugin<Parameters> = (
 
     const pbxProject = config.modResults;
 
-    // Check if the extension target already exists. If so, abort the process since the steps below are already done.
-    if (!!pbxProject.pbxTargetByName(extensionName)) {
+    /* ------------------------------------------------------------------ */
+    /* 1. Bail out early if target/group already exist                    */
+    /* ------------------------------------------------------------------ */
+    const existingTarget = pbxProject.pbxTargetByName(extensionName);
+    if (existingTarget) {
+      console.log(
+        `[expo-share-intent] ${extensionName} already exists in project. Skipping…`,
+      );
       return config;
     }
 
+    const existingGroups = pbxProject.hash.project.objects.PBXGroup;
+    const groupExists = Object.values(existingGroups).some(
+      (group: any) => group && group.name === extensionName,
+    );
+    if (groupExists) {
+      console.log(
+        `[expo-share-intent] ${extensionName} group already exists in project. Skipping…`,
+      );
+      return config;
+    }
+
+    /* ------------------------------------------------------------------ */
+    /* 2. Resolve DEVELOPMENT_TEAM                                        */
+    /* ------------------------------------------------------------------ */
+    const detectedDevTeam = getMainAppDevelopmentTeam(pbxProject);
+    const devTeam = detectedDevTeam ?? undefined;
+
+    /* ------------------------------------------------------------------ */
+    /* 3. Define all files for the extension                              */
+    /* ------------------------------------------------------------------ */
+    const sourceFiles = [shareExtensionViewControllerFileName];
+    const resourceFiles = [
+      shareExtensionStoryBoardFileName,
+      shareExtensionPreprocessorFileName,
+      "PrivacyInfo.xcprivacy",
+    ];
+    const configFiles = [
+      shareExtensionInfoFileName,
+      shareExtensionEntitlementsFileName,
+    ];
+    const allFiles = [...sourceFiles, ...resourceFiles, ...configFiles];
+
+    /* ------------------------------------------------------------------ */
+    /* 4. Create target, group & build phases (CORRECTED APPROACH)       */
+    /* ------------------------------------------------------------------ */
+
+    // 4.1 Create PBXGroup for the extension using addPbxGroup (OneSignal style)
+    const extGroup = pbxProject.addPbxGroup(
+      allFiles,
+      extensionName,
+      extensionName,
+    );
+
+    // 4.2 Add the new PBXGroup to the top level group
+    const groups = pbxProject.hash.project.objects.PBXGroup;
+    Object.keys(groups).forEach(function (key) {
+      if (
+        typeof groups[key] === "object" &&
+        groups[key].name === undefined &&
+        groups[key].path === undefined
+      ) {
+        pbxProject.addToPbxGroup(extGroup.uuid, key);
+      }
+    });
+
+    // 4.3 WORK AROUND for addTarget BUG (from OneSignal)
+    // Xcode projects don't contain these if there is only one target
+    const projObjects = pbxProject.hash.project.objects;
+    projObjects.PBXTargetDependency = projObjects.PBXTargetDependency || {};
+    projObjects.PBXContainerItemProxy = projObjects.PBXContainerItemProxy || {};
+
+    // 4.4 Create native target
     const target = pbxProject.addTarget(
       extensionName,
       "app_extension",
       extensionName,
     );
 
-    // Add a new PBXSourcesBuildPhase for our ShareViewController
-    // (we can't add it to the existing one because an extension is kind of an extra app)
+    // 4.5 Add build phases to the new target
     pbxProject.addBuildPhase(
-      [],
+      sourceFiles, // Add source files directly to the build phase
       "PBXSourcesBuildPhase",
       "Sources",
       target.uuid,
     );
 
-    // Add a new PBXResourcesBuildPhase for the Resources used by the Share Extension
     pbxProject.addBuildPhase(
-      [],
+      resourceFiles, // Add resource files directly to the build phase
       "PBXResourcesBuildPhase",
       "Resources",
       target.uuid,
     );
 
-    // Create a separate PBXGroup for the shareExtension's files
-    const pbxGroupKey = pbxProject.pbxCreateGroup(extensionName, extensionName);
-
-    // Add files which are not part of any build phase (ShareExtension-Info.plist)
-    pbxProject.addFile(infoPlistFilePath, pbxGroupKey);
-
-    // Add source files to our PbxGroup and our newly created PBXSourcesBuildPhase (ShareViewController.swift)
-    pbxProject.addSourceFile(
-      getShareExtensionViewControllerPath(platformProjectRoot, parameters),
-      { target: target.uuid },
-      pbxGroupKey,
+    pbxProject.addBuildPhase(
+      [],
+      "PBXFrameworksBuildPhase",
+      "Frameworks",
+      target.uuid,
     );
 
-    // Add the resource file and include it into the target PbxResourcesBuildPhase and PbxGroup
-    try {
-      // ShareExtensionPreprocessor.js
-      pbxProject.addResourceFile(
-        getPreprocessorFilePath(platformProjectRoot, parameters),
-        { target: target.uuid },
-        pbxGroupKey,
-      );
-      // MainInterface.storyboard
-      pbxProject.addResourceFile(
-        getShareExtensionStoryboardFilePath(platformProjectRoot, parameters),
-        { target: target.uuid },
-        pbxGroupKey,
-      );
-      // PrivacyInfo.xcprivacy
-      pbxProject.addResourceFile(
-        getPrivacyInfoFilePath(platformProjectRoot, parameters),
-        { target: target.uuid },
-        pbxGroupKey,
-      );
-    } catch (e: any) {
-      if (e.message.includes("reading 'path'")) {
-        console.error(e);
-        throw new Error(
-          `[expo-share-intent] Could not add resource files to the Share Extension, please check your "patch-package" installation for xcode (see: https://github.com/achorein/expo-share-intent?tab=readme-ov-file#installation)`,
-        );
-      }
-      throw e;
-    }
-
+    /* ------------------------------------------------------------------ */
+    /* 5. Build-settings configuration                                    */
+    /* ------------------------------------------------------------------ */
     const configurations = pbxProject.pbxXCBuildConfigurationSection();
     for (const key in configurations) {
-      if (typeof configurations[key].buildSettings !== "undefined") {
-        const buildSettingsObj = configurations[key].buildSettings;
-        if (
-          typeof buildSettingsObj["PRODUCT_NAME"] !== "undefined" &&
-          buildSettingsObj["PRODUCT_NAME"] === `"${extensionName}"`
-        ) {
-          buildSettingsObj["CLANG_ENABLE_MODULES"] = "YES";
-          buildSettingsObj["INFOPLIST_FILE"] = `"${infoPlistFilePath}"`;
-          buildSettingsObj["CODE_SIGN_ENTITLEMENTS"] =
-            `"${entitlementsFilePath}"`;
-          buildSettingsObj["CODE_SIGN_STYLE"] = "Automatic";
-          buildSettingsObj["CURRENT_PROJECT_VERSION"] =
-            `"${currentProjectVersion}"`;
-          buildSettingsObj["GENERATE_INFOPLIST_FILE"] = "YES";
-          buildSettingsObj["MARKETING_VERSION"] = `"${marketingVersion}"`;
-          buildSettingsObj["PRODUCT_BUNDLE_IDENTIFIER"] =
-            `"${shareExtensionIdentifier}"`;
-          buildSettingsObj["SWIFT_EMIT_LOC_STRINGS"] = "YES";
-          buildSettingsObj["SWIFT_VERSION"] = "5.0";
-          buildSettingsObj["TARGETED_DEVICE_FAMILY"] = `"1,2"`;
+      const config = configurations[key];
+      const buildSettingsObj = config.buildSettings;
+      if (!buildSettingsObj) continue;
+
+      if (
+        typeof buildSettingsObj["PRODUCT_NAME"] !== "undefined" &&
+        buildSettingsObj["PRODUCT_NAME"] === `"${extensionName}"`
+      ) {
+        buildSettingsObj["CLANG_ENABLE_MODULES"] = "YES";
+        buildSettingsObj["INFOPLIST_FILE"] =
+          `"${extensionName}/${shareExtensionInfoFileName}"`;
+        buildSettingsObj["CODE_SIGN_ENTITLEMENTS"] =
+          `"${extensionName}/${shareExtensionEntitlementsFileName}"`;
+        buildSettingsObj["CODE_SIGN_STYLE"] = "Automatic";
+        buildSettingsObj["CURRENT_PROJECT_VERSION"] =
+          `"${currentProjectVersion}"`;
+        buildSettingsObj["GENERATE_INFOPLIST_FILE"] = "YES";
+        buildSettingsObj["MARKETING_VERSION"] = `"${marketingVersion}"`;
+        buildSettingsObj["PRODUCT_BUNDLE_IDENTIFIER"] =
+          `"${shareExtensionIdentifier}"`;
+        buildSettingsObj["SWIFT_EMIT_LOC_STRINGS"] = "YES";
+        buildSettingsObj["SWIFT_VERSION"] = "5.0";
+        buildSettingsObj["TARGETED_DEVICE_FAMILY"] = `"1,2"`;
+
+        if (devTeam) {
+          buildSettingsObj["DEVELOPMENT_TEAM"] = devTeam;
         }
       }
     }
+
+    /* ------------------------------------------------------------------ */
+    /* 6. Apply DevelopmentTeam to both targets                           */
+    /* ------------------------------------------------------------------ */
+    if (devTeam) {
+      pbxProject.addTargetAttribute("DevelopmentTeam", devTeam);
+      const shareTarget = pbxProject.pbxTargetByName(extensionName);
+      pbxProject.addTargetAttribute("DevelopmentTeam", devTeam, shareTarget);
+    }
+
+    console.log(
+      `[expo-share-intent] Successfully created ${extensionName} target with files`,
+    );
 
     return config;
   });
