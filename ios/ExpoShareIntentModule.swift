@@ -135,48 +135,6 @@ public class ExpoShareIntentModule: Module {
                         return "empty"
                     }
                 }
-            } else if url.fragment == "mixed" {
-                if let key = url.host?.components(separatedBy: "=").last {
-                    if let jsonData = userDefaults?.object(forKey: key) as? Data {
-                        // Parse the mixed JSON format and process file paths
-                        if let jsonObject = try? JSONSerialization.jsonObject(with: jsonData) as? [String: Any] {
-                            var processedData = jsonObject
-                            
-                            // Process files array if it exists
-                            if let filesArray = jsonObject["files"] as? [[String: Any]] {
-                                let processedFiles = filesArray.compactMap { fileDict -> [String: Any]? in
-                                    var processedFile = fileDict
-                                    if let path = fileDict["path"] as? String,
-                                       let absolutePath = getAbsolutePath(for: path) {
-                                        processedFile["path"] = absolutePath
-                                        
-                                        // Process thumbnail if it exists (for videos)
-                                        if let thumbnail = fileDict["thumbnail"] as? String,
-                                           let absoluteThumbnail = getAbsolutePath(for: thumbnail) {
-                                            processedFile["thumbnail"] = absoluteThumbnail
-                                        }
-                                        return processedFile
-                                    }
-                                    return nil
-                                }
-                                processedData["files"] = processedFiles
-                            }
-                            
-                            // Convert back to JSON string
-                            if let processedJsonData = try? JSONSerialization.data(withJSONObject: processedData),
-                               let jsonString = String(data: processedJsonData, encoding: .utf8) {
-                                return jsonString
-                            }
-                        }
-                        
-                        // Fallback to original approach if processing fails
-                        if let jsonString = String(data: jsonData, encoding: .utf8) {
-                            return jsonString
-                        }
-                    } else {
-                        return "empty"
-                    }
-                }
             } else {
                 latestText = url.absoluteString
                 let optionalString = latestText
