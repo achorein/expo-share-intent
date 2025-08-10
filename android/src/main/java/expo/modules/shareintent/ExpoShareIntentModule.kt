@@ -112,15 +112,6 @@ class ExpoShareIntentModule : Module() {
         }
 
         fun handleShareIntent(intent: Intent) {
-            val activity = instance?.currentActivity
-            if (activity != null && !activity.isTaskRoot) {
-                val newIntent = Intent(intent).apply {
-                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                }
-                activity.startActivity(newIntent)
-                activity.finish()
-                return
-            }
             if (intent.type == null) return
             if (intent.type!!.startsWith("text/plain")) {
                 // text / urls
