@@ -16,15 +16,15 @@
     "postinstall": "patch-package"
   },
   "dependencies": {
-    "expo": "53.0.12",
+    "expo": "53.0.22",
     "expo-constants": "~17.1.6",
     "expo-linking": "~7.1.5",
-    "expo-router": "~5.1.0",
+    "expo-router": "~5.1.5",
     "expo-splash-screen": "~0.30.9",
     "expo-status-bar": "~2.2.3",
     "patch-package": "^8.0.0",
     "react": "19.0.0",
-    "react-native": "0.79.4",
+    "react-native": "0.79.5",
     "react-native-safe-area-context": "5.4.0",
     "react-native-screens": "~4.11.1"
   },
