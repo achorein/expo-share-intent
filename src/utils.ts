@@ -121,7 +121,7 @@ export const parseShareIntent = (
     );
     result = {
       ...SHAREINTENT_DEFAULTVALUE,
-      files: shareIntent?.files
+      files: shareIntent && shareIntent.files
         ? shareIntent.files.reduce((acc: ShareIntentFile[], file: any) => {
             if (!file.path && !file.contentUri) return acc;
             return [
@@ -143,6 +143,12 @@ export const parseShareIntent = (
           }, [])
         : null,
       type: isMedia ? "media" : "file",
+      meta: shareIntent && shareIntent.meta
+        ? {
+            ...shareIntent.meta,
+            extra: shareIntent.meta && shareIntent.meta.extra ? shareIntent.meta.extra : undefined,
+          }
+        : undefined,
     };
   }
   options.debug &&

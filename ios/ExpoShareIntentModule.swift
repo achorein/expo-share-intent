@@ -69,21 +69,26 @@ public class ExpoShareIntentModule: Module {
                                     return SharedMediaFile.init(
                                         path: path, thumbnail: thumbnail, fileName: $0.fileName,
                                         fileSize: $0.fileSize, width: $0.width, height: $0.height,
-                                        duration: $0.duration, mimeType: $0.mimeType, type: $0.type)
+                                        duration: $0.duration, mimeType: $0.mimeType, type: $0.type, extra: $0.extra)
                                 } else if $0.type == .video && $0.thumbnail == nil {
                                     return SharedMediaFile.init(
                                         path: path, thumbnail: nil, fileName: $0.fileName,
                                         fileSize: $0.fileSize, width: $0.width, height: $0.height,
-                                        duration: $0.duration, mimeType: $0.mimeType, type: $0.type)
+                                        duration: $0.duration, mimeType: $0.mimeType, type: $0.type, extra: $0.extra)
                                 }
                                 return SharedMediaFile.init(
                                     path: path, thumbnail: nil, fileName: $0.fileName,
                                     fileSize: $0.fileSize, width: $0.width, height: $0.height,
-                                    duration: $0.duration, mimeType: $0.mimeType, type: $0.type)
+                                    duration: $0.duration, mimeType: $0.mimeType, type: $0.type, extra: $0.extra)
                             }
                             return nil
                         }
                         guard let json = toJson(data: sharedMediaFiles) else { return "[]" }
+                        // meta.extra: first non-empty extra among files
+                        let extra = sharedMediaFiles.compactMap { $0.extra }.first { !$0.isEmpty }
+                        if let extra = extra, let metaData = try? JSONSerialization.data(withJSONObject: ["extra": extra]), let metaJson = String(data: metaData, encoding: .utf8) {
+                            return "{ \"files\": \(json), \"meta\": \(metaJson), \"type\": \"\(url.fragment!)\" }"
+                        }
                         return "{ \"files\": \(json), \"type\": \"\(url.fragment!)\" }"
                     } else {
                         return "empty"
@@ -98,11 +103,15 @@ public class ExpoShareIntentModule: Module {
                                 return SharedMediaFile.init(
                                     path: path, thumbnail: nil, fileName: $0.fileName,
                                     fileSize: $0.fileSize, width: nil, height: nil, duration: nil,
-                                    mimeType: $0.mimeType, type: $0.type)
+                                    mimeType: $0.mimeType, type: $0.type, extra: $0.extra)
                             }
                             return nil
                         }
                         guard let json = toJson(data: sharedMediaFiles) else { return "[]" }
+                        let extra = sharedMediaFiles.compactMap { $0.extra }.first { !$0.isEmpty }
+                        if let extra = extra, let metaData = try? JSONSerialization.data(withJSONObject: ["extra": extra]), let metaJson = String(data: metaData, encoding: .utf8) {
+                            return "{ \"files\": \(json), \"meta\": \(metaJson), \"type\": \"\(url.fragment!)\" }"
+                        }
                         return "{ \"files\": \(json), \"type\": \"\(url.fragment!)\" }"
                     } else {
                         return "empty"
@@ -255,10 +264,11 @@ public class ExpoShareIntentModule: Module {
         var duration: Double?  // video duration in milliseconds
         var mimeType: String
         var type: SharedMediaType
+    var extra: String?  // caption / extra text (optional)
 
         init(
             path: String, thumbnail: String?, fileName: String, fileSize: Int?, width: Int?,
-            height: Int?, duration: Double?, mimeType: String, type: SharedMediaType
+            height: Int?, duration: Double?, mimeType: String, type: SharedMediaType, extra: String? = nil
         ) {
             self.path = path
             self.thumbnail = thumbnail
@@ -269,6 +279,7 @@ public class ExpoShareIntentModule: Module {
             self.duration = duration
             self.mimeType = mimeType
             self.type = type
+            self.extra = extra
         }
     }
 
