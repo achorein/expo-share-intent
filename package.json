@@ -81,6 +81,6 @@
     "expo-module-scripts": "^4.0.2",
     "expo-modules-core": "^2.0.1",
     "prettier": "^3.2.5",
-    "release-it": "^17.10.0"
+    "release-it": "^19.0.4"
   }
 }
