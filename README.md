@@ -19,6 +19,7 @@ Ensure you use versions that work together
 
 | Expo       | Supported `expo-share-intent` version |
 | ---------- | ------------------------------------- |
+| **SDK 54** | 5.0+                                  |
 | **SDK 53** | 4.0+                                  |
 | **SDK 52** | 3.0+                                  |
 | **SDK 51** | 2.0+                                  |

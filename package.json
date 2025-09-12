@@ -66,9 +66,9 @@
     "wrap-ansi": "^7"
   },
   "peerDependencies": {
-    "expo": "^53",
-    "expo-constants": ">=17.1.5",
-    "expo-linking": ">=7.0.2",
+    "expo": "^54",
+    "expo-constants": ">=18.0.8",
+    "expo-linking": ">=8.0.8",
     "react": "*",
     "react-native": "*"
   },
