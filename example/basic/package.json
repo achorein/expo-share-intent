@@ -18,10 +18,10 @@
     "postinstall": "patch-package"
   },
   "dependencies": {
-    "expo": "^54.0.0",
+    "expo": "54.0.7",
     "expo-dev-client": "~6.0.12",
     "expo-linking": "~8.0.8",
-    "expo-splash-screen": "~31.0.9",
+    "expo-splash-screen": "~31.0.10",
     "expo-status-bar": "~3.0.8",
     "expo-updates": "~29.0.10",
     "patch-package": "^8.0.0",
