@@ -66,9 +66,9 @@
     "wrap-ansi": "^7"
   },
   "peerDependencies": {
-    "expo": "^53",
-    "expo-constants": ">=17.1.5",
-    "expo-linking": ">=7.0.2",
+    "expo": "^54",
+    "expo-constants": ">=18.0.8",
+    "expo-linking": ">=8.0.8",
     "react": "*",
     "react-native": "*"
   },
@@ -78,8 +78,8 @@
     "@types/react-native": "^0.73.0",
     "dotenv-cli": "^7.4.2",
     "eslint": "^8.57.1",
-    "expo-module-scripts": "^4.0.2",
-    "expo-modules-core": "^2.0.1",
+    "expo-module-scripts": "^5.0.7",
+    "expo-modules-core": "^3.0.15",
     "prettier": "^3.2.5",
     "release-it": "^19.0.4"
   }

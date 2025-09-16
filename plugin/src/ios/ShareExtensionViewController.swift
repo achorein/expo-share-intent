@@ -180,7 +180,7 @@ class ShareViewController: UIViewController {
                   NSLog("[ERROR] Cannot load pkpass content: Item was neither URL nor Data for type \(self.pkpassContentType). Attachment: \(attachment)")
                   // Ensure dismissWithError runs on the main thread if it interacts with UI
                   Task { @MainActor in
-                      await self.dismissWithError(message: "Cannot load pkpass content (unexpected data type).")
+                      self.dismissWithError(message: "Cannot load pkpass content (unexpected data type).")
                   }
               }
           } catch {
@@ -188,7 +188,7 @@ class ShareViewController: UIViewController {
               NSLog("[ERROR] Exception when handling pkpass: \(error.localizedDescription)")
               // Ensure dismissWithError runs on the main thread if it interacts with UI
               Task { @MainActor in
-                  await self.dismissWithError(message: "Error processing pkpass: \(error.localizedDescription)")
+                  self.dismissWithError(message: "Error processing pkpass: \(error.localizedDescription)")
               }
           }
       }
