@@ -32,9 +32,9 @@ Ensure you use versions that work together
 | **SDK 50** | 1.0+                                  |
 | **SDK 49** | 0.2+                                  |
 
-</details>
-
 > iOS privacy manifest is available since v1.4.1
+
+</details>
 
 ## Table of Contents
 
