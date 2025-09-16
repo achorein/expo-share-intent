@@ -195,22 +195,40 @@ class ShareViewController: UIViewController {
   }
 
 
-  private func handleImages(content: NSExtensionItem, attachment: NSItemProvider, index: Int) async
-  {
+  private func handleImages(content: NSExtensionItem, attachment: NSItemProvider, index: Int) async {
     Task.detached {
-      if let item = try? await attachment.loadItem(forTypeIdentifier: self.imageContentType) {
+      do {
+        let item = try await attachment.loadItem(forTypeIdentifier: self.imageContentType)
+        
         Task { @MainActor in
-
           var url: URL? = nil
+          
           if let dataURL = item as? URL {
             url = dataURL
           } else if let imageData = item as? UIImage {
             url = self.saveScreenshot(imageData)
+            if url == nil {
+              NSLog("[ERROR] handleImages: saveScreenshot returned nil")
+            }
+          } else if let data = item as? Data {
+            if let image = UIImage(data: data) {
+              url = self.saveScreenshot(image)
+            } else {
+              NSLog("[ERROR] handleImages: Failed to create UIImage from Data")
+            }
+          } else {
+            NSLog("[ERROR] handleImages: Item is unexpected type: \(type(of: item))")
+          }
+
+          guard let safeURL = url else {
+            NSLog("[ERROR] handleImages: Failed to get URL for image item")
+            self.dismissWithError(message: "Failed to process image")
+            return
           }
 
           var pixelWidth: Int? = nil
           var pixelHeight: Int? = nil
-          if let imageSource = CGImageSourceCreateWithURL(url! as CFURL, nil) {
+          if let imageSource = CGImageSourceCreateWithURL(safeURL as CFURL, nil) {
             if let imageProperties = CGImageSourceCopyPropertiesAtIndex(imageSource, 0, nil)
               as Dictionary?
             {
@@ -231,16 +249,18 @@ class ShareViewController: UIViewController {
           }
 
           // Always copy
-          let fileName = self.getFileName(from: url!, type: .image)
-          let fileExtension = self.getExtension(from: url!, type: .image)
-          let fileSize = self.getFileSize(from: url!)
-          let mimeType = url!.mimeType(ext: fileExtension)
+          let fileName = self.getFileName(from: safeURL, type: .image)
+          let fileExtension = self.getExtension(from: safeURL, type: .image)
+          let fileSize = self.getFileSize(from: safeURL)
+          let mimeType = safeURL.mimeType(ext: fileExtension)
           let newName = "\(UUID().uuidString).\(fileExtension)"
           let newPath = FileManager.default
             .containerURL(
               forSecurityApplicationGroupIdentifier: self.hostAppGroupIdentifier)!
             .appendingPathComponent(newName)
-          let copied = self.copyFile(at: url!, to: newPath)
+          
+          let copied = self.copyFile(at: safeURL, to: newPath)
+          
           if copied {
             self.sharedMedia.append(
               SharedMediaFile(
@@ -256,30 +276,54 @@ class ShareViewController: UIViewController {
             userDefaults?.synchronize()
             self.redirectToHostApp(type: .media)
           }
-
         }
-      } else {
-        NSLog("[ERROR] Cannot load image content !\(String(describing: content))")
-        await self.dismissWithError(
-          message: "Cannot load image content \(String(describing: content))")
+      } catch {
+        NSLog("[ERROR] handleImages: Exception loading image item: \(error)")
+        await self.dismissWithError(message: "Cannot load image content: \(error.localizedDescription)")
       }
     }
   }
 
   private func documentDirectoryPath() -> URL? {
-    let path = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
-    return path.first
+    let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
+    
+    if let firstPath = paths.first {
+      _ = FileManager.default.fileExists(atPath: firstPath.path)
+      return firstPath
+    } else {
+      return nil
+    }
   }
 
   private func saveScreenshot(_ image: UIImage) -> URL? {
-    var screenshotURL: URL? = nil
-    if let screenshotData = image.pngData(),
-      let screenshotPath = documentDirectoryPath()?.appendingPathComponent("screenshot.png")
-    {
-      try? screenshotData.write(to: screenshotPath)
-      screenshotURL = screenshotPath
+    guard let screenshotData = image.pngData() else {
+      return nil
     }
-    return screenshotURL
+    
+    // Try using the app group container instead of documents directory
+    guard let containerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: self.hostAppGroupIdentifier) else {
+      return nil
+    }
+    
+    let fileName = "screenshot_\(UUID().uuidString).png"
+    let screenshotPath = containerURL.appendingPathComponent(fileName)
+    
+    do {
+      try screenshotData.write(to: screenshotPath)
+
+      let fileExists = FileManager.default.fileExists(atPath: screenshotPath.path)
+      
+      if fileExists {
+        let attributes = try? FileManager.default.attributesOfItem(atPath: screenshotPath.path)
+        _ = attributes?[.size] as? Int ?? 0
+      }
+      
+      return screenshotPath
+    } catch {
+      NSLog("[ERROR] saveScreenshot: Failed to write screenshot: \(error)")
+      NSLog("[ERROR] saveScreenshot: Error details: \(error.localizedDescription)")
+      return nil
+    }
   }
 
   private func handleVideos(content: NSExtensionItem, attachment: NSItemProvider, index: Int) async
