@@ -18,12 +18,12 @@
     "postinstall": "patch-package"
   },
   "dependencies": {
-    "expo": "54.0.7",
+    "expo": "^54.0.10",
     "expo-dev-client": "~6.0.12",
     "expo-linking": "~8.0.8",
     "expo-splash-screen": "~31.0.10",
     "expo-status-bar": "~3.0.8",
-    "expo-updates": "~29.0.10",
+    "expo-updates": "~29.0.11",
     "patch-package": "^8.0.0",
     "react": "19.1.0",
     "react-dom": "19.1.0",
