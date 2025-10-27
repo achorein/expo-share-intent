@@ -19,13 +19,22 @@ Ensure you use versions that work together
 
 | Expo       | Supported `expo-share-intent` version |
 | ---------- | ------------------------------------- |
+| **SDK 54** | 5.0+                                  |
 | **SDK 53** | 4.0+                                  |
+
+<details>
+<summary>📋 Legacy versions</summary>
+
+| Expo       | Supported `expo-share-intent` version |
+| ---------- | ------------------------------------- |
 | **SDK 52** | 3.0+                                  |
 | **SDK 51** | 2.0+                                  |
 | **SDK 50** | 1.0+                                  |
 | **SDK 49** | 0.2+                                  |
 
 > iOS privacy manifest is available since v1.4.1
+
+</details>
 
 ## Table of Contents
 
