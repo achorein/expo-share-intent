@@ -28,6 +28,7 @@ class ShareViewController: UIViewController {
   let fileURLType: String = UTType.fileURL.identifier
   let pkpassContentType: String = "com.apple.pkpass"
   let pdfContentType: String = UTType.pdf.identifier
+  let vcardContentType: String = "public.vcard"
 
   override func viewDidLoad() {
     super.viewDidLoad()
@@ -53,6 +54,8 @@ class ShareViewController: UIViewController {
         } else if attachment.hasItemConformingToTypeIdentifier(videoContentType) {
           thisType = .media
           await handleVideos(content: content, attachment: attachment, index: index)
+        } else if attachment.hasItemConformingToTypeIdentifier(vcardContentType) {
+          await handleVCard(content: content, attachment: attachment, index: index) 
         } else if attachment.hasItemConformingToTypeIdentifier(fileURLType) {
           thisType = .file
           await handleFiles(content: content, attachment: attachment, index: index)
@@ -76,6 +79,33 @@ class ShareViewController: UIViewController {
           dismissWithError(message: "content type not handle \(String(describing: content)))")
         }
         if index == lastIndex { self.expectedFinalType = thisType }
+      }
+    }
+  }
+
+  private func handleVCard(content: NSExtensionItem, attachment: NSItemProvider, index: Int) async {
+    Task.detached {
+      do {
+        if let url = try? await attachment.loadItem(forTypeIdentifier: self.vcardContentType) as? URL {
+          // ensure a .vcf file extension so mime resolves properly
+          let tmp = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString + ".vcf")
+          _ = self.copyFile(at: url, to: tmp)
+          Task { @MainActor in
+            await self.handleFileURL(content: content, url: tmp, index: index)
+          }
+        } else if let data = try? await attachment.loadItem(forTypeIdentifier: self.vcardContentType) as? Data {
+          let tmp = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString + ".vcf")
+          try data.write(to: tmp)
+          Task { @MainActor in
+            await self.handleFileURL(content: content, url: tmp, index: index)
+          }
+        } else {
+          NSLog("[ERROR] Cannot load vcard content !\(String(describing: content))")
+          await self.dismissWithError(message: "Cannot load vCard content \(String(describing: content))")
+        }
+      } catch {
+        NSLog("[ERROR] handleVCard exception: \(error.localizedDescription)")
+        await self.dismissWithError(message: "vCard error: \(error.localizedDescription)")
       }
     }
   }
@@ -744,6 +774,7 @@ internal let mimeTypes = [
   "asf": "video/x-ms-asf",
   "wmv": "video/x-ms-wmv",
   "avi": "video/x-msvideo",
+  "vcf": "text/vcard",
 ]
 
 extension URL {
