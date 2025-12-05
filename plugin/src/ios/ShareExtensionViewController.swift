@@ -16,6 +16,10 @@ class ShareViewController: UIViewController {
   var sharedMedia: [SharedMediaFile] = []
   var sharedWebUrl: [WebUrl] = []
   var sharedText: [String] = []
+  // Race condition handling
+  var totalAttachments: Int = 0
+  var processedAttachments: Int = 0
+  var expectedFinalType: RedirectType? = nil
   let imageContentType: String = UTType.image.identifier
   let videoContentType: String = UTType.movie.identifier
   let textContentType: String = UTType.text.identifier
@@ -40,29 +44,41 @@ class ShareViewController: UIViewController {
         dismissWithError(message: "No content found")
         return
       }
+      self.totalAttachments = attachments.count
+      let lastIndex = attachments.count - 1
       for (index, attachment) in (attachments).enumerated() {
+        var thisType: RedirectType? = nil
         if attachment.hasItemConformingToTypeIdentifier(imageContentType) {
+          thisType = .media
           await handleImages(content: content, attachment: attachment, index: index)
         } else if attachment.hasItemConformingToTypeIdentifier(videoContentType) {
+          thisType = .media
           await handleVideos(content: content, attachment: attachment, index: index)
         } else if attachment.hasItemConformingToTypeIdentifier(vcardContentType) {
           await handleVCard(content: content, attachment: attachment, index: index) 
         } else if attachment.hasItemConformingToTypeIdentifier(fileURLType) {
+          thisType = .file
           await handleFiles(content: content, attachment: attachment, index: index)
         } else if attachment.hasItemConformingToTypeIdentifier(pkpassContentType) {
+          thisType = .file
           await handlePkPass(content: content, attachment: attachment, index: index)
         } else if attachment.hasItemConformingToTypeIdentifier(pdfContentType) {
+          thisType = .file
           await handlePdf(content: content, attachment: attachment, index: index)
         } else if attachment.hasItemConformingToTypeIdentifier(propertyListType) {
+          thisType = .weburl
           await handlePrepocessing(content: content, attachment: attachment, index: index)
         } else if attachment.hasItemConformingToTypeIdentifier(urlContentType) {
+          thisType = .weburl
           await handleUrl(content: content, attachment: attachment, index: index)
         } else if attachment.hasItemConformingToTypeIdentifier(textContentType) {
+          thisType = .text
           await handleText(content: content, attachment: attachment, index: index)
         } else {
           NSLog("[ERROR] content type not handle !\(String(describing: content))")
           dismissWithError(message: "content type not handle \(String(describing: content)))")
         }
+        if index == lastIndex { self.expectedFinalType = thisType }
       }
     }
   }
@@ -102,13 +118,7 @@ class ShareViewController: UIViewController {
         Task { @MainActor in
 
           self.sharedText.append(item)
-          // If this is the last item, save sharedText in userDefaults and redirect to host app
-          if index == (content.attachments?.count)! - 1 {
-            let userDefaults = UserDefaults(suiteName: self.hostAppGroupIdentifier)
-            userDefaults?.set(self.sharedText, forKey: self.sharedKey)
-            userDefaults?.synchronize()
-            self.redirectToHostApp(type: .text)
-          }
+          self.markProcessed()
 
         }
       } else {
@@ -125,13 +135,7 @@ class ShareViewController: UIViewController {
         Task { @MainActor in
 
           self.sharedWebUrl.append(WebUrl(url: item.absoluteString, meta: ""))
-          // If this is the last item, save sharedText in userDefaults and redirect to host app
-          if index == (content.attachments?.count)! - 1 {
-            let userDefaults = UserDefaults(suiteName: self.hostAppGroupIdentifier)
-            userDefaults?.set(self.toData(data: self.sharedWebUrl), forKey: self.sharedKey)
-            userDefaults?.synchronize()
-            self.redirectToHostApp(type: .weburl)
-          }
+          self.markProcessed()
 
         }
       } else {
@@ -160,13 +164,7 @@ class ShareViewController: UIViewController {
             )
             self.sharedWebUrl.append(
               WebUrl(url: results["baseURI"] as! String, meta: results["meta"] as! String))
-            // If this is the last item, save sharedText in userDefaults and redirect to host app
-            if index == (content.attachments?.count)! - 1 {
-              let userDefaults = UserDefaults(suiteName: self.hostAppGroupIdentifier)
-              userDefaults?.set(self.toData(data: self.sharedWebUrl), forKey: self.sharedKey)
-              userDefaults?.synchronize()
-              self.redirectToHostApp(type: .weburl)
-            }
+            self.markProcessed()
           } else {
             NSLog("[ERROR] Cannot load preprocessing results !\(String(describing: content))")
             self.dismissWithError(
@@ -299,13 +297,8 @@ class ShareViewController: UIViewController {
                 mimeType: mimeType, type: .image))
           }
 
-          // If this is the last item, save imagesData in userDefaults and redirect to host app
-          if index == (content.attachments?.count)! - 1 {
-            let userDefaults = UserDefaults(suiteName: self.hostAppGroupIdentifier)
-            userDefaults?.set(self.toData(data: self.sharedMedia), forKey: self.sharedKey)
-            userDefaults?.synchronize()
-            self.redirectToHostApp(type: .media)
-          }
+          self.markProcessed()
+
         }
       } catch {
         NSLog("[ERROR] handleImages: Exception loading image item: \(error)")
@@ -384,13 +377,7 @@ class ShareViewController: UIViewController {
             self.sharedMedia.append(sharedFile)
           }
 
-          // If this is the last item, save imagesData in userDefaults and redirect to host app
-          if index == (content.attachments?.count)! - 1 {
-            let userDefaults = UserDefaults(suiteName: self.hostAppGroupIdentifier)
-            userDefaults?.set(self.toData(data: self.sharedMedia), forKey: self.sharedKey)
-            userDefaults?.synchronize()
-            self.redirectToHostApp(type: .media)
-          }
+          self.markProcessed()
 
         }
       } else {
@@ -453,12 +440,7 @@ class ShareViewController: UIViewController {
           type: .file))
     }
 
-    if index == (content.attachments?.count)! - 1 {
-      let userDefaults = UserDefaults(suiteName: self.hostAppGroupIdentifier)
-      userDefaults?.set(self.toData(data: self.sharedMedia), forKey: self.sharedKey)
-      userDefaults?.synchronize()
-      self.redirectToHostApp(type: .file)
-    }
+  self.markProcessed()
   }
 
   private func dismissWithError(message: String? = nil) {
@@ -628,10 +610,11 @@ class ShareViewController: UIViewController {
     var duration: Double?  // video duration in milliseconds
     var mimeType: String
     var type: SharedMediaType
+    var extra: String?  // caption / extra text
 
     init(
       path: String, thumbnail: String?, fileName: String, fileSize: Int?, width: Int?, height: Int?,
-      duration: Double?, mimeType: String, type: SharedMediaType
+      duration: Double?, mimeType: String, type: SharedMediaType, extra: String? = nil
     ) {
       self.path = path
       self.thumbnail = thumbnail
@@ -642,6 +625,7 @@ class ShareViewController: UIViewController {
       self.duration = duration
       self.mimeType = mimeType
       self.type = type
+      self.extra = extra
     }
   }
 
@@ -658,6 +642,39 @@ class ShareViewController: UIViewController {
   func toData(data: [SharedMediaFile]) -> Data? {
     let encodedData = try? JSONEncoder().encode(data)
     return encodedData
+  }
+
+  // MARK: - Finalization helpers (race condition fix)
+  private func markProcessed() {
+    processedAttachments += 1
+    if processedAttachments == totalAttachments { finalizeAndRedirect() }
+  }
+
+  private func finalizeAndRedirect() {
+    // Prefer media if any media files were collected, regardless of last attachment type.
+    var chosenType = expectedFinalType
+    if !sharedMedia.isEmpty { chosenType = .media }
+    guard let finalType = chosenType else {
+      dismissWithError(message: "Unknown final type")
+      return
+    }
+    let userDefaults = UserDefaults(suiteName: self.hostAppGroupIdentifier)
+
+    switch finalType {
+    case .media, .file:
+      // Attach extra caption if we have text and media
+      let caption = sharedText.first
+      if let caption = caption, !caption.isEmpty {
+        for i in 0..<sharedMedia.count { if sharedMedia[i].extra == nil { sharedMedia[i].extra = caption } }
+      }
+      userDefaults?.set(self.toData(data: self.sharedMedia), forKey: self.sharedKey)
+    case .text:
+      userDefaults?.set(self.sharedText, forKey: self.sharedKey)
+    case .weburl:
+      userDefaults?.set(self.toData(data: self.sharedWebUrl), forKey: self.sharedKey)
+    }
+    userDefaults?.synchronize()
+    self.redirectToHostApp(type: finalType)
   }
 }
 

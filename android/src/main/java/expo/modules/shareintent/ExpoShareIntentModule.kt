@@ -112,15 +112,6 @@ class ExpoShareIntentModule : Module() {
         }
 
         fun handleShareIntent(intent: Intent) {
-            val activity = instance?.currentActivity
-            if (activity != null && !activity.isTaskRoot) {
-                val newIntent = Intent(intent).apply {
-                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                }
-                activity.startActivity(newIntent)
-                activity.finish()
-                return
-            }
             if (intent.type == null) return
             if (intent.type!!.startsWith("text/plain")) {
                 // text / urls
@@ -139,17 +130,31 @@ class ExpoShareIntentModule : Module() {
                 }
             } else {
                 // files / medias
+                val extraText = intent.getStringExtra(Intent.EXTRA_TEXT)
+                val meta = mutableMapOf<String, Any?>()
+                val title = intent.getCharSequenceExtra(Intent.EXTRA_TITLE)
+                if (title != null) meta["title"] = title
+                if (extraText != null) meta["extra"] = extraText
+
                 if (intent.action == Intent.ACTION_SEND) {
                     val uri = intent.parcelable<Uri>(Intent.EXTRA_STREAM);
                     if (uri != null) {
-                        notifyShareIntent(mapOf( "files" to arrayOf(getFileInfo(uri), "type" to "file")))
+                        notifyShareIntent(mapOf(
+                            "files" to arrayOf(getFileInfo(uri)),
+                            "type" to "file",
+                            "meta" to if (meta.isNotEmpty()) meta else null
+                        ))
                     } else {
                         notifyError("empty uri for file sharing: " + intent.action)
                     }
                 } else if (intent.action == Intent.ACTION_SEND_MULTIPLE) {
                     val uris = intent.parcelableArrayList<Uri>(Intent.EXTRA_STREAM)
                     if (uris != null) {
-                        notifyShareIntent(mapOf( "files" to uris.map { getFileInfo(it) }, "type" to "file"))
+                        notifyShareIntent(mapOf(
+                            "files" to uris.map { getFileInfo(it) },
+                            "type" to "file",
+                            "meta" to if (meta.isNotEmpty()) meta else null
+                        ))
                     } else {
                         notifyError("empty uris array for file sharing: " + intent.action)
                     }
