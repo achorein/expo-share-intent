@@ -27,7 +27,9 @@
     "react-native-share-intent",
     "expo-config-plugin",
     "share-share-intent",
-    "share-intent"
+    "share-intent",
+    "ios-custom-view",
+    "ios-context-menu"
   ],
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
