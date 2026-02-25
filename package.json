@@ -56,9 +56,9 @@
     "expo-module": "expo-module"
   },
   "dependencies": {
-    "@expo/config-plugins": "~10.1.1",
-    "expo-constants": "~18.0.10",
-    "expo-linking": "~8.0.9"
+    "@expo/config-plugins": "~55.0.6",
+    "expo-constants": "~55.0.7",
+    "expo-linking": "~55.0.7"
   },
   "resolutions": {
     "string-width": "^4",
@@ -66,20 +66,20 @@
     "wrap-ansi": "^7"
   },
   "peerDependencies": {
-    "expo": "^54",
-    "expo-constants": ">=18.0.8",
-    "expo-linking": ">=8.0.8",
+    "expo": "^55",
+    "expo-constants": ">=55.0.7",
+    "expo-linking": ">=55.0.7",
     "react": "*",
     "react-native": "*"
   },
   "devDependencies": {
     "@release-it/conventional-changelog": "^9.0.0",
-    "@types/react": "~18.3.12",
+    "@types/react": "~19.2.10",
     "@types/react-native": "^0.73.0",
     "dotenv-cli": "^7.4.2",
     "eslint": "^8.57.1",
-    "expo-module-scripts": "^5.0.7",
-    "expo-modules-core": "^3.0.15",
+    "expo-module-scripts": "^55.0.2",
+    "expo-modules-core": "^55.0.11",
     "prettier": "^3.2.5",
     "release-it": "^19.0.4"
   }
