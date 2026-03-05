@@ -63,52 +63,103 @@ class ExpoShareIntentModule : Module() {
                 notifyError("Cannot get resolver (getFileInfo)")
                 return mapOf(
                     "contentUri" to uri.toString(),
-                    "filePath" to instance?.getAbsolutePath(uri),
                 )
             }
-            val queryResult: Cursor = resolver.query(uri, null, null, null, null)!!
-            queryResult.moveToFirst()
-            val fileName = queryResult.getString(queryResult.getColumnIndex(OpenableColumns.DISPLAY_NAME))
-            val fileSize = queryResult.getString(queryResult.getColumnIndex(OpenableColumns.SIZE))
-            queryResult.close()
 
-            val mimeType = resolver.getType(uri)!!
-
-            var mediaWidth: String? = null;
-            var mediaHeight: String? = null;
-            var mediaDuration: String? = null;
-            if (mimeType.startsWith("image/")) {
-                val options = BitmapFactory.Options().apply {
-                    inJustDecodeBounds = true
+            try {
+                // Step 1: Read metadata from the content URI while permission is valid
+                var fileName: String? = null
+                var fileSize: String? = null
+                try {
+                    resolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME, OpenableColumns.SIZE), null, null, null)?.use { cursor ->
+                        if (cursor.moveToFirst()) {
+                            val nameIdx = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                            val sizeIdx = cursor.getColumnIndex(OpenableColumns.SIZE)
+                            if (nameIdx >= 0) fileName = cursor.getString(nameIdx)
+                            if (sizeIdx >= 0) fileSize = cursor.getString(sizeIdx)
+                        }
+                    }
+                } catch (e: SecurityException) {
+                    Log.w("ExpoShareIntent", "Cannot query metadata for $uri: ${e.message}")
                 }
-                BitmapFactory.decodeStream(resolver.openInputStream(uri), null, options)
-                mediaHeight = options.outHeight.toString()
-                mediaWidth = options.outWidth.toString()
-            }
-            if (mimeType.startsWith("video/")) {
-                val retriever = MediaMetadataRetriever()
-                retriever.setDataSource(instance?.getAbsolutePath(uri))
-                mediaWidth = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)?.toInt().toString() ?: null
-                mediaHeight = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)?.toInt().toString() ?: null
-                // Check orientation and flip size if required
-                val metaRotation = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION)?.toInt() ?: 0;
-                if (metaRotation == 90 || metaRotation == 270) {
-                    mediaWidth = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)?.toInt().toString() ?: null
-                    mediaHeight = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)?.toInt().toString() ?: null
-                }
-                mediaDuration = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toInt().toString() ?: null
-            }
 
-            return mapOf(
-                    "contentUri" to uri.toString(),
-                    "filePath" to instance?.getAbsolutePath(uri),
-                    "fileName" to fileName,
-                    "fileSize" to fileSize,
-                    "mimeType" to mimeType,
-                    "width" to mediaWidth,
-                    "height" to mediaHeight,
-                    "duration" to mediaDuration
-            )
+                val mimeType = try {
+                    resolver.getType(uri)
+                } catch (e: SecurityException) {
+                    Log.w("ExpoShareIntent", "Cannot get MIME type for $uri: ${e.message}")
+                    null
+                }
+
+                // Step 2: Copy file to cache immediately (while URI permission is still valid)
+                val extension = if (fileName != null && fileName!!.contains(".")) {
+                    fileName!!.substringAfterLast(".")
+                } else {
+                    MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType) ?: "bin"
+                }
+                val safeName = fileName ?: "shared_${Date().time}.$extension"
+                val targetFile = File(instance?.context?.cacheDir, safeName)
+
+                resolver.openInputStream(uri)?.use { input ->
+                    FileOutputStream(targetFile).use { output ->
+                        input.copyTo(output)
+                    }
+                } ?: run {
+                    notifyError("Cannot open input stream for $uri")
+                    return mapOf("contentUri" to uri.toString())
+                }
+
+                // Step 3: If we couldn't get size from metadata, use the copied file size
+                if (fileSize == null) {
+                    fileSize = targetFile.length().toString()
+                }
+
+                // Step 4: Read media dimensions from the LOCAL copy (no permission needed)
+                var mediaWidth: String? = null
+                var mediaHeight: String? = null
+                var mediaDuration: String? = null
+
+                if (mimeType?.startsWith("image/") == true) {
+                    val options = BitmapFactory.Options().apply {
+                        inJustDecodeBounds = true
+                    }
+                    BitmapFactory.decodeFile(targetFile.path, options)
+                    mediaHeight = options.outHeight.toString()
+                    mediaWidth = options.outWidth.toString()
+                }
+                if (mimeType?.startsWith("video/") == true) {
+                    try {
+                        val retriever = MediaMetadataRetriever()
+                        retriever.setDataSource(targetFile.path)
+                        mediaWidth = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)
+                        mediaHeight = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)
+                        val metaRotation = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION)?.toIntOrNull() ?: 0
+                        if (metaRotation == 90 || metaRotation == 270) {
+                            val tmp = mediaWidth
+                            mediaWidth = mediaHeight
+                            mediaHeight = tmp
+                        }
+                        mediaDuration = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
+                        retriever.release()
+                    } catch (e: Exception) {
+                        Log.w("ExpoShareIntent", "Cannot read video metadata: ${e.message}")
+                    }
+                }
+
+                return mapOf(
+                        "contentUri" to uri.toString(),
+                        "filePath" to targetFile.path,
+                        "fileName" to (fileName ?: safeName),
+                        "fileSize" to fileSize,
+                        "mimeType" to mimeType,
+                        "width" to mediaWidth,
+                        "height" to mediaHeight,
+                        "duration" to mediaDuration
+                )
+            } catch (e: Exception) {
+                Log.e("ExpoShareIntent", "getFileInfo failed for $uri: ${e.message}", e)
+                notifyError("Cannot process shared file: ${e.message}")
+                return mapOf("contentUri" to uri.toString())
+            }
         }
 
         fun handleShareIntent(intent: Intent) {
