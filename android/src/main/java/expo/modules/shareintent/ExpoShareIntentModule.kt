@@ -173,9 +173,14 @@ class ExpoShareIntentModule : Module() {
                 return
             }
             if (intent.type == null) return
-            if (intent.type!!.startsWith("text/plain")) {
-                // text / urls
-                if (intent.action == Intent.ACTION_SEND) {
+
+            if (intent.action == Intent.ACTION_SEND) {
+                // Check for file stream first — even text/* MIME types can be file shares
+                val streamUri = intent.parcelable<Uri>(Intent.EXTRA_STREAM)
+                if (streamUri != null) {
+                    notifyShareIntent(mapOf("files" to arrayOf(getFileInfo(streamUri)), "type" to "file"))
+                } else if (intent.type!!.startsWith("text/")) {
+                    // Pure text share (no file attachment)
                     notifyShareIntent(mapOf(
                         "text" to intent.getStringExtra(Intent.EXTRA_TEXT),
                         "type" to "text",
@@ -183,30 +188,20 @@ class ExpoShareIntentModule : Module() {
                             "title" to intent.getCharSequenceExtra(Intent.EXTRA_TITLE),
                         )
                     ))
-                } else if (intent.action == Intent.ACTION_VIEW) {
-                    notifyShareIntent(mapOf( "text" to intent.dataString, "type" to "text"))
                 } else {
-                    notifyError("Invalid action for text sharing: " + intent.action)
+                    notifyError("Unsupported ACTION_SEND with no stream and non-text type: ${intent.type}")
                 }
+            } else if (intent.action == Intent.ACTION_SEND_MULTIPLE) {
+                val uris = intent.parcelableArrayList<Uri>(Intent.EXTRA_STREAM)
+                if (uris != null) {
+                    notifyShareIntent(mapOf("files" to uris.map { getFileInfo(it) }, "type" to "file"))
+                } else {
+                    notifyError("empty uris array for file sharing: ${intent.action}")
+                }
+            } else if (intent.action == Intent.ACTION_VIEW) {
+                notifyShareIntent(mapOf("text" to intent.dataString, "type" to "text"))
             } else {
-                // files / medias
-                if (intent.action == Intent.ACTION_SEND) {
-                    val uri = intent.parcelable<Uri>(Intent.EXTRA_STREAM);
-                    if (uri != null) {
-                        notifyShareIntent(mapOf( "files" to arrayOf(getFileInfo(uri), "type" to "file")))
-                    } else {
-                        notifyError("empty uri for file sharing: " + intent.action)
-                    }
-                } else if (intent.action == Intent.ACTION_SEND_MULTIPLE) {
-                    val uris = intent.parcelableArrayList<Uri>(Intent.EXTRA_STREAM)
-                    if (uris != null) {
-                        notifyShareIntent(mapOf( "files" to uris.map { getFileInfo(it) }, "type" to "file"))
-                    } else {
-                        notifyError("empty uris array for file sharing: " + intent.action)
-                    }
-                } else {
-                    notifyError("Invalid action for file sharing: " + intent.action)
-                }
+                notifyError("Unsupported intent action: ${intent.action}")
             }
         }
 
