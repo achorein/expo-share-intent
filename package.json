@@ -1,16 +1,16 @@
 {
-  "name": "expo-share-intent",
-  "version": "6.0.0",
+  "name": "expo-share-multi-intent",
+  "version": "6.1.0",
   "description": "use native share intent for ios and android with expo",
-  "homepage": "https://github.com/achorein/expo-share-intent/",
+  "homepage": "https://github.com/voidmaster000/expo-share-multi-intent/",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/achorein/expo-share-intent.git"
+    "url": "git+https://github.com/voidmaster000/expo-share-multi-intent.git"
   },
-  "author": "achorein (https://github.com/achorein)",
+  "author": "voidmaster000 (https://github.com/voidmaster000)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/achorein/expo-share-intent/issues"
+    "url": "https://github.com/voidmaster000/expo-share-multi-intent/issues"
   },
   "funding": [
     {
@@ -49,7 +49,7 @@
     "release": "dotenv release-it",
     "build": "expo-module build",
     "build:plugin": "expo-module build plugin",
-    "postbuild": "cp plugin/src/ios/*.swift plugin/build/ios",
+    "postbuild": "xcopy .\\plugin\\src\\ios\\*.swift .\\plugin\\build\\ios\\ /I /Y",
     "clean": "expo-module clean",
     "lint": "expo-module lint",
     "test": "expo-module test",
@@ -58,9 +58,9 @@
     "expo-module": "expo-module"
   },
   "dependencies": {
-    "@expo/config-plugins": "~55.0.6",
-    "expo-constants": "~55.0.7",
-    "expo-linking": "~55.0.7"
+    "@expo/config-plugins": "~55.0.7",
+    "expo-constants": "~55.0.9",
+    "expo-linking": "~55.0.9"
   },
   "resolutions": {
     "string-width": "^4",
@@ -75,14 +75,18 @@
     "react-native": "*"
   },
   "devDependencies": {
-    "@release-it/conventional-changelog": "^9.0.0",
+    "@release-it/conventional-changelog": "^10.0.6",
     "@types/react": "~19.2.10",
     "@types/react-native": "^0.73.0",
-    "dotenv-cli": "^7.4.2",
-    "eslint": "^8.57.1",
+    "dotenv-cli": "^11.0.0",
+    "eslint": "^9.39.4",
     "expo-module-scripts": "^55.0.2",
-    "expo-modules-core": "^55.0.11",
-    "prettier": "^3.2.5",
+    "expo-modules-core": "^55.0.18",
+    "prettier": "^3.8.1",
     "release-it": "^19.2.4"
+  },
+  "overrides": {
+    "undici": "^7.24.7",
+    "@tootallnate/once": "^3.0.1"
   }
 }
