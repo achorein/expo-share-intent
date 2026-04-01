@@ -32,7 +32,18 @@ class ShareViewController: UIViewController {
     if hideView {
       view.backgroundColor = .clear
       view.isOpaque = false
+      handleViewLoad()
     }
+  }
+
+  override func viewDidAppear(_ animated: Bool) {
+    super.viewDidAppear(animated)
+    if !hideView {
+      handleViewLoad()
+    }
+  }
+
+  private func handleViewLoad() {
     Task {
       guard let extensionContext = self.extensionContext,
         let content = extensionContext.inputItems.first as? NSExtensionItem,
