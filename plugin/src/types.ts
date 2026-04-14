@@ -5,6 +5,7 @@ export type Parameters = {
   iosShareExtensionName?: string;
   iosAppGroupIdentifier?: string;
   iosShareExtensionBundleIdentifier?: string;
+  iosHideView?: boolean;
   androidMainActivityAttributes?: CustomParameter;
   androidIntentFilters?: ("text/*" | "image/*" | "video/*" | "*/*")[];
   androidMultiIntentFilters?: ("image/*" | "video/*" | "*/*")[];

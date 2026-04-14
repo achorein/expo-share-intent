@@ -18,16 +18,16 @@
     "postinstall": "patch-package"
   },
   "dependencies": {
-    "expo": "^55.0.0",
-    "expo-dev-client": "~55.0.8",
-    "expo-linking": "~55.0.7",
-    "expo-splash-screen": "~55.0.9",
+    "expo": "~55.0.9",
+    "expo-dev-client": "~55.0.19",
+    "expo-linking": "~55.0.9",
+    "expo-splash-screen": "~55.0.13",
     "expo-status-bar": "~55.0.4",
-    "expo-updates": "~55.0.11",
+    "expo-updates": "~55.0.16",
     "patch-package": "^8.0.0",
     "react": "19.2.0",
     "react-dom": "19.2.0",
-    "react-native": "0.83.2",
+    "react-native": "0.83.4",
     "react-native-web": "^0.21.0"
   },
   "devDependencies": {

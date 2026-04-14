@@ -69,6 +69,7 @@ export async function writeShareExtensionFiles(
   const viewControllerContent = getShareExtensionViewControllerContent(
     scheme,
     getAppGroup(appIdentifier, parameters),
+    parameters.iosHideView,
   );
   await fs.promises.writeFile(viewControllerFilePath, viewControllerContent);
 
@@ -277,6 +278,7 @@ var ExtensionPreprocessingJS = new ShareExtensionPreprocessor();
 export function getShareExtensionViewControllerContent(
   scheme: string,
   groupIdentifier: string,
+  hideView: boolean = true,
 ) {
   let updatedScheme = scheme;
   if (Array.isArray(scheme)) {
@@ -301,5 +303,6 @@ export function getShareExtensionViewControllerContent(
 
   return content
     .replaceAll("<SCHEME>", updatedScheme)
-    .replaceAll("<GROUPIDENTIFIER>", groupIdentifier);
+    .replaceAll("<GROUPIDENTIFIER>", groupIdentifier)
+    .replaceAll("<HIDEVIEW>", hideView ? "true" : "false");
 }

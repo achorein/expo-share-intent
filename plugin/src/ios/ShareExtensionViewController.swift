@@ -10,9 +10,10 @@ import Social
 import UIKit
 
 class ShareViewController: UIViewController {
-  let hostAppGroupIdentifier = "<GROUPIDENTIFIER>"
-  let shareProtocol = "<SCHEME>"
-  let sharedKey = "<SCHEME>ShareKey"
+  let hostAppGroupIdentifier: String = "<GROUPIDENTIFIER>"
+  let shareProtocol: String = "<SCHEME>"
+  let sharedKey: String = "<SCHEME>ShareKey"
+  let hideView: Bool = <HIDEVIEW>
   var sharedMedia: [SharedMediaFile] = []
   var sharedWebUrl: [WebUrl] = []
   var sharedText: [String] = []
@@ -28,10 +29,21 @@ class ShareViewController: UIViewController {
 
   override func viewDidLoad() {
     super.viewDidLoad()
+    if hideView {
+      view.backgroundColor = .clear
+      view.isOpaque = false
+      handleViewLoad()
+    }
   }
 
   override func viewDidAppear(_ animated: Bool) {
     super.viewDidAppear(animated)
+    if !hideView {
+      handleViewLoad()
+    }
+  }
+
+  private func handleViewLoad() {
     Task {
       guard let extensionContext = self.extensionContext,
         let content = extensionContext.inputItems.first as? NSExtensionItem,
