@@ -12,8 +12,7 @@
     "test": "CI=1 expo install --check",
     "test:fix": "expo install --fix",
     "doctor": "npx --yes expo-doctor@latest",
-    "lint": "eslint .",
-    "postinstall": "patch-package"
+    "lint": "eslint ."
   },
   "dependencies": {
     "@react-navigation/native": "^7.0.2",
@@ -23,7 +22,6 @@
     "expo-linking": "~55.0.15",
     "expo-splash-screen": "~55.0.21",
     "expo-status-bar": "~55.0.6",
-    "patch-package": "^8.0.0",
     "react": "19.2.0",
     "react-native": "0.83.6",
     "react-native-gesture-handler": "~2.30.0",
