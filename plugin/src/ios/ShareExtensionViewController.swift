@@ -85,7 +85,7 @@ class ShareViewController: UIViewController {
         if let url = try? await attachment.loadItem(forTypeIdentifier: self.vcardContentType) as? URL {
           // ensure a .vcf file extension so mime resolves properly
           let tmp = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString + ".vcf")
-          _ = self.copyFile(at: url, to: tmp)
+          _ = Self.copyFile(at: url, to: tmp)
           Task { @MainActor in
             await self.handleFileURL(content: content, url: tmp, index: index)
           }
@@ -301,7 +301,7 @@ class ShareViewController: UIViewController {
               forSecurityApplicationGroupIdentifier: self.hostAppGroupIdentifier)!
             .appendingPathComponent(newName)
           
-          let copied = self.copyFile(at: safeURL, to: newPath)
+          let copied = Self.copyFile(at: safeURL, to: newPath)
           
           if copied {
             self.sharedMedia.append(
@@ -385,7 +385,7 @@ class ShareViewController: UIViewController {
             .containerURL(
               forSecurityApplicationGroupIdentifier: self.hostAppGroupIdentifier)!
             .appendingPathComponent(newName)
-          let copied = self.copyFile(at: url, to: newPath)
+          let copied = Self.copyFile(at: url, to: newPath)
           if copied {
             guard
               let sharedFile = self.getSharedMediaFile(
@@ -456,7 +456,7 @@ class ShareViewController: UIViewController {
       .containerURL(
         forSecurityApplicationGroupIdentifier: self.hostAppGroupIdentifier)!
       .appendingPathComponent(newName)
-    let copied = self.copyFile(at: url, to: newPath)
+    let copied = Self.copyFile(at: url, to: newPath)
     if copied {
       self.sharedMedia.append(
         SharedMediaFile(
@@ -555,7 +555,7 @@ class ShareViewController: UIViewController {
     }
   }
 
-  func copyFile(at srcURL: URL, to dstURL: URL) -> Bool {
+  static func copyFile(at srcURL: URL, to dstURL: URL) -> Bool {
     do {
       if FileManager.default.fileExists(atPath: dstURL.path) {
         try FileManager.default.removeItem(at: dstURL)

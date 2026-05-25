@@ -1,7 +1,7 @@
 import Constants from "expo-constants";
 import { createURL } from "expo-linking";
 
-import {
+import type {
   AndroidShareIntent,
   IosShareIntent,
   ShareIntent,
@@ -101,7 +101,7 @@ export const parseShareIntent = (
       },
     };
   } else if ((shareIntent as IosShareIntent)?.weburls?.length) {
-    const weburl = (shareIntent as IosShareIntent).weburls![0];
+    const weburl = (shareIntent as IosShareIntent).weburls![0]!;
     result = {
       ...SHAREINTENT_DEFAULTVALUE,
       type: "weburl",

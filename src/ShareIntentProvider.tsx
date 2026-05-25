@@ -1,6 +1,9 @@
 import React, { useContext } from "react";
 
-import { ShareIntent, ShareIntentOptions } from "./ExpoShareIntentModule.types";
+import type {
+  ShareIntent,
+  ShareIntentOptions,
+} from "./ExpoShareIntentModule.types";
 import useShareIntent, { SHAREINTENT_DEFAULTVALUE } from "./useShareIntent";
 
 type ShareIntentContextState = {

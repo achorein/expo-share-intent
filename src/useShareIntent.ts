@@ -3,7 +3,10 @@ import { useEffect, useRef, useState } from "react";
 import { AppState, Platform } from "react-native";
 
 import ExpoShareIntentModule from "./ExpoShareIntentModule";
-import { ShareIntent, ShareIntentOptions } from "./ExpoShareIntentModule.types";
+import type {
+  ShareIntent,
+  ShareIntentOptions,
+} from "./ExpoShareIntentModule.types";
 import { getScheme, getShareExtensionKey, parseShareIntent } from "./utils";
 
 export const SHAREINTENT_DEFAULTVALUE: ShareIntent = {

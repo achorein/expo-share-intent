@@ -47,20 +47,23 @@
   ],
   "scripts": {
     "release": "dotenv release-it",
-    "build": "expo-module build",
-    "build:plugin": "expo-module build plugin",
-    "postbuild": "cp plugin/src/ios/*.swift plugin/build/ios",
-    "clean": "expo-module clean",
+    "build": "EXPO_NONINTERACTIVE=1 expo-module build",
+    "build:dev": "expo-module build",
+    "build:plugin": "EXPO_NONINTERACTIVE=1 expo-module build plugin",
+    "build:plugin:dev": "expo-module build plugin",
+    "copy:plugin-swift": "mkdir -p plugin/build/ios && cp plugin/src/ios/*.swift plugin/build/ios/",
+    "build:all": "yarn build && yarn build:plugin && yarn copy:plugin-swift",
+    "clean": "expo-module clean && rm -fr plugin/build",
     "lint": "expo-module lint",
     "test": "expo-module test",
-    "prepare": "expo-module prepare && yarn postbuild",
+    "prepare": "chmod +x node_modules/expo-module-scripts/bin/* && expo-module configure && yarn build:all",
     "prepublishOnly": "expo-module prepublishOnly",
     "expo-module": "expo-module"
   },
   "dependencies": {
-    "@expo/config-plugins": "~55.0.6",
-    "expo-constants": "~55.0.7",
-    "expo-linking": "~55.0.7"
+    "@expo/config-plugins": "~56.0.8",
+    "expo-constants": "~56.0.10",
+    "expo-linking": "~56.0.11"
   },
   "resolutions": {
     "string-width": "^4",
@@ -68,21 +71,23 @@
     "wrap-ansi": "^7"
   },
   "peerDependencies": {
-    "expo": "^55",
-    "expo-constants": ">=55.0.7",
-    "expo-linking": ">=55.0.7",
+    "expo": "^56",
+    "expo-constants": ">=56.0.10",
+    "expo-linking": ">=56.0.11",
     "react": "*",
     "react-native": "*"
   },
   "devDependencies": {
-    "@release-it/conventional-changelog": "^9.0.0",
+    "@release-it/conventional-changelog": "^11.0.0",
+    "@types/node": "^24.0.0",
     "@types/react": "~19.2.10",
     "@types/react-native": "^0.73.0",
     "dotenv-cli": "^7.4.2",
     "eslint": "^8.57.1",
-    "expo-module-scripts": "^55.0.2",
-    "expo-modules-core": "^55.0.11",
+    "expo-module-scripts": "^56.0.2",
+    "expo-modules-core": "^56.0.12",
     "prettier": "^3.2.5",
-    "release-it": "^19.2.4"
+    "release-it": "^20.0.1",
+    "typescript": "~6.0.3"
   }
 }
