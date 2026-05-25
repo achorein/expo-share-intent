@@ -7,11 +7,6 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
     "assetBundlePatterns": ["**/*"],
     "plugins": [
       [
@@ -31,7 +26,15 @@
           "preprocessorInjectJS": "metas['og\\:image'] = metas['og\\:image'] || document.querySelector('img#main-image')?.getAttribute('src') ;"
         }
       ],
-      ["expo-updates"]
+      ["expo-updates"],
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash.png",
+          "resizeMode": "contain",
+          "backgroundColor": "#ffffff"
+        }
+      ]
     ],
     "ios": {
       "supportsTablet": true,
