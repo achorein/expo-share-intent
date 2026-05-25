@@ -14,8 +14,7 @@
     "doctor": "npx --yes expo-doctor@latest",
     "lint": "eslint .",
     "open:ios": "open -a \"Xcode\" ios",
-    "open:android": "open -a \"Android Studio\" android",
-    "postinstall": "patch-package"
+    "open:android": "open -a \"Android Studio\" android"
   },
   "dependencies": {
     "expo": "~55.0.26",
@@ -24,7 +23,6 @@
     "expo-splash-screen": "~55.0.21",
     "expo-status-bar": "~55.0.6",
     "expo-updates": "~55.0.24",
-    "patch-package": "^8.0.0",
     "react": "19.2.0",
     "react-dom": "19.2.0",
     "react-native": "0.83.6",
