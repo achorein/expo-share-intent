@@ -3595,19 +3595,19 @@ expo-module-scripts@^56.0.2:
     resolve-workspace-root "^2.0.0"
     ts-jest "~29.4.7"
 
-expo-modules-core@^56.0.12:
-  version "56.0.12"
-  resolved "https://registry.yarnpkg.com/expo-modules-core/-/expo-modules-core-56.0.12.tgz#5e67f6a7ab31ab0824693634cc4ce163926e1714"
-  integrity sha512-2Rf+FBU2EXe27km3m066xHu4kuUSpNT35nzk98fFxIV8B2Ah+FHub2rvAznEcGAUlDArVA2S/6+pMlHWijbicQ==
+expo-modules-core@^56.0.15:
+  version "56.0.15"
+  resolved "https://registry.yarnpkg.com/expo-modules-core/-/expo-modules-core-56.0.15.tgz#63e8a3e58a1cf917db149a8d7efaa55edb41d82e"
+  integrity sha512-XOXuWjtUA/xF8VjMHoRTRxuAmrAeUv8QyASX3h/CpTNS58fOt3stV8EYW7BinJPJyqwV7BZoYV83iN0p2FzyZw==
   dependencies:
     "@expo/expo-modules-macros-plugin" "~0.0.9"
-    expo-modules-jsi "~56.0.7"
+    expo-modules-jsi "~56.0.8"
     invariant "^2.2.4"
 
-expo-modules-jsi@~56.0.7:
-  version "56.0.7"
-  resolved "https://registry.yarnpkg.com/expo-modules-jsi/-/expo-modules-jsi-56.0.7.tgz#4246c6e9ad91ce89bc3c3ec47bc6285f29de90f7"
-  integrity sha512-iBAj4Xeh/8HT201VVxFlmf+VBfmtQV1ZUoJdLQQENm0+j9gnD2QswZLJyNo3CmNNXl46esJeLR5lpGpYZts/zA==
+expo-modules-jsi@~56.0.8:
+  version "56.0.8"
+  resolved "https://registry.yarnpkg.com/expo-modules-jsi/-/expo-modules-jsi-56.0.8.tgz#c5bd6b29d0e586840cbe4d051da68d9a8789c419"
+  integrity sha512-tXqFU1MHrf7Ctq+Pw0qOeIPDFl1W51p9nRRZy9vVUn4GNuAk1Av0vrj0SGLvcxJvDf3aGwSzr8o8dgUsX5sG0g==
 
 exponential-backoff@^3.1.1:
   version "3.1.3"

@@ -555,7 +555,7 @@ class ShareViewController: UIViewController {
     }
   }
 
-  static func copyFile(at srcURL: URL, to dstURL: URL) -> Bool {
+  nonisolated static func copyFile(at srcURL: URL, to dstURL: URL) -> Bool {
     do {
       if FileManager.default.fileExists(atPath: dstURL.path) {
         try FileManager.default.removeItem(at: dstURL)

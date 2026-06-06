@@ -73,7 +73,7 @@
   "peerDependencies": {
     "expo": "^56",
     "expo-constants": ">=56.0.10",
-    "expo-linking": ">=56.0.11",
+    "expo-linking": ">=56.0.13",
     "react": "*",
     "react-native": "*"
   },
@@ -85,7 +85,7 @@
     "dotenv-cli": "^7.4.2",
     "eslint": "^8.57.1",
     "expo-module-scripts": "^56.0.2",
-    "expo-modules-core": "^56.0.12",
+    "expo-modules-core": "^56.0.15",
     "prettier": "^3.2.5",
     "release-it": "^20.0.1",
     "typescript": "~6.0.3"
