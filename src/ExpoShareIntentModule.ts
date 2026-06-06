@@ -1,6 +1,6 @@
 import { requireOptionalNativeModule, NativeModule } from "expo-modules-core";
 
-import {
+import type {
   ChangeEventPayload,
   ErrorEventPayload,
   StateEventPayload,

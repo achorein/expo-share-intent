@@ -18,13 +18,13 @@ Then make a full build with :
 yarn prepare
 ```
 
-> Needed to copy `plugin/src/ios/ShareExtensionViewController.swift` into `plugin/build/ios/` (postbuild script)
+> `prepare` also copies `plugin/src/ios/*.swift` into `plugin/build/ios/` (script `copy:plugin-swift`).
 
 Then watch for changes with these two commands (in seperated terminals) :
 
 ```
-yarn build
-yarn build:plugin
+yarn build:dev
+yarn build:plugin:dev
 ```
 
 ### Example
