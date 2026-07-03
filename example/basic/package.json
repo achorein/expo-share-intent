@@ -17,12 +17,12 @@
     "open:android": "open -a \"Android Studio\" android"
   },
   "dependencies": {
-    "expo": "~56.0.9",
-    "expo-dev-client": "~56.0.19",
-    "expo-linking": "~56.0.13",
-    "expo-splash-screen": "~56.0.10",
+    "expo": "~56.0.14",
+    "expo-dev-client": "~56.0.22",
+    "expo-linking": "~56.0.15",
+    "expo-splash-screen": "~56.0.12",
     "expo-status-bar": "~56.0.4",
-    "expo-updates": "~56.0.18",
+    "expo-updates": "~56.0.21",
     "patch-package": "^8.0.0",
     "react": "19.2.3",
     "react-dom": "19.2.3",
