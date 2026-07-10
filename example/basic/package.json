@@ -17,9 +17,9 @@
     "open:android": "open -a \"Android Studio\" android"
   },
   "dependencies": {
-    "expo": "^57.0.0",
+    "expo": "~57.0.4",
     "expo-dev-client": "~57.0.5",
-    "expo-linking": "~57.0.1",
+    "expo-linking": "~57.0.2",
     "expo-splash-screen": "~57.0.2",
     "expo-status-bar": "~57.0.0",
     "expo-updates": "~57.0.6",
