@@ -21,7 +21,7 @@ export const withShareExtensionConfig: ConfigPlugin<Parameters> = (
   // When disabled this function no longer alters the config object passed to it
   // It only returns the original config to satisfy any calling conventions
   if (!parameters.disableExperimental) {
-    let extConfigIndex = null;
+    let extConfigIndex: number | null = null;
     config.extra?.eas?.build?.experimental?.ios?.appExtensions?.forEach(
       (ext: any, index: number) => {
         ext.targetName === extName && (extConfigIndex = index);
@@ -32,7 +32,7 @@ export const withShareExtensionConfig: ConfigPlugin<Parameters> = (
       config.extra = {};
     }
 
-    if (!extConfigIndex) {
+    if (extConfigIndex === null) {
       if (!config.extra.eas) {
         config.extra.eas = {};
       }
