@@ -301,8 +301,14 @@ class ExpoShareIntentModule : Module() {
                     val columnIndex = cursor.getColumnIndexOrThrow(column)
                     val fileName = cursor.getString(columnIndex)
                     Log.i("FileDirectory", "File name: $fileName")
-                    targetFile = File(context.cacheDir, fileName)
-                }
+                    val safeName = fileName?.let { File(it).name }.orEmpty()
+                    if (safeName.isNotEmpty()) {
+                        val candidate = File(context.cacheDir, safeName)
+                        val cacheRoot = context.cacheDir.canonicalPath + File.separator
+                        if (candidate.canonicalPath.startsWith(cacheRoot)) {
+                            targetFile = candidate
+                        }
+                    }                }
             } finally {
                 cursor?.close()
             }
