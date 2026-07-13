@@ -125,13 +125,26 @@ class ExpoShareIntentModule : Module() {
             if (intent.type!!.startsWith("text/plain")) {
                 // text / urls
                 if (intent.action == Intent.ACTION_SEND) {
-                    notifyShareIntent(mapOf(
-                        "text" to intent.getStringExtra(Intent.EXTRA_TEXT),
-                        "type" to "text",
-                        "meta" to mapOf(
-                            "title" to intent.getCharSequenceExtra(Intent.EXTRA_TITLE),
-                        )
-                    ))
+                    // Check if this is a file share (e.g., .txt file) rather than a text selection
+                    val streamUri = intent.parcelable<Uri>(Intent.EXTRA_STREAM)
+                    if (streamUri != null) {
+                        notifyShareIntent(mapOf("files" to arrayOf(getFileInfo(streamUri)), "type" to "file"))
+                    } else {
+                        notifyShareIntent(mapOf(
+                            "text" to intent.getStringExtra(Intent.EXTRA_TEXT),
+                            "type" to "text",
+                            "meta" to mapOf(
+                                "title" to intent.getCharSequenceExtra(Intent.EXTRA_TITLE),
+                            )
+                        ))
+                    }
+                } else if (intent.action == Intent.ACTION_SEND_MULTIPLE) {
+                    val uris = intent.parcelableArrayList<Uri>(Intent.EXTRA_STREAM)
+                    if (uris != null) {
+                        notifyShareIntent(mapOf("files" to uris.map { getFileInfo(it) }, "type" to "file"))
+                    } else {
+                        notifyError("empty uris array for text file sharing: " + intent.action)
+                    }
                 } else if (intent.action == Intent.ACTION_VIEW) {
                     notifyShareIntent(mapOf( "text" to intent.dataString, "type" to "text"))
                 } else {
