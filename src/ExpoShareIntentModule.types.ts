@@ -42,6 +42,7 @@ export type ShareIntentOptions = {
 
 export type ShareIntentMeta = Record<string, string | undefined> & {
   title?: string;
+  extra?: string;
 };
 
 /**

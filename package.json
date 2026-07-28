@@ -1,16 +1,16 @@
 {
-  "name": "expo-share-intent",
-  "version": "8.0.1",
+  "name": "expo-share-multi-intent",
+  "version": "8.0.2",
   "description": "use native share intent for ios and android with expo",
-  "homepage": "https://github.com/achorein/expo-share-intent/",
+  "homepage": "https://github.com/voidmaster000/expo-share-multi-intent/",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/achorein/expo-share-intent.git"
+    "url": "git+https://github.com/voidmaster000/expo-share-multi-intent.git"
   },
-  "author": "achorein (https://github.com/achorein)",
+  "author": "voidmaster000 (https://github.com/voidmaster000)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/achorein/expo-share-intent/issues"
+    "url": "https://github.com/voidmaster000/expo-share-multi-intent/issues"
   },
   "funding": [
     {
@@ -31,9 +31,6 @@
     "ios-custom-view",
     "ios-context-menu"
   ],
-  "publishConfig": {
-    "registry": "https://registry.npmjs.org/"
-  },
   "main": "build/index.js",
   "types": "build/index.d.ts",
   "files": [
