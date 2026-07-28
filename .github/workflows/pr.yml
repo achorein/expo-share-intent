@@ -17,6 +17,7 @@ jobs:
           registry-url: "https://registry.npmjs.org"
       - run: yarn install --immutable
       - run: yarn prepare
+      - run: yarn test:plugin
       - uses: actions/cache/save@v3
         with:
           path: |
