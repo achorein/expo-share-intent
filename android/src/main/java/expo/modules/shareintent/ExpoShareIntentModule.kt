@@ -66,13 +66,23 @@ class ExpoShareIntentModule : Module() {
                     "filePath" to instance?.getAbsolutePath(uri),
                 )
             }
-            val queryResult: Cursor = resolver.query(uri, null, null, null, null)!!
-            queryResult.moveToFirst()
+            // A provider may return no cursor, or an empty one (lapsed grant, revoked
+            // document): reading column 0 of an empty cursor throws on the main thread
+            // and kills the host app. Report the error instead of crashing.
+            val queryResult: Cursor? = resolver.query(uri, null, null, null, null)
+            if (queryResult == null || !queryResult.moveToFirst()) {
+                queryResult?.close()
+                notifyError("Cannot read the shared file (getFileInfo): $uri")
+                return mapOf(
+                    "contentUri" to uri.toString(),
+                    "filePath" to instance?.getAbsolutePath(uri),
+                )
+            }
             val fileName = queryResult.getString(queryResult.getColumnIndex(OpenableColumns.DISPLAY_NAME))
             val fileSize = queryResult.getString(queryResult.getColumnIndex(OpenableColumns.SIZE))
             queryResult.close()
 
-            val mimeType = resolver.getType(uri)!!
+            val mimeType = resolver.getType(uri) ?: "application/octet-stream"
 
             var mediaWidth: String? = null;
             var mediaHeight: String? = null;
