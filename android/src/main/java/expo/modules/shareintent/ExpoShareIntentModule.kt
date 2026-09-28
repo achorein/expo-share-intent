@@ -223,15 +223,9 @@ class ExpoShareIntentModule : Module() {
             if (DocumentsContract.isDocumentUri(context, uri)) {
                 // ExternalStorageProvider
                 if (isExternalStorageDocument(uri)) {
-                    val docId = DocumentsContract.getDocumentId(uri)
-                    val split = docId.split(":".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
-                    val type = split[0]
-
-                    return if ("primary".equals(type, ignoreCase = true)) {
-                        Environment.getExternalStorageDirectory().toString() + "/" + split[1]
-                    } else {
-                        getDataColumn(uri, null, null)
-                    }
+                    // Copied like any other content: under scoped storage the app cannot read the
+                    // filesystem path of a document in shared storage, even on the primary volume.
+                    return getDataColumn(uri, null, null)
                 } else if (isDownloadsDocument(uri)) {
                     return try {
                         val id = DocumentsContract.getDocumentId(uri)
