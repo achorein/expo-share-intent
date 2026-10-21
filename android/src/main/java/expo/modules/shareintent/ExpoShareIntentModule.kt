@@ -66,37 +66,78 @@ class ExpoShareIntentModule : Module() {
                     "filePath" to instance?.getAbsolutePath(uri),
                 )
             }
-            val queryResult: Cursor = resolver.query(uri, null, null, null, null)!!
-            queryResult.moveToFirst()
-            val fileName = queryResult.getString(queryResult.getColumnIndex(OpenableColumns.DISPLAY_NAME))
-            val fileSize = queryResult.getString(queryResult.getColumnIndex(OpenableColumns.SIZE))
-            queryResult.close()
+            var fileName: String? = null
+            var fileSize: String? = null
+            try {
+                resolver.query(uri, null, null, null, null)?.use { queryResult ->
+                    if (queryResult.moveToFirst()) {
+                        val nameIndex = queryResult.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                        if (nameIndex >= 0) {
+                            fileName = queryResult.getString(nameIndex)
+                        }
+                        val sizeIndex = queryResult.getColumnIndex(OpenableColumns.SIZE)
+                        if (sizeIndex >= 0) {
+                            fileSize = queryResult.getString(sizeIndex)
+                        }
+                    }
+                }
+            } catch (exception: Exception) {
+                Log.w("ExpoShareIntent", "Cannot query shared URI metadata", exception)
+            }
 
-            val mimeType = resolver.getType(uri)!!
+            val mimeType = try {
+                resolver.getType(uri)?.takeIf { it.isNotBlank() }
+            } catch (exception: Exception) {
+                Log.w("ExpoShareIntent", "Cannot read shared URI MIME type", exception)
+                null
+            } ?: "application/octet-stream"
 
             var mediaWidth: String? = null;
             var mediaHeight: String? = null;
             var mediaDuration: String? = null;
             if (mimeType.startsWith("image/")) {
-                val options = BitmapFactory.Options().apply {
-                    inJustDecodeBounds = true
+                try {
+                    val options = BitmapFactory.Options().apply {
+                        inJustDecodeBounds = true
+                    }
+                    resolver.openInputStream(uri)?.use { input ->
+                        BitmapFactory.decodeStream(input, null, options)
+                    }
+                    if (options.outHeight > 0 && options.outWidth > 0) {
+                        mediaHeight = options.outHeight.toString()
+                        mediaWidth = options.outWidth.toString()
+                    }
+                } catch (exception: Exception) {
+                    Log.w("ExpoShareIntent", "Cannot inspect shared image metadata", exception)
                 }
-                BitmapFactory.decodeStream(resolver.openInputStream(uri), null, options)
-                mediaHeight = options.outHeight.toString()
-                mediaWidth = options.outWidth.toString()
             }
             if (mimeType.startsWith("video/")) {
-                val retriever = MediaMetadataRetriever()
-                retriever.setDataSource(instance?.getAbsolutePath(uri))
-                mediaWidth = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)?.toInt().toString() ?: null
-                mediaHeight = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)?.toInt().toString() ?: null
-                // Check orientation and flip size if required
-                val metaRotation = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION)?.toInt() ?: 0;
-                if (metaRotation == 90 || metaRotation == 270) {
-                    mediaWidth = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)?.toInt().toString() ?: null
-                    mediaHeight = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)?.toInt().toString() ?: null
+                var retriever: MediaMetadataRetriever? = null
+                try {
+                    val mediaRetriever = MediaMetadataRetriever()
+                    retriever = mediaRetriever
+                    mediaRetriever.setDataSource(instance?.getAbsolutePath(uri))
+                    mediaWidth = mediaRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)?.toIntOrNull()?.toString()
+                    mediaHeight = mediaRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)?.toIntOrNull()?.toString()
+                    // Check orientation and flip size if required
+                    val metaRotation = mediaRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION)?.toIntOrNull() ?: 0;
+                    if (metaRotation == 90 || metaRotation == 270) {
+                        mediaWidth = mediaRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)?.toIntOrNull()?.toString()
+                        mediaHeight = mediaRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)?.toIntOrNull()?.toString()
+                    }
+                    mediaDuration = mediaRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toIntOrNull()?.toString()
+                } catch (exception: Exception) {
+                    mediaWidth = null
+                    mediaHeight = null
+                    mediaDuration = null
+                    Log.w("ExpoShareIntent", "Cannot inspect shared video metadata", exception)
+                } finally {
+                    try {
+                        retriever?.release()
+                    } catch (exception: Exception) {
+                        Log.w("ExpoShareIntent", "Cannot release video metadata reader", exception)
+                    }
                 }
-                mediaDuration = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toInt().toString() ?: null
             }
 
             return mapOf(

@@ -112,18 +112,20 @@ export const parseShareIntent = (
   } else {
     // Ensure we got a valid file. some array value are emply
     const files =
-      shareIntent?.files?.filter((file: any) => file.path || file.contentUri) ||
-      [];
-    const isMedia = files.every(
-      (file) =>
-        file.mimeType.startsWith("image/") ||
-        file.mimeType.startsWith("video/"),
-    );
+      shareIntent?.files?.filter(
+        (file: any) => file && (file.path || file.contentUri),
+      ) || [];
+    const isMedia =
+      files.length > 0 &&
+      files.every((file) => {
+        const mimeType = typeof file.mimeType === "string" ? file.mimeType : "";
+        return mimeType.startsWith("image/") || mimeType.startsWith("video/");
+      });
     result = {
       ...SHAREINTENT_DEFAULTVALUE,
       files: shareIntent?.files
         ? shareIntent.files.reduce((acc: ShareIntentFile[], file: any) => {
-            if (!file.path && !file.contentUri) return acc;
+            if (!file || (!file.path && !file.contentUri)) return acc;
             return [
               ...acc,
               {
@@ -132,7 +134,10 @@ export const parseShareIntent = (
                   (file.filePath ? `file://${file.filePath}` : null) ||
                   file.contentUri ||
                   null,
-                mimeType: file.mimeType || null,
+                mimeType:
+                  typeof file.mimeType === "string" && file.mimeType.trim()
+                    ? file.mimeType
+                    : "application/octet-stream",
                 fileName: file.fileName || null,
                 width: file.width ? Number(file.width) : null,
                 height: file.height ? Number(file.height) : null,
