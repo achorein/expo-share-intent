@@ -20,7 +20,7 @@ yarn prepare
 
 > `prepare` also copies `plugin/src/ios/*.swift` into `plugin/build/ios/` (script `copy:plugin-swift`).
 
-Then watch for changes with these two commands (in seperated terminals) :
+Then watch for changes with these two commands (in separated terminals) :
 
 ```
 yarn build:dev
