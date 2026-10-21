@@ -80,21 +80,21 @@ class ShareViewController: UIViewController {
   }
 
   private func handleVCard(content: NSExtensionItem, attachment: NSItemProvider, index: Int) async {
-    Task.detached {
+    await Task.detached {
       do {
         if let url = try? await attachment.loadItem(forTypeIdentifier: self.vcardContentType) as? URL {
           // ensure a .vcf file extension so mime resolves properly
           let tmp = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString + ".vcf")
           _ = Self.copyFile(at: url, to: tmp)
-          Task { @MainActor in
+          await Task { @MainActor in
             await self.handleFileURL(content: content, url: tmp, index: index)
-          }
+          }.value
         } else if let data = try? await attachment.loadItem(forTypeIdentifier: self.vcardContentType) as? Data {
           let tmp = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString + ".vcf")
           try data.write(to: tmp)
-          Task { @MainActor in
+          await Task { @MainActor in
             await self.handleFileURL(content: content, url: tmp, index: index)
-          }
+          }.value
         } else {
           NSLog("[ERROR] Cannot load vcard content !\(String(describing: content))")
           await self.dismissWithError(message: "Cannot load vCard content \(String(describing: content))")
@@ -103,15 +103,15 @@ class ShareViewController: UIViewController {
         NSLog("[ERROR] handleVCard exception: \(error.localizedDescription)")
         await self.dismissWithError(message: "vCard error: \(error.localizedDescription)")
       }
-    }
+    }.value
   }
 
   private func handleText(content: NSExtensionItem, attachment: NSItemProvider, index: Int) async {
-    Task.detached {
+    await Task.detached {
       if let item = try! await attachment.loadItem(forTypeIdentifier: self.textContentType)
         as? String
       {
-        Task { @MainActor in
+        await Task { @MainActor in
 
           self.sharedText.append(item)
           // If this is the last item, save sharedText in userDefaults and redirect to host app
@@ -122,19 +122,19 @@ class ShareViewController: UIViewController {
             self.redirectToHostApp(type: .text)
           }
 
-        }
+        }.value
       } else {
         NSLog("[ERROR] Cannot load text content !\(String(describing: content))")
         await self.dismissWithError(
           message: "Cannot load text content \(String(describing: content))")
       }
-    }
+    }.value
   }
 
   private func handleUrl(content: NSExtensionItem, attachment: NSItemProvider, index: Int) async {
-    Task.detached {
+    await Task.detached {
       if let item = try! await attachment.loadItem(forTypeIdentifier: self.urlContentType) as? URL {
-        Task { @MainActor in
+        await Task { @MainActor in
 
           self.sharedWebUrl.append(WebUrl(url: item.absoluteString, meta: ""))
           // If this is the last item, save sharedText in userDefaults and redirect to host app
@@ -145,24 +145,24 @@ class ShareViewController: UIViewController {
             self.redirectToHostApp(type: .weburl)
           }
 
-        }
+        }.value
       } else {
         NSLog("[ERROR] Cannot load url content !\(String(describing: content))")
         await self.dismissWithError(
           message: "Cannot load url content \(String(describing: content))")
       }
-    }
+    }.value
   }
 
   private func handlePrepocessing(content: NSExtensionItem, attachment: NSItemProvider, index: Int)
     async
   {
-    Task.detached {
+    await Task.detached {
       if let item = try! await attachment.loadItem(
         forTypeIdentifier: self.propertyListType, options: nil)
         as? NSDictionary
       {
-        Task { @MainActor in
+        await Task { @MainActor in
 
           if let results = item[NSExtensionJavaScriptPreprocessingResultsKey]
             as? NSDictionary
@@ -185,17 +185,17 @@ class ShareViewController: UIViewController {
               message: "Cannot load preprocessing results \(String(describing: content))")
           }
 
-        }
+        }.value
       } else {
         NSLog("[ERROR] Cannot load preprocessing content !\(String(describing: content))")
         await self.dismissWithError(
           message: "Cannot load preprocessing content \(String(describing: content))")
       }
-    }
+    }.value
   }
 
   private func handlePkPass(content: NSExtensionItem, attachment: NSItemProvider, index: Int) async {
-      Task.detached {
+      await Task.detached {
           NSLog("[DEBUG] Attempting to handle pkpass file for item \(index)")
           NSLog("[DEBUG] Available type identifiers: \(attachment.registeredTypeIdentifiers)")
   
@@ -221,28 +221,28 @@ class ShareViewController: UIViewController {
                   // If it's neither URL nor Data, it's unexpected for pkpassContentType.
                   NSLog("[ERROR] Cannot load pkpass content: Item was neither URL nor Data for type \(self.pkpassContentType). Attachment: \(attachment)")
                   // Ensure dismissWithError runs on the main thread if it interacts with UI
-                  Task { @MainActor in
+                  await Task { @MainActor in
                       self.dismissWithError(message: "Cannot load pkpass content (unexpected data type).")
-                  }
+                  }.value
               }
           } catch {
               // Catch errors from loadItem or data.write
               NSLog("[ERROR] Exception when handling pkpass: \(error.localizedDescription)")
               // Ensure dismissWithError runs on the main thread if it interacts with UI
-              Task { @MainActor in
+              await Task { @MainActor in
                   self.dismissWithError(message: "Error processing pkpass: \(error.localizedDescription)")
-              }
+              }.value
           }
-      }
+      }.value
   }
 
 
   private func handleImages(content: NSExtensionItem, attachment: NSItemProvider, index: Int) async {
-    Task.detached {
+    await Task.detached {
       do {
         let item = try await attachment.loadItem(forTypeIdentifier: self.imageContentType)
         
-        Task { @MainActor in
+        await Task { @MainActor in
           var url: URL? = nil
           
           if let dataURL = item as? URL {
@@ -318,12 +318,12 @@ class ShareViewController: UIViewController {
             userDefaults?.synchronize()
             self.redirectToHostApp(type: .media)
           }
-        }
+        }.value
       } catch {
         NSLog("[ERROR] handleImages: Exception loading image item: \(error)")
         await self.dismissWithError(message: "Cannot load image content: \(error.localizedDescription)")
       }
-    }
+    }.value
   }
 
   private func documentDirectoryPath() -> URL? {
@@ -370,10 +370,10 @@ class ShareViewController: UIViewController {
 
   private func handleVideos(content: NSExtensionItem, attachment: NSItemProvider, index: Int) async
   {
-    Task.detached {
+    await Task.detached {
       if let url = try? await attachment.loadItem(forTypeIdentifier: self.videoContentType) as? URL
       {
-        Task { @MainActor in
+        await Task { @MainActor in
 
           // Always copy
           let fileName = self.getFileName(from: url, type: .video)
@@ -404,45 +404,45 @@ class ShareViewController: UIViewController {
             self.redirectToHostApp(type: .media)
           }
 
-        }
+        }.value
       } else {
         NSLog("[ERROR] Cannot load video content !\(String(describing: content))")
         await self.dismissWithError(
           message: "Cannot load video content \(String(describing: content))")
       }
-    }
+    }.value
   }
 
   private func handlePdf(content: NSExtensionItem, attachment: NSItemProvider, index: Int) async {
-    Task.detached {
+    await Task.detached {
       if let url = try? await attachment.loadItem(forTypeIdentifier: self.pdfContentType) as? URL {
-        Task { @MainActor in
+        await Task { @MainActor in
 
           await self.handleFileURL(content: content, url: url, index: index)
 
-        }
+        }.value
       } else {
         NSLog("[ERROR] Cannot load pdf content !\(String(describing: content))")
         await self.dismissWithError(
           message: "Cannot load pdf content \(String(describing: content))")
       }
-    }
+    }.value
   }
 
   private func handleFiles(content: NSExtensionItem, attachment: NSItemProvider, index: Int) async {
-    Task.detached {
+    await Task.detached {
       if let url = try? await attachment.loadItem(forTypeIdentifier: self.fileURLType) as? URL {
-        Task { @MainActor in
+        await Task { @MainActor in
 
           await self.handleFileURL(content: content, url: url, index: index)
 
-        }
+        }.value
       } else {
         NSLog("[ERROR] Cannot load file content !\(String(describing: content))")
         await self.dismissWithError(
           message: "Cannot load file content \(String(describing: content))")
       }
-    }
+    }.value
   }
 
   private func handleFileURL(content: NSExtensionItem, url: URL, index: Int) async {
