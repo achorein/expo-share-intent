@@ -171,7 +171,7 @@ export function getPrivacyInfoContent() {
     NSPrivacyAccessedAPITypes: [
       {
         NSPrivacyAccessedAPIType: "NSPrivacyAccessedAPICategoryUserDefaults",
-        NSPrivacyAccessedAPITypeReasons: ["CA92.1"],
+        NSPrivacyAccessedAPITypeReasons: ["1C8F.1"],
       },
     ],
     NSPrivacyCollectedDataTypes: [],

@@ -70,6 +70,13 @@ We follow the [conventional commits specification](https://www.conventionalcommi
 
 We use [TypeScript](https://www.typescriptlang.org/) for type checking, [ESLint](https://eslint.org/) with [Prettier](https://prettier.io/) for linting and formatting the code.
 
+Run the config plugin checks with:
+
+```sh
+yarn lint plugin
+yarn test:plugin
+```
+
 ### Sending a pull request
 
 > **Working on your first pull request?** You can learn how from here: [Learn how to contribute to a project through forking](https://docs.github.com/en/get-started/exploring-projects-on-github/contributing-to-a-project).
