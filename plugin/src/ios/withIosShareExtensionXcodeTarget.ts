@@ -47,6 +47,61 @@ function getMainAppDevelopmentTeam(pbx: any): string | null {
   return null;
 }
 
+//───────────────────────────────────────────────────────────────────────────
+// Helper: move the host app's "Embed App Extensions" phase ahead of its
+// run-script build phases to avoid an Xcode build cycle.
+//
+// `addTarget()` appends the "Embed App Extensions" copy-files phase (which writes
+// `<app>.app/PlugIns/<ext>.appex`) to the END of the host target's build phases.
+// That places it AFTER run-script phases such as expo-dev-launcher's
+// "[Expo Dev Launcher] Strip Local Network Keys for Release", which declares the
+// app's Info.plist (inside the .app bundle) as an input and no outputs. Xcode's
+// build system then needs the whole bundle assembled before that script can run,
+// yet the embed phase that finishes assembling it runs later — an unbreakable
+// cycle, and the build fails with:
+//   "Cycle inside <app>; building could produce unreliable results."
+//
+// The embed phase only depends on the extension target's product (an implicit
+// target dependency), so it is safe to run earlier. Moving it to just after the
+// host target's Resources phase makes the dependency one-directional and resolves
+// the cycle. No-op if the phase is already positioned before the run scripts.
+//───────────────────────────────────────────────────────────────────────────
+function moveEmbedAppExtensionsPhaseBeforeScripts(pbx: any): void {
+  const objects = pbx.hash.project.objects;
+  const nativeTargets = objects.PBXNativeTarget || {};
+  const copyPhases = objects.PBXCopyFilesBuildPhase || {};
+  const resourcePhases = objects.PBXResourcesBuildPhase || {};
+
+  for (const key of Object.keys(nativeTargets)) {
+    if (key.endsWith("_comment")) continue;
+    const target = nativeTargets[key];
+    if (
+      !target ||
+      typeof target !== "object" ||
+      !String(target.productType || "").includes("product-type.application")
+    ) {
+      continue;
+    }
+
+    const phases = target.buildPhases || [];
+    // "Embed App Extensions" is a copy-files phase whose destination is PlugIns
+    // (dstSubfolderSpec 13).
+    const embedIndex = phases.findIndex((bp: any) => {
+      const phase = copyPhases[bp.value];
+      return phase && String(phase.dstSubfolderSpec) === "13";
+    });
+    const resourceIndex = phases.findIndex(
+      (bp: any) => resourcePhases[bp.value],
+    );
+    if (embedIndex < 0 || resourceIndex < 0) continue;
+    if (embedIndex === resourceIndex + 1) continue; // already early enough
+
+    const [embed] = phases.splice(embedIndex, 1);
+    // embedIndex > resourceIndex, so resourceIndex is unaffected by the splice.
+    phases.splice(resourceIndex + 1, 0, embed);
+  }
+}
+
 export const withShareExtensionXcodeTarget: ConfigPlugin<Parameters> = (
   config,
   parameters,
@@ -218,6 +273,11 @@ export const withShareExtensionXcodeTarget: ConfigPlugin<Parameters> = (
       const shareTarget = pbxProject.pbxTargetByName(extensionName);
       pbxProject.addTargetAttribute("DevelopmentTeam", devTeam, shareTarget);
     }
+
+    /* ------------------------------------------------------------------ */
+    /* 7. Avoid the "Embed App Extensions" ↔ run-script build cycle       */
+    /* ------------------------------------------------------------------ */
+    moveEmbedAppExtensionsPhaseBeforeScripts(pbxProject);
 
     console.log(
       `[expo-share-intent] Successfully created ${extensionName} target with files`,
