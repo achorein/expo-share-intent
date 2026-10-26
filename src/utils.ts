@@ -19,7 +19,7 @@ export const getScheme = (options?: ShareIntentOptions) => {
   if (Constants.expoConfig?.scheme) {
     let updatedScheme = Constants.expoConfig?.scheme;
     if (Array.isArray(Constants.expoConfig?.scheme)) {
-      updatedScheme = updatedScheme[0];
+      updatedScheme = updatedScheme[0] as string;
       options?.debug &&
         console.debug(
           `expoShareIntent[scheme] from expoConfig: multiple scheme detected (${Constants.expoConfig?.scheme.join(",")}), using:${updatedScheme}`,

@@ -1,4 +1,4 @@
-import { requireOptionalNativeModule, NativeModule } from "expo-modules-core";
+import { requireOptionalNativeModule, NativeModule } from "expo";
 
 import type {
   ChangeEventPayload,

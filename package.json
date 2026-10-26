@@ -84,6 +84,7 @@
     "@types/react-native": "^0.73.0",
     "dotenv-cli": "^7.4.2",
     "eslint": "^8.57.1",
+    "expo": "^58",
     "expo-module-scripts": "^56.0.3",
     "expo-modules-core": "^58.0.19",
     "prettier": "^3.2.5",
