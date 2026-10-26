@@ -129,7 +129,10 @@ class ExpoShareIntentModule : Module() {
                         "text" to intent.getStringExtra(Intent.EXTRA_TEXT),
                         "type" to "text",
                         "meta" to mapOf(
-                            "title" to intent.getCharSequenceExtra(Intent.EXTRA_TITLE),
+                            // Browsers (Chrome, Firefox) send the page title in
+                            // EXTRA_SUBJECT rather than EXTRA_TITLE.
+                            "title" to (intent.getCharSequenceExtra(Intent.EXTRA_TITLE)
+                                ?: intent.getStringExtra(Intent.EXTRA_SUBJECT)),
                         )
                     ))
                 } else if (intent.action == Intent.ACTION_VIEW) {
