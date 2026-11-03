@@ -26,56 +26,191 @@ class ShareViewController: UIViewController {
   let pkpassContentType: String = "com.apple.pkpass"
   let pdfContentType: String = UTType.pdf.identifier
   let vcardContentType: String = "public.vcard"
+  let mapItemContentType: String = "com.apple.mapkit.map-item"
+  // Last handled attachment saves the payload and redirects.
+  var lastHandledIndex: Int? = nil
 
   override func viewDidLoad() {
     super.viewDidLoad()
     if hideView {
       view.backgroundColor = .clear
       view.isOpaque = false
-      handleViewLoad()
     }
   }
 
   override func viewDidAppear(_ animated: Bool) {
     super.viewDidAppear(animated)
-    if !hideView {
-      handleViewLoad()
-    }
+    handleViewLoad()
   }
 
   private func handleViewLoad() {
     Task {
-      guard let extensionContext = self.extensionContext,
-        let content = extensionContext.inputItems.first as? NSExtensionItem,
-        let attachments = content.attachments
-      else {
-        dismissWithError(message: "No content found")
+      guard let extensionContext = self.extensionContext else {
+        self.dismissWithError(message: "No content found")
         return
       }
-      for (index, attachment) in (attachments).enumerated() {
-        if attachment.hasItemConformingToTypeIdentifier(imageContentType) {
-          await handleImages(content: content, attachment: attachment, index: index)
-        } else if attachment.hasItemConformingToTypeIdentifier(videoContentType) {
-          await handleVideos(content: content, attachment: attachment, index: index)
-        } else if attachment.hasItemConformingToTypeIdentifier(vcardContentType) {
-          await handleVCard(content: content, attachment: attachment, index: index) 
-        } else if attachment.hasItemConformingToTypeIdentifier(fileURLType) {
-          await handleFiles(content: content, attachment: attachment, index: index)
-        } else if attachment.hasItemConformingToTypeIdentifier(pkpassContentType) {
-          await handlePkPass(content: content, attachment: attachment, index: index)
-        } else if attachment.hasItemConformingToTypeIdentifier(pdfContentType) {
-          await handlePdf(content: content, attachment: attachment, index: index)
-        } else if attachment.hasItemConformingToTypeIdentifier(propertyListType) {
-          await handlePrepocessing(content: content, attachment: attachment, index: index)
-        } else if attachment.hasItemConformingToTypeIdentifier(urlContentType) {
-          await handleUrl(content: content, attachment: attachment, index: index)
-        } else if attachment.hasItemConformingToTypeIdentifier(textContentType) {
-          await handleText(content: content, attachment: attachment, index: index)
-        } else {
-          NSLog("[ERROR] content type not handle !\(String(describing: content))")
-          dismissWithError(message: "content type not handle \(String(describing: content)))")
+
+      let items = extensionContext.inputItems.compactMap { $0 as? NSExtensionItem }
+      guard !items.isEmpty else {
+        self.dismissWithError(message: "No content found")
+        return
+      }
+
+      // Map-item only marks a map share; use its url+text, skip unsupported types.
+      var mapAction: (
+        position: Int, content: NSExtensionItem, urlAttachment: NSItemProvider?,
+        textAttachment: NSItemProvider?
+      )? = nil
+      var actions: [
+        (
+          position: Int, content: NSExtensionItem, attachment: NSItemProvider,
+          kind: AttachmentKind
+        )
+      ] = []
+      var position = 0
+
+      for content in items {
+        guard let attachments = content.attachments else { continue }
+
+        if attachments.contains(where: {
+          $0.hasItemConformingToTypeIdentifier(self.mapItemContentType)
+        }) {
+          if mapAction == nil {
+            let urlAttachment = attachments.first {
+              $0.hasItemConformingToTypeIdentifier(self.urlContentType)
+            }
+            let textAttachment = attachments.first {
+              $0.hasItemConformingToTypeIdentifier(self.textContentType)
+            }
+            mapAction = (position, content, urlAttachment, textAttachment)
+            position += 1
+          } else {
+            NSLog("[DEBUG] Skipping additional map-item attachment (single-place share)")
+          }
+          continue
+        }
+
+        for attachment in attachments {
+          if attachment.hasItemConformingToTypeIdentifier(self.imageContentType) {
+            actions.append((position, content, attachment, .image))
+          } else if attachment.hasItemConformingToTypeIdentifier(self.videoContentType) {
+            actions.append((position, content, attachment, .video))
+          } else if attachment.hasItemConformingToTypeIdentifier(self.vcardContentType) {
+            actions.append((position, content, attachment, .vcard))
+          } else if attachment.hasItemConformingToTypeIdentifier(self.fileURLType) {
+            actions.append((position, content, attachment, .file))
+          } else if attachment.hasItemConformingToTypeIdentifier(self.pkpassContentType) {
+            actions.append((position, content, attachment, .pkpass))
+          } else if attachment.hasItemConformingToTypeIdentifier(self.pdfContentType) {
+            actions.append((position, content, attachment, .pdf))
+          } else if attachment.hasItemConformingToTypeIdentifier(self.propertyListType) {
+            actions.append((position, content, attachment, .preprocessing))
+          } else if attachment.hasItemConformingToTypeIdentifier(self.urlContentType) {
+            actions.append((position, content, attachment, .url))
+          } else if attachment.hasItemConformingToTypeIdentifier(self.textContentType) {
+            actions.append((position, content, attachment, .text))
+          } else {
+            NSLog(
+              "[DEBUG] Skipping unsupported attachment: \(attachment.registeredTypeIdentifiers)"
+            )
+            continue
+          }
+          position += 1
         }
       }
+
+      guard mapAction != nil || !actions.isEmpty else {
+        NSLog("[ERROR] content type not handle !\(String(describing: items))")
+        self.dismissWithError(message: "content type not handle \(String(describing: items))")
+        return
+      }
+
+      self.lastHandledIndex = max(mapAction?.position ?? -1, actions.last?.position ?? -1)
+
+      for action in actions {
+        switch action.kind {
+        case .image:
+          await self.handleImages(
+            content: action.content, attachment: action.attachment, index: action.position)
+        case .video:
+          await self.handleVideos(
+            content: action.content, attachment: action.attachment, index: action.position)
+        case .vcard:
+          await self.handleVCard(
+            content: action.content, attachment: action.attachment, index: action.position)
+        case .file:
+          await self.handleFiles(
+            content: action.content, attachment: action.attachment, index: action.position)
+        case .pkpass:
+          await self.handlePkPass(
+            content: action.content, attachment: action.attachment, index: action.position)
+        case .pdf:
+          await self.handlePdf(
+            content: action.content, attachment: action.attachment, index: action.position)
+        case .preprocessing:
+          await self.handlePrepocessing(
+            content: action.content, attachment: action.attachment, index: action.position)
+        case .url:
+          await self.handleUrl(
+            content: action.content, attachment: action.attachment, index: action.position)
+        case .text:
+          await self.handleText(
+            content: action.content, attachment: action.attachment, index: action.position)
+        }
+      }
+
+      if let mapAction {
+        await self.handleMapItem(
+          content: mapAction.content, urlAttachment: mapAction.urlAttachment,
+          textAttachment: mapAction.textAttachment, index: mapAction.position,
+          shouldRedirect: mapAction.position == self.lastHandledIndex,
+          isOnlyShare: actions.isEmpty)
+      }
+    }
+  }
+
+  private enum AttachmentKind {
+    case image, video, vcard, file, pkpass, pdf, preprocessing, url, text
+  }
+
+  private func handleMapItem(
+    content: NSExtensionItem,
+    urlAttachment: NSItemProvider?,
+    textAttachment: NSItemProvider?,
+    index: Int,
+    shouldRedirect: Bool,
+    isOnlyShare: Bool
+  ) async {
+    var appended = false
+    if let urlAttachment,
+      let url = try? await urlAttachment.loadItem(forTypeIdentifier: self.urlContentType) as? URL
+    {
+      // Use the URL as link and the text as prefilled title.
+      var meta = ""
+      if let textAttachment,
+        let text = try? await textAttachment.loadItem(forTypeIdentifier: self.textContentType)
+          as? String, !text.isEmpty,
+        let data = try? JSONSerialization.data(withJSONObject: ["title": text]),
+        let json = String(data: data, encoding: .utf8)
+      {
+        meta = json
+      }
+      self.sharedWebUrl.append(WebUrl(url: url.absoluteString, meta: meta))
+      appended = true
+    } else if let textAttachment {
+      await self.handleText(content: content, attachment: textAttachment, index: index)
+      return
+    }
+
+    if appended {
+      if shouldRedirect {
+        let userDefaults = UserDefaults(suiteName: self.hostAppGroupIdentifier)
+        userDefaults?.set(self.toData(data: self.sharedWebUrl), forKey: self.sharedKey)
+        userDefaults?.synchronize()
+        self.redirectToHostApp(type: .weburl)
+      }
+    } else if isOnlyShare {
+      self.dismissWithError(message: "Cannot load map item content")
     }
   }
 
@@ -115,13 +250,12 @@ class ShareViewController: UIViewController {
 
           self.sharedText.append(item)
           // If this is the last item, save sharedText in userDefaults and redirect to host app
-          if index == (content.attachments?.count)! - 1 {
+          if index == self.lastHandledIndex {
             let userDefaults = UserDefaults(suiteName: self.hostAppGroupIdentifier)
             userDefaults?.set(self.sharedText, forKey: self.sharedKey)
             userDefaults?.synchronize()
             self.redirectToHostApp(type: .text)
           }
-
         }
       } else {
         NSLog("[ERROR] Cannot load text content !\(String(describing: content))")
@@ -138,13 +272,12 @@ class ShareViewController: UIViewController {
 
           self.sharedWebUrl.append(WebUrl(url: item.absoluteString, meta: ""))
           // If this is the last item, save sharedText in userDefaults and redirect to host app
-          if index == (content.attachments?.count)! - 1 {
+          if index == self.lastHandledIndex {
             let userDefaults = UserDefaults(suiteName: self.hostAppGroupIdentifier)
             userDefaults?.set(self.toData(data: self.sharedWebUrl), forKey: self.sharedKey)
             userDefaults?.synchronize()
             self.redirectToHostApp(type: .weburl)
           }
-
         }
       } else {
         NSLog("[ERROR] Cannot load url content !\(String(describing: content))")
@@ -173,7 +306,7 @@ class ShareViewController: UIViewController {
             self.sharedWebUrl.append(
               WebUrl(url: results["baseURI"] as! String, meta: results["meta"] as! String))
             // If this is the last item, save sharedText in userDefaults and redirect to host app
-            if index == (content.attachments?.count)! - 1 {
+            if index == self.lastHandledIndex {
               let userDefaults = UserDefaults(suiteName: self.hostAppGroupIdentifier)
               userDefaults?.set(self.toData(data: self.sharedWebUrl), forKey: self.sharedKey)
               userDefaults?.synchronize()
@@ -312,7 +445,7 @@ class ShareViewController: UIViewController {
           }
 
           // If this is the last item, save imagesData in userDefaults and redirect to host app
-          if index == (content.attachments?.count)! - 1 {
+          if index == self.lastHandledIndex {
             let userDefaults = UserDefaults(suiteName: self.hostAppGroupIdentifier)
             userDefaults?.set(self.toData(data: self.sharedMedia), forKey: self.sharedKey)
             userDefaults?.synchronize()
@@ -397,13 +530,12 @@ class ShareViewController: UIViewController {
           }
 
           // If this is the last item, save imagesData in userDefaults and redirect to host app
-          if index == (content.attachments?.count)! - 1 {
+          if index == self.lastHandledIndex {
             let userDefaults = UserDefaults(suiteName: self.hostAppGroupIdentifier)
             userDefaults?.set(self.toData(data: self.sharedMedia), forKey: self.sharedKey)
             userDefaults?.synchronize()
             self.redirectToHostApp(type: .media)
           }
-
         }
       } else {
         NSLog("[ERROR] Cannot load video content !\(String(describing: content))")
@@ -465,7 +597,7 @@ class ShareViewController: UIViewController {
           type: .file))
     }
 
-    if index == (content.attachments?.count)! - 1 {
+    if index == self.lastHandledIndex {
       let userDefaults = UserDefaults(suiteName: self.hostAppGroupIdentifier)
       userDefaults?.set(self.toData(data: self.sharedMedia), forKey: self.sharedKey)
       userDefaults?.synchronize()
