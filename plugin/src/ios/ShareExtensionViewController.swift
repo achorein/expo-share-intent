@@ -72,7 +72,7 @@ class ShareViewController: UIViewController {
         } else if attachment.hasItemConformingToTypeIdentifier(textContentType) {
           await handleText(content: content, attachment: attachment, index: index)
         } else {
-          NSLog("[ERROR] content type not handle !\(String(describing: content))")
+          NSLog("%@", "[ERROR] content type not handle !\(String(describing: content))")
           dismissWithError(message: "content type not handle \(String(describing: content)))")
         }
       }
@@ -96,11 +96,11 @@ class ShareViewController: UIViewController {
             await self.handleFileURL(content: content, url: tmp, index: index)
           }
         } else {
-          NSLog("[ERROR] Cannot load vcard content !\(String(describing: content))")
+          NSLog("%@", "[ERROR] Cannot load vcard content !\(String(describing: content))")
           await self.dismissWithError(message: "Cannot load vCard content \(String(describing: content))")
         }
       } catch {
-        NSLog("[ERROR] handleVCard exception: \(error.localizedDescription)")
+        NSLog("%@", "[ERROR] handleVCard exception: \(error.localizedDescription)")
         await self.dismissWithError(message: "vCard error: \(error.localizedDescription)")
       }
     }
@@ -124,7 +124,7 @@ class ShareViewController: UIViewController {
 
         }
       } else {
-        NSLog("[ERROR] Cannot load text content !\(String(describing: content))")
+        NSLog("%@", "[ERROR] Cannot load text content !\(String(describing: content))")
         await self.dismissWithError(
           message: "Cannot load text content \(String(describing: content))")
       }
@@ -147,7 +147,7 @@ class ShareViewController: UIViewController {
 
         }
       } else {
-        NSLog("[ERROR] Cannot load url content !\(String(describing: content))")
+        NSLog("%@", "[ERROR] Cannot load url content !\(String(describing: content))")
         await self.dismissWithError(
           message: "Cannot load url content \(String(describing: content))")
       }
@@ -168,6 +168,7 @@ class ShareViewController: UIViewController {
             as? NSDictionary
           {
             NSLog(
+              "%@",
               "[DEBUG] NSExtensionJavaScriptPreprocessingResultsKey \(String(describing: results))"
             )
             self.sharedWebUrl.append(
@@ -180,14 +181,14 @@ class ShareViewController: UIViewController {
               self.redirectToHostApp(type: .weburl)
             }
           } else {
-            NSLog("[ERROR] Cannot load preprocessing results !\(String(describing: content))")
+            NSLog("%@", "[ERROR] Cannot load preprocessing results !\(String(describing: content))")
             self.dismissWithError(
               message: "Cannot load preprocessing results \(String(describing: content))")
           }
 
         }
       } else {
-        NSLog("[ERROR] Cannot load preprocessing content !\(String(describing: content))")
+        NSLog("%@", "[ERROR] Cannot load preprocessing content !\(String(describing: content))")
         await self.dismissWithError(
           message: "Cannot load preprocessing content \(String(describing: content))")
       }
@@ -196,30 +197,30 @@ class ShareViewController: UIViewController {
 
   private func handlePkPass(content: NSExtensionItem, attachment: NSItemProvider, index: Int) async {
       Task.detached {
-          NSLog("[DEBUG] Attempting to handle pkpass file for item \(index)")
-          NSLog("[DEBUG] Available type identifiers: \(attachment.registeredTypeIdentifiers)")
+          NSLog("%@", "[DEBUG] Attempting to handle pkpass file for item \(index)")
+          NSLog("%@", "[DEBUG] Available type identifiers: \(attachment.registeredTypeIdentifiers)")
   
           do {
               if let url = try await attachment.loadItem(forTypeIdentifier: self.pkpassContentType) as? URL {
-                  NSLog("[DEBUG] Successfully loaded pkpass as URL: \(url.absoluteString)")
-                  NSLog("[DEBUG] URL path: \(url.path), isFileURL: \(url.isFileURL)")
+                  NSLog("%@", "[DEBUG] Successfully loaded pkpass as URL: \(url.absoluteString)")
+                  NSLog("%@", "[DEBUG] URL path: \(url.path), isFileURL: \(url.isFileURL)")
                   await self.handleFileURL(content: content, url: url, index: index)
   
               } else if let data = try await attachment.loadItem(forTypeIdentifier: self.pkpassContentType) as? Data {
-                  NSLog("[DEBUG] Successfully loaded pkpass as Data, size: \(data.count) bytes")
+                  NSLog("%@", "[DEBUG] Successfully loaded pkpass as Data, size: \(data.count) bytes")
                   let tempFileName = UUID().uuidString + ".pkpass"
                   let tempFileURL = FileManager.default.temporaryDirectory.appendingPathComponent(tempFileName)
   
                   // Writing data to a file is I/O, keep it off the main thread.
                   try data.write(to: tempFileURL)
-                  NSLog("[DEBUG] Saved pkpass data to temporary file: \(tempFileURL.path)")
+                  NSLog("%@", "[DEBUG] Saved pkpass data to temporary file: \(tempFileURL.path)")
   
                   // Handle the newly created temporary file URL.
                   await self.handleFileURL(content: content, url: tempFileURL, index: index)
   
               } else {
                   // If it's neither URL nor Data, it's unexpected for pkpassContentType.
-                  NSLog("[ERROR] Cannot load pkpass content: Item was neither URL nor Data for type \(self.pkpassContentType). Attachment: \(attachment)")
+                  NSLog("%@", "[ERROR] Cannot load pkpass content: Item was neither URL nor Data for type \(self.pkpassContentType). Attachment: \(attachment)")
                   // Ensure dismissWithError runs on the main thread if it interacts with UI
                   Task { @MainActor in
                       self.dismissWithError(message: "Cannot load pkpass content (unexpected data type).")
@@ -227,7 +228,7 @@ class ShareViewController: UIViewController {
               }
           } catch {
               // Catch errors from loadItem or data.write
-              NSLog("[ERROR] Exception when handling pkpass: \(error.localizedDescription)")
+              NSLog("%@", "[ERROR] Exception when handling pkpass: \(error.localizedDescription)")
               // Ensure dismissWithError runs on the main thread if it interacts with UI
               Task { @MainActor in
                   self.dismissWithError(message: "Error processing pkpass: \(error.localizedDescription)")
@@ -250,20 +251,20 @@ class ShareViewController: UIViewController {
           } else if let imageData = item as? UIImage {
             url = self.saveScreenshot(imageData)
             if url == nil {
-              NSLog("[ERROR] handleImages: saveScreenshot returned nil")
+              NSLog("%@", "[ERROR] handleImages: saveScreenshot returned nil")
             }
           } else if let data = item as? Data {
             if let image = UIImage(data: data) {
               url = self.saveScreenshot(image)
             } else {
-              NSLog("[ERROR] handleImages: Failed to create UIImage from Data")
+              NSLog("%@", "[ERROR] handleImages: Failed to create UIImage from Data")
             }
           } else {
-            NSLog("[ERROR] handleImages: Item is unexpected type: \(type(of: item))")
+            NSLog("%@", "[ERROR] handleImages: Item is unexpected type: \(type(of: item))")
           }
 
           guard let safeURL = url else {
-            NSLog("[ERROR] handleImages: Failed to get URL for image item")
+            NSLog("%@", "[ERROR] handleImages: Failed to get URL for image item")
             self.dismissWithError(message: "Failed to process image")
             return
           }
@@ -320,7 +321,7 @@ class ShareViewController: UIViewController {
           }
         }
       } catch {
-        NSLog("[ERROR] handleImages: Exception loading image item: \(error)")
+        NSLog("%@", "[ERROR] handleImages: Exception loading image item: \(error)")
         await self.dismissWithError(message: "Cannot load image content: \(error.localizedDescription)")
       }
     }
@@ -362,8 +363,8 @@ class ShareViewController: UIViewController {
       
       return screenshotPath
     } catch {
-      NSLog("[ERROR] saveScreenshot: Failed to write screenshot: \(error)")
-      NSLog("[ERROR] saveScreenshot: Error details: \(error.localizedDescription)")
+      NSLog("%@", "[ERROR] saveScreenshot: Failed to write screenshot: \(error)")
+      NSLog("%@", "[ERROR] saveScreenshot: Error details: \(error.localizedDescription)")
       return nil
     }
   }
@@ -406,7 +407,7 @@ class ShareViewController: UIViewController {
 
         }
       } else {
-        NSLog("[ERROR] Cannot load video content !\(String(describing: content))")
+        NSLog("%@", "[ERROR] Cannot load video content !\(String(describing: content))")
         await self.dismissWithError(
           message: "Cannot load video content \(String(describing: content))")
       }
@@ -422,7 +423,7 @@ class ShareViewController: UIViewController {
 
         }
       } else {
-        NSLog("[ERROR] Cannot load pdf content !\(String(describing: content))")
+        NSLog("%@", "[ERROR] Cannot load pdf content !\(String(describing: content))")
         await self.dismissWithError(
           message: "Cannot load pdf content \(String(describing: content))")
       }
@@ -438,7 +439,7 @@ class ShareViewController: UIViewController {
 
         }
       } else {
-        NSLog("[ERROR] Cannot load file content !\(String(describing: content))")
+        NSLog("%@", "[ERROR] Cannot load file content !\(String(describing: content))")
         await self.dismissWithError(
           message: "Cannot load file content \(String(describing: content))")
       }
@@ -475,7 +476,7 @@ class ShareViewController: UIViewController {
 
   private func dismissWithError(message: String? = nil) {
     DispatchQueue.main.async {
-      NSLog("[ERROR] Error loading application ! \(message!)")
+      NSLog("%@", "[ERROR] Error loading application ! \(message!)")
       let alert = UIAlertController(
         title: "Error", message: "Error loading application: \(message!)", preferredStyle: .alert)
 
@@ -499,7 +500,7 @@ class ShareViewController: UIViewController {
         if application.canOpenURL(url) {
           application.open(url)
         } else {
-          NSLog("redirectToHostApp canOpenURL KO: \(shareProtocol)")
+          NSLog("%@", "redirectToHostApp canOpenURL KO: \(shareProtocol)")
           self.dismissWithError(
             message: "Application not found, invalid url scheme \(shareProtocol)")
           return
@@ -550,7 +551,7 @@ class ShareViewController: UIViewController {
       let resources = try url.resourceValues(forKeys: [.fileSizeKey])
       return resources.fileSize
     } catch {
-      NSLog("Error: \(error)")
+      NSLog("%@", "Error: \(error)")
       return nil
     }
   }
@@ -562,7 +563,7 @@ class ShareViewController: UIViewController {
       }
       try FileManager.default.copyItem(at: srcURL, to: dstURL)
     } catch (let error) {
-      NSLog("Cannot copy item at \(srcURL) to \(dstURL): \(error)")
+      NSLog("%@", "Cannot copy item at \(srcURL) to \(dstURL): \(error)")
       return false
     }
     return true

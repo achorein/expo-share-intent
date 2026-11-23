@@ -55,7 +55,7 @@ public class ExpoShareIntentModule: Module {
 
     private func handleUrl(url: URL?) -> String? {
         let appGroupIdentifier = self.getAppGroupIdentifier()
-        NSLog("HandleUrl \(String(describing: url)) \(String(describing: appGroupIdentifier))")
+        NSLog("%@", "HandleUrl \(String(describing: url)) \(String(describing: appGroupIdentifier))")
         if let url = url {
             let userDefaults = UserDefaults(suiteName: appGroupIdentifier)
             if url.fragment == "media" {
